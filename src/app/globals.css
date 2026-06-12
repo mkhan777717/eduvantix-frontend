@@ -1,26 +1,249 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* =============================================
+   THEME VARIABLE SYSTEM
+   4 themes: light (default), dark, mint, violet
+   ============================================= */
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+@layer base {
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* ---- LIGHT THEME (default) ---- */
+  :root,
+  html.theme-light {
+    --bg-primary:       #faf9f6;
+    --bg-secondary:     #ffffff;
+    --bg-card:          #ffffff;
+    --bg-sidebar:       #ffffff;
+    --bg-input:         #f8fafc;
+    --bg-hover:         #f1f5f9;
+    --bg-badge:         #eff6ff;
+    --bg-code:          #f8fafc;
+
+    --text-primary:     #0f172a;
+    --text-secondary:   #475569;
+    --text-muted:       #94a3b8;
+    --text-accent:      #4f46e5;
+    --text-accent2:     #7c3aed;
+
+    --border-primary:   #e2e8f0;
+    --border-accent:    #c7d2fe;
+    --border-card:      #e2e8f0;
+
+    --accent-primary:   #4f46e5;
+    --accent-secondary: #7c3aed;
+    --accent-gradient:  linear-gradient(135deg, #4f46e5, #7c3aed);
+    --accent-glow:      rgba(99, 102, 241, 0.25);
+
+    --note-bg:          #fffbeb;
+    --note-border:      #f59e0b;
+    --note-text:        #78350f;
+
+    --glass-bg:         rgba(255, 255, 255, 0.72);
+    --glass-border:     rgba(99, 102, 241, 0.10);
+
+    --scrollbar-track:  #faf9f6;
+    --scrollbar-thumb:  #cbd5e1;
+    --scrollbar-hover:  #94a3b8;
+
+    --selection-bg:     rgba(99, 102, 241, 0.15);
+    --selection-text:   #4f46e5;
+
+    --font-inter: 'Inter', sans-serif;
+    --font-outfit: 'Outfit', sans-serif;
+  }
+
+  /* ---- DARK THEME ---- */
+  html.theme-dark {
+    --bg-primary:       #0b0f19;
+    --bg-secondary:     #111827;
+    --bg-card:          #161d2e;
+    --bg-sidebar:       #0f1624;
+    --bg-input:         #1e2740;
+    --bg-hover:         #1e293b;
+    --bg-badge:         #1e2a4a;
+    --bg-code:          #0d1117;
+
+    --text-primary:     #e2e8f0;
+    --text-secondary:   #94a3b8;
+    --text-muted:       #4b5563;
+    --text-accent:      #818cf8;
+    --text-accent2:     #a78bfa;
+
+    --border-primary:   #1e293b;
+    --border-accent:    #3730a3;
+    --border-card:      #1e293b;
+
+    --accent-primary:   #6366f1;
+    --accent-secondary: #8b5cf6;
+    --accent-gradient:  linear-gradient(135deg, #6366f1, #8b5cf6);
+    --accent-glow:      rgba(99, 102, 241, 0.35);
+
+    --note-bg:          #1c1a0d;
+    --note-border:      #d97706;
+    --note-text:        #fbbf24;
+
+    --glass-bg:         rgba(15, 22, 36, 0.80);
+    --glass-border:     rgba(99, 102, 241, 0.18);
+
+    --scrollbar-track:  #0b0f19;
+    --scrollbar-thumb:  #1e293b;
+    --scrollbar-hover:  #334155;
+
+    --selection-bg:     rgba(99, 102, 241, 0.25);
+    --selection-text:   #818cf8;
+  }
+
+  /* ---- MINT / SAGE THEME ---- */
+  html.theme-mint {
+    --bg-primary:       #f0fbf7;
+    --bg-secondary:     #ffffff;
+    --bg-card:          #ffffff;
+    --bg-sidebar:       #f7fdfb;
+    --bg-input:         #ecfdf5;
+    --bg-hover:         #d1fae5;
+    --bg-badge:         #ecfdf5;
+    --bg-code:          #f0fdf4;
+
+    --text-primary:     #064e3b;
+    --text-secondary:   #065f46;
+    --text-muted:       #6ee7b7;
+    --text-accent:      #059669;
+    --text-accent2:     #0d9488;
+
+    --border-primary:   #a7f3d0;
+    --border-accent:    #6ee7b7;
+    --border-card:      #bbf7d0;
+
+    --accent-primary:   #10b981;
+    --accent-secondary: #0d9488;
+    --accent-gradient:  linear-gradient(135deg, #10b981, #0d9488);
+    --accent-glow:      rgba(16, 185, 129, 0.28);
+
+    --note-bg:          #ecfeff;
+    --note-border:      #0891b2;
+    --note-text:        #164e63;
+
+    --glass-bg:         rgba(240, 253, 247, 0.80);
+    --glass-border:     rgba(16, 185, 129, 0.15);
+
+    --scrollbar-track:  #f0fbf7;
+    --scrollbar-thumb:  #6ee7b7;
+    --scrollbar-hover:  #34d399;
+
+    --selection-bg:     rgba(16, 185, 129, 0.15);
+    --selection-text:   #065f46;
+  }
+
+  /* ---- MIDNIGHT VIOLET THEME ---- */
+  html.theme-violet {
+    --bg-primary:       #0d0818;
+    --bg-secondary:     #130d24;
+    --bg-card:          #1a1030;
+    --bg-sidebar:       #0f0a1e;
+    --bg-input:         #1f1438;
+    --bg-hover:         #2a1b48;
+    --bg-badge:         #231549;
+    --bg-code:          #0a0714;
+
+    --text-primary:     #e9d5ff;
+    --text-secondary:   #c4b5fd;
+    --text-muted:       #6b21a8;
+    --text-accent:      #e879f9;
+    --text-accent2:     #a855f7;
+
+    --border-primary:   #2d1b54;
+    --border-accent:    #7c3aed;
+    --border-card:      #2d1b54;
+
+    --accent-primary:   #d946ef;
+    --accent-secondary: #a855f7;
+    --accent-gradient:  linear-gradient(135deg, #d946ef, #a855f7, #6366f1);
+    --accent-glow:      rgba(217, 70, 239, 0.35);
+
+    --note-bg:          #1a0d2e;
+    --note-border:      #9333ea;
+    --note-text:        #e9d5ff;
+
+    --glass-bg:         rgba(13, 8, 24, 0.80);
+    --glass-border:     rgba(217, 70, 239, 0.20);
+
+    --scrollbar-track:  #0d0818;
+    --scrollbar-thumb:  #2d1b54;
+    --scrollbar-hover:  #5b21b6;
+
+    --selection-bg:     rgba(217, 70, 239, 0.20);
+    --selection-text:   #e879f9;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: var(--font-inter);
+    overflow-x: hidden;
+    transition: background-color 0.35s ease, color 0.35s ease;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-outfit);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* =============================================
+   CUSTOM SCROLLBAR (theme-aware)
+   ============================================= */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track  { background: var(--scrollbar-track); }
+::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
+
+/* =============================================
+   TEXT SELECTION (theme-aware)
+   ============================================= */
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+/* =============================================
+   GLASSMORPHISM UTILITIES (theme-aware)
+   ============================================= */
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-panel-heavy {
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  opacity: 0.95;
+}
+
+/* =============================================
+   TEXT GRADIENTS
+   ============================================= */
+.text-gradient {
+  background: var(--accent-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.text-gradient-neon {
+  background: linear-gradient(to right, #4f46e5, #6366f1, #2563eb, #0891b2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* =============================================
+   THEME TRANSITION HELPER
+   ============================================= */
+html {
+  transition: background-color 0.35s ease;
 }
