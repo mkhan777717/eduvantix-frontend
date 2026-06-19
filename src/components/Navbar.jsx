@@ -396,16 +396,18 @@ export default function Navbar() {
               </div>
             )}
 
-            <motion.a
-              href="#pricing"
-              whileHover={{ scale: 1.05, boxShadow: "0px 6px 20px var(--accent-glow)" }}
-              whileTap={{ scale: 0.95 }}
-              className="inline-flex items-center space-x-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all"
-              style={{ background: "var(--accent-gradient)" }}
-            >
-              <span>Enroll Now</span>
-              <ArrowRight size={14} />
-            </motion.a>
+            {!user && (
+              <motion.a
+                href="#pricing"
+                whileHover={{ scale: 1.05, boxShadow: "0px 6px 20px var(--accent-glow)" }}
+                whileTap={{ scale: 0.95 }}
+                className="inline-flex items-center space-x-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-md transition-all shrink-0"
+                style={{ background: "var(--accent-gradient)" }}
+              >
+                <span>Enroll Now</span>
+                <ArrowRight size={14} />
+              </motion.a>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -588,17 +590,19 @@ export default function Navbar() {
                 </>
               )}
 
-              <li className="pt-2 border-t" style={{ borderColor: "var(--border-primary)" }}>
-                <a
-                  href="#pricing"
-                  onClick={() => setIsOpen(false)}
-                  className="flex w-full items-center justify-center space-x-2 rounded-xl py-3 font-semibold text-white shadow-lg"
-                  style={{ background: "var(--accent-gradient)" }}
-                >
-                  <span>Enroll Now</span>
-                  <ArrowRight size={16} />
-                </a>
-              </li>
+              {!user && (
+                <li className="pt-2 border-t" style={{ borderColor: "var(--border-primary)" }}>
+                  <a
+                    href="#pricing"
+                    onClick={() => setIsOpen(false)}
+                    className="flex w-full items-center justify-center space-x-2 rounded-xl py-3 font-semibold text-white shadow-lg"
+                    style={{ background: "var(--accent-gradient)" }}
+                  >
+                    <span>Enroll Now</span>
+                    <ArrowRight size={16} />
+                  </a>
+                </li>
+              )}
               {/* Theme Toggle in mobile too */}
               <li className="pt-2 flex justify-center">
                 <ThemeToggle />

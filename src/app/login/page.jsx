@@ -9,7 +9,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Mail, Lock, User, ShieldAlert, ArrowRight, RefreshCw, AlertCircle } from "lucide-react";
 
 function LoginForm() {
-  const { login, register, user } = useAuth();
+  const { login, register, user, logout } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
@@ -27,12 +27,93 @@ function LoginForm() {
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Mismatch check
+  const isMismatched = (() => {
+    if (!user || !redirectTo) return false;
+    const path = redirectTo.toLowerCase();
+    if (path.startsWith('/admin') && user.role !== 'ADMIN') return true;
+    if (path.startsWith('/mentor') && user.email !== 'mentor@synapse.com') return true;
+    if (path.startsWith('/student') && user.role === 'ADMIN') return true;
+    return false;
+  })();
+
   // Redirect if user is already logged in
   useEffect(() => {
-    if (user) {
+    if (user && !isMismatched) {
       router.replace(redirectTo);
     }
-  }, [user, redirectTo, router]);
+  }, [user, redirectTo, router, isMismatched]);
+
+  if (user && isMismatched) {
+    const userRoleLabel = user.email === 'mentor@synapse.com' 
+      ? 'Mentor' 
+      : user.role === 'ADMIN' 
+        ? 'Administrator' 
+        : 'Student';
+
+    const targetPortalLabel = redirectTo.toLowerCase().startsWith('/admin') 
+      ? 'Admin Control' 
+      : redirectTo.toLowerCase().startsWith('/mentor') 
+        ? 'Mentor Board' 
+        : 'Student Desk';
+
+    const getDashboardPath = () => {
+      if (user.email === 'mentor@synapse.com') return '/mentor/dashboard';
+      if (user.role === 'ADMIN') return '/admin/dashboard';
+      return '/student/dashboard';
+    };
+
+    return (
+      <div
+        className="glass-panel p-8 rounded-3xl border shadow-xl backdrop-blur-xl space-y-6 text-center w-full max-w-md"
+        style={{
+          backgroundColor: "var(--glass-bg)",
+          borderColor: "var(--border-primary)"
+        }}
+      >
+        <div
+          className="inline-flex h-12 w-12 items-center justify-center rounded-2xl text-white shadow-md mx-auto"
+          style={{ background: "var(--accent-gradient)" }}
+        >
+          <ShieldAlert size={24} className="animate-pulse" />
+        </div>
+        <h1 className="text-2xl font-black font-display tracking-tight" style={{ color: "var(--text-primary)" }}>
+          Role Mismatch
+        </h1>
+        <div className="space-y-4 text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
+          <p>
+            You are currently signed in as <span className="font-bold text-[var(--text-primary)]">{user.username}</span> ({user.email}) with the role <span className="font-bold text-[var(--text-primary)]">{userRoleLabel}</span>.
+          </p>
+          <p className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 text-left leading-relaxed">
+            ⚠️ This account does not have permission to access the <strong>{targetPortalLabel}</strong>. To access this section, you must log out first and sign in with an appropriate account.
+          </p>
+        </div>
+
+        <div className="space-y-3 pt-2">
+          <button
+            onClick={() => router.push(getDashboardPath())}
+            className="w-full py-3.5 rounded-2xl font-bold text-xs text-white shadow-md transition-all flex items-center justify-center space-x-2 hover:scale-102 cursor-pointer"
+            style={{ background: "var(--accent-gradient)" }}
+          >
+            <span>Go to my {userRoleLabel} Desk</span>
+            <ArrowRight size={14} />
+          </button>
+
+          <button
+            onClick={() => logout()}
+            className="w-full py-3.5 rounded-2xl font-bold text-xs transition-all flex items-center justify-center space-x-2 border cursor-pointer"
+            style={{
+              backgroundColor: "var(--bg-primary)",
+              borderColor: "var(--border-primary)",
+              color: "var(--text-primary)"
+            }}
+          >
+            <span>Sign Out & Switch Accounts</span>
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
