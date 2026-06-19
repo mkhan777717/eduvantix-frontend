@@ -1,165 +1,137 @@
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+provider = "postgresql"
+url = env("DATABASE_URL")
 }
 
 generator client {
-  provider = "prisma-client-js"
+provider = "prisma-client-js"
 }
 
 enum Role {
-  USER
-  ADMIN
-  MENTOR
+USER
+ADMIN
+MENTOR
 }
 
 enum Difficulty {
-  EASY
-  MEDIUM
-  HARD
+EASY
+MEDIUM
+HARD
 }
 
 enum Language {
-  JAVASCRIPT
-  PYTHON
-  CPP
+JAVASCRIPT
+PYTHON
+CPP
 }
 
 enum SubmissionStatus {
-  ACCEPTED
-  WRONG_ANSWER
-  RUNTIME_ERROR
-  COMPILATION_ERROR
-  TIME_LIMIT_EXCEEDED
-  PENDING
+ACCEPTED
+WRONG_ANSWER
+RUNTIME_ERROR
+COMPILATION_ERROR
+TIME_LIMIT_EXCEEDED
+PENDING
 }
 
 model User {
-<<<<<<< HEAD
-  id               Int           @id @default(autoincrement())
-  email            String        @unique
-  username         String        @unique
-  password         String
-  role             Role          @default(USER)
-  submissions      Submission[]
-  contestsCreated  Contest[]     @relation("ContestCreator")
-  liveSessions     LiveSession[] @relation("SessionHost")
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-=======
-  id                    Int                    @id @default(autoincrement())
-  email                 String                 @unique
-  username              String                 @unique
-  password              String
-  role                  Role                   @default(USER)
-  submissions           Submission[]
-  contestsCreated       Contest[]              @relation("ContestCreator")
-  contestParticipations ContestParticipation[]
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
->>>>>>> 9c5c3d3555e471facd39b4cc675bf96e066ccbbe
+id Int @id @default(autoincrement())
+email String @unique
+username String @unique
+password String
+role Role @default(USER)
+submissions Submission[]
+contestsCreated Contest[] @relation("ContestCreator")
+liveSessions LiveSession[] @relation("SessionHost")
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
 }
 
 model Problem {
-  id              Int              @id @default(autoincrement())
-  title           String
-  slug            String           @unique
-  difficulty      Difficulty
-  statement       String
-  inputFormat     String
-  outputFormat    String
-  constraints     String
-  explanation     String
-  testCases       TestCase[]
-  submissions     Submission[]
-  contestProblems ContestProblem[]
-  createdAt       DateTime         @default(now())
-  updatedAt       DateTime         @updatedAt
+id Int @id @default(autoincrement())
+title String
+slug String @unique
+difficulty Difficulty
+statement String
+inputFormat String
+outputFormat String
+constraints String
+explanation String
+testCases TestCase[]
+submissions Submission[]
+contestProblems ContestProblem[]
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
 }
 
 model TestCase {
-  id             Int      @id @default(autoincrement())
-  input          String
-  expectedOutput String
-  isSample       Boolean  @default(false)
-  problemId      Int
-  problem        Problem  @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+id Int @id @default(autoincrement())
+input String
+expectedOutput String
+isSample Boolean @default(false)
+problemId Int
+problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
 }
 
 model Submission {
-  id            Int              @id @default(autoincrement())
-  userId        Int
-  user          User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  problemId     Int
-  problem       Problem          @relation(fields: [problemId], references: [id], onDelete: Cascade)
-  language      Language
-  code          String
-  status        SubmissionStatus @default(PENDING)
-  executionTime Int?             // In milliseconds
-  createdAt     DateTime         @default(now())
+id Int @id @default(autoincrement())
+userId Int
+user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+problemId Int
+problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+language Language
+code String
+status SubmissionStatus @default(PENDING)
+executionTime Int? // In milliseconds
+createdAt DateTime @default(now())
 }
 
 model Contest {
-  id                    Int                    @id @default(autoincrement())
-  title                 String
-  description           String?
-  category              String?
-  startTime             DateTime
-  endTime               DateTime
-  creatorId             Int?
-  creator               User?                  @relation("ContestCreator", fields: [creatorId], references: [id], onDelete: SetNull)
-  contestProblems       ContestProblem[]
-  contestParticipations ContestParticipation[]
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
+id Int @id @default(autoincrement())
+title String
+description String?
+category String?
+startTime DateTime
+endTime DateTime
+creatorId Int?
+creator User? @relation("ContestCreator", fields: [creatorId], references: [id], onDelete: SetNull)
+contestProblems ContestProblem[]
+contestParticipations ContestParticipation[]
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
 }
 
 model ContestProblem {
-  id        Int     @id @default(autoincrement())
-  contestId Int
-  problemId Int
-  points    Int     @default(100)
-  contest   Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
-  problem   Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
+id Int @id @default(autoincrement())
+contestId Int
+problemId Int
+points Int @default(100)
+contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+problem Problem @relation(fields: [problemId], references: [id], onDelete: Cascade)
 
-  @@unique([contestId, problemId])
+@@unique([contestId, problemId])
 }
 
-<<<<<<< HEAD
 // ─── Live Session (LiveKit Integration) ─────────────────────────────
 model LiveSession {
-  id            Int       @id @default(autoincrement())
-  title         String
-  description   String?
-  thumbnailUrl  String?               // URL or base64 of session thumbnail
-  roomName      String    @unique     // LiveKit room identifier
-  hostId        Int
-  host          User      @relation("SessionHost", fields: [hostId], references: [id])
-  isLive        Boolean   @default(false)
-  scheduledAt   DateTime?             // Optional: when session is scheduled to start
-  startedAt     DateTime?             // Actual start time
-  endedAt       DateTime?             // Actual end time
+id Int @id @default(autoincrement())
+title String
+description String?
+thumbnailUrl String? // URL or base64 of session thumbnail
+roomName String @unique // LiveKit room identifier
+hostId Int
+host User @relation("SessionHost", fields: [hostId], references: [id])
+isLive Boolean @default(false)
+scheduledAt DateTime? // Optional: when session is scheduled to start
+startedAt DateTime? // Actual start time
+endedAt DateTime? // Actual end time
 
-  // ── Recording placeholder (for future VPS implementation) ──
-  recordingUrl  String?               // Will hold path/URL to recorded file
-  recordingSize Int?                  // Size in bytes, for storage management
+// ── Recording placeholder (for future VPS implementation) ──
+recordingUrl String? // Will hold path/URL to recorded file
+recordingSize Int? // Size in bytes, for storage management
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-=======
-model ContestParticipation {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  contestId Int
-  contest   Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
-  completed Boolean  @default(false)
-  score     Int      @default(0)
-  timeSpent String?
-  createdAt DateTime @default(now())
-
-  @@unique([userId, contestId])
->>>>>>> 9c5c3d3555e471facd39b4cc675bf96e066ccbbe
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
 }
