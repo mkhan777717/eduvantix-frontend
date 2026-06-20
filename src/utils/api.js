@@ -4,21 +4,25 @@
  * Handles production vs development environment variables.
  */
 export function getApiBase(fallbackPort = 5001) {
+  // Explicit production API URL wins first.
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname;
-    // If the site is accessed via LAN IP or hostname (like 192.168.29.27),
-    // point API requests to port 5001 on that same LAN address.
+    // In deployed environments without a configured API URL, use same-origin.
     if (
       hostname &&
       hostname !== "localhost" &&
       hostname !== "127.0.0.1" &&
       hostname !== "::1"
     ) {
-      return `http://${hostname}:${fallbackPort}`;
+      return window.location.origin;
     }
   }
-  
-  // Preferred local network fallback is 127.0.0.1 to avoid Windows IPv6 resolution latency or blockages
+
+  // Preferred local network fallback is 127.0.0.1 to avoid Windows IPv6 resolution issues.
   const defaultLocal = `http://127.0.0.1:${fallbackPort}`;
-  return process.env.NEXT_PUBLIC_API_URL || defaultLocal;
+  return defaultLocal;
 }
