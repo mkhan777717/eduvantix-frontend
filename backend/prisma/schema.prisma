@@ -35,17 +35,18 @@ enum SubmissionStatus {
 }
 
 model User {
-  id                   Int                    @id @default(autoincrement())
-  email                String                 @unique
-  username             String                 @unique
-  password             String
-  role                 Role                   @default(USER)
-  submissions          Submission[]
-  contestsCreated      Contest[]              @relation("ContestCreator")
-  liveSessions         LiveSession[]          @relation("SessionHost")
-  createdAt            DateTime               @default(now())
-  updatedAt            DateTime               @updatedAt
-  ContestParticipation ContestParticipation[]
+  id                    Int                    @id @default(autoincrement())
+  email                 String                 @unique
+  username              String                 @unique
+  password              String
+  role                  Role                   @default(USER)
+  submissions           Submission[]
+  contestsCreated       Contest[]              @relation("ContestCreator")
+  contestParticipations ContestParticipation[]
+  liveSessions          LiveSession[]          @relation("SessionHost")
+  vivaSessions          VivaSession[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
 }
 
 model Problem {
@@ -115,6 +116,20 @@ model ContestProblem {
   @@unique([contestId, problemId])
 }
 
+model ContestParticipation {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  contestId Int
+  contest   Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
+  completed Boolean  @default(false)
+  score     Int      @default(0)
+  timeSpent String?
+  createdAt DateTime @default(now())
+
+  @@unique([userId, contestId])
+}
+
 // ─── Live Session (LiveKit Integration) ─────────────────────────────
 model LiveSession {
   id           Int       @id @default(autoincrement())
@@ -137,16 +152,40 @@ model LiveSession {
   updatedAt DateTime @updatedAt
 }
 
-model ContestParticipation {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  contestId Int
-  contest   Contest  @relation(fields: [contestId], references: [id], onDelete: Cascade)
-  completed Boolean  @default(false)
-  score     Int      @default(0)
-  timeSpent String?
-  createdAt DateTime @default(now())
+// ─── AI Viva System ─────────────────────────────
+model VivaQuestion {
+  id             Int          @id @default(autoincrement())
+  subject        String
+  questionText   String
+  expectedAnswer String       @db.Text
+  keywords       String       @db.Text // Comma-separated list for local evaluation
+  difficulty     Difficulty   @default(EASY)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  vivaAnswers    VivaAnswer[]
+}
 
-  @@unique([userId, contestId])
+model VivaSession {
+  id          Int          @id @default(autoincrement())
+  userId      Int
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject     String
+  status      String       @default("STARTED") // STARTED, COMPLETED
+  score       Int          @default(0)
+  feedback    String?      @db.Text
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  vivaAnswers VivaAnswer[]
+}
+
+model VivaAnswer {
+  id         Int          @id @default(autoincrement())
+  sessionId  Int
+  session    VivaSession  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  questionId Int
+  question   VivaQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answerText String       @db.Text
+  score      Int          @default(0)
+  feedback   String?      @db.Text
+  createdAt  DateTime     @default(now())
 }
