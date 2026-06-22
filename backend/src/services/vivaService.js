@@ -63,9 +63,7 @@ const seedQuestionsIfNeeded = async () => {
     }
   ];
 
-  await prisma.vivaQuestion.createMany({
-    data: defaultQuestions
-  });
+  await prisma.vivaQuestion.createMany({ data: defaultQuestions });
   console.log("Seeded Viva Questions.");
 };
 
@@ -82,20 +80,13 @@ const evaluateAnswer = (question, answerText) => {
 
   const normalizedAnswer = answerText.toLowerCase();
   const keywords = question.keywords.split(',').map(kw => kw.trim().toLowerCase());
-  
   const matchedKeywords = keywords.filter(kw => normalizedAnswer.includes(kw));
   const missingKeywords = keywords.filter(kw => !normalizedAnswer.includes(kw));
-  
-  let matchRatio = 0;
-  if (keywords.length > 0) {
-    matchRatio = matchedKeywords.length / keywords.length;
-  }
-  
+
+  let matchRatio = keywords.length > 0 ? matchedKeywords.length / keywords.length : 0;
   let score = Math.round(matchRatio * 10);
-  if (score === 0 && answerText.trim().length > 10) {
-    score = 2; // give minimal credit for trying
-  }
-  
+  if (score === 0 && answerText.trim().length > 10) score = 2;
+
   let feedback = "";
   if (score >= 8) {
     feedback = `Excellent answer! You correctly mentioned key concepts such as ${matchedKeywords.join(', ')}. Your understanding of the topic is very strong.`;
@@ -112,39 +103,32 @@ const evaluateAnswer = (question, answerText) => {
 
 /**
  * Starts a new Viva Session.
+ * DB columns: id, userId, subject, status, score, feedback, createdAt, updatedAt
  */
 const startVivaSession = async (userId, subject) => {
   await seedQuestionsIfNeeded();
 
-  const totalQuestions = await prisma.vivaQuestion.count({
-    where: { subject }
-  });
-
+  const totalQuestions = await prisma.vivaQuestion.count({ where: { subject } });
   if (totalQuestions === 0) {
     throw new Error(`No questions available for subject: ${subject}`);
   }
 
-  // Create a new session
+  // Create session using only columns that exist in DB
   const session = await prisma.vivaSession.create({
     data: {
       userId,
       subject,
-      totalQuestions,
-      status: "IN_PROGRESS",
-      startedAt: new Date()
+      status: "IN_PROGRESS"
     }
   });
 
-  // Get the first question for this subject
-  const firstQuestion = await prisma.vivaQuestion.findFirst({
-    where: { subject }
-  });
+  const firstQuestion = await prisma.vivaQuestion.findFirst({ where: { subject } });
 
   return {
     sessionId: session.id,
     nextQuestion: {
       id: firstQuestion.id,
-      questionText: firstQuestion.questionText,
+      questionText: firstQuestion.questionText
     },
     progress: { current: 1, total: totalQuestions },
     isCompleted: false
@@ -153,9 +137,9 @@ const startVivaSession = async (userId, subject) => {
 
 /**
  * Submits an answer for the active session, evaluates it, and gets next question.
+ * DB VivaAnswer columns: id, sessionId, questionId (required), answerText, score, feedback, createdAt
  */
 const submitAnswer = async (userId, sessionId, questionText, studentAnswer) => {
-  // Validate session
   const session = await prisma.vivaSession.findUnique({
     where: { id: sessionId },
     include: { vivaAnswers: true }
@@ -165,44 +149,29 @@ const submitAnswer = async (userId, sessionId, questionText, studentAnswer) => {
   if (session.userId !== userId) throw new Error("Unauthorized access to session");
   if (session.status === "COMPLETED" || session.status === "ABORTED") throw new Error("Session already finished");
 
-  // Get the question by text
-  const question = await prisma.vivaQuestion.findFirst({
-    where: { questionText }
-  });
+  // Find question by text to get its ID (required by DB)
+  const question = await prisma.vivaQuestion.findFirst({ where: { questionText } });
+  if (!question) throw new Error("Question not found");
 
-  let score = 0;
-  let feedback = "No feedback available.";
-  let qId = null;
+  const existingAnswer = session.vivaAnswers.find(a => a.questionId === question.id);
+  if (existingAnswer) throw new Error("Question already answered");
 
-  if (question) {
-    qId = question.id;
-    const existingAnswer = session.vivaAnswers.find(a => a.questionId === qId);
-    if (existingAnswer) throw new Error("Question already answered");
+  const evaluation = evaluateAnswer(question, studentAnswer);
 
-    const evaluation = evaluateAnswer(question, studentAnswer);
-    score = evaluation.score;
-    feedback = evaluation.feedback;
-  }
-
-  // Save answer
+  // Save answer using actual DB column names (answerText, not studentAnswer)
   await prisma.vivaAnswer.create({
     data: {
       sessionId,
-      questionId: qId,
-      questionText,
-      studentAnswer,
-      score,
-      feedback
+      questionId: question.id,
+      answerText: studentAnswer,   // DB column is answerText
+      score: evaluation.score,
+      feedback: evaluation.feedback
     }
   });
 
-  // Refresh answers for session
-  const allAnswers = await prisma.vivaAnswer.findMany({
-    where: { sessionId }
-  });
-  const answeredIds = allAnswers.map(a => a.questionId).filter(id => id !== null);
+  const allAnswers = await prisma.vivaAnswer.findMany({ where: { sessionId } });
+  const answeredIds = allAnswers.map(a => a.questionId);
 
-  // Find next question
   const nextQuestion = await prisma.vivaQuestion.findFirst({
     where: {
       subject: session.subject,
@@ -210,19 +179,21 @@ const submitAnswer = async (userId, sessionId, questionText, studentAnswer) => {
     }
   });
 
+  const totalQCount = await prisma.vivaQuestion.count({ where: { subject: session.subject } });
+
   return {
-    answer: { score, feedback },
-    nextQuestion: nextQuestion ? {
-      id: nextQuestion.id,
-      questionText: nextQuestion.questionText
-    } : null,
-    progress: { current: allAnswers.length + (nextQuestion ? 1 : 0), total: session.totalQuestions },
+    answer: { score: evaluation.score, feedback: evaluation.feedback },
+    nextQuestion: nextQuestion
+      ? { id: nextQuestion.id, questionText: nextQuestion.questionText }
+      : null,
+    progress: { current: allAnswers.length + (nextQuestion ? 1 : 0), total: totalQCount },
     isCompleted: !nextQuestion
   };
 };
 
 /**
- * Complete a session and calculate score.
+ * Complete a session and calculate final score.
+ * DB VivaSession columns for update: status, score, feedback (no totalScore/completedAt)
  */
 const completeSession = async (userId, sessionId) => {
   const session = await prisma.vivaSession.findUnique({
@@ -232,49 +203,45 @@ const completeSession = async (userId, sessionId) => {
 
   if (!session) throw new Error("Session not found");
   if (session.userId !== userId) throw new Error("Unauthorized");
-  if (session.status === "COMPLETED") return session; // already completed
+  if (session.status === "COMPLETED") return normalizeSession(session);
 
-  const totalScore = session.vivaAnswers.reduce((sum, a) => sum + a.score, 0);
-  
-  const maxScore = session.totalQuestions * 10;
-  let finalScorePercentage = 0;
-  if (maxScore > 0) {
-    finalScorePercentage = Math.round((totalScore / maxScore) * 100);
-  }
+  const totalQCount = await prisma.vivaQuestion.count({ where: { subject: session.subject } });
+  const rawScore = session.vivaAnswers.reduce((sum, a) => sum + a.score, 0);
+  const maxScore = totalQCount * 10;
+  const finalScorePercentage = maxScore > 0 ? Math.round((rawScore / maxScore) * 100) : 0;
 
   let overallFeedback = "";
   if (finalScorePercentage >= 80) overallFeedback = "Outstanding performance! You have a deep understanding of this subject.";
   else if (finalScorePercentage >= 50) overallFeedback = "Good effort! You know the basics but could brush up on a few details.";
   else overallFeedback = "You might need to review this subject again. Focus on the core concepts.";
 
+  // Update using only actual DB columns (score not totalScore, no completedAt/startedAt)
   const updatedSession = await prisma.vivaSession.update({
     where: { id: sessionId },
     data: {
       status: "COMPLETED",
-      totalScore: finalScorePercentage,
-      feedback: overallFeedback,
-      completedAt: new Date()
+      score: finalScorePercentage,
+      feedback: overallFeedback
     }
   });
 
-  return updatedSession;
+  return normalizeSession(updatedSession);
 };
 
 /**
- * Retrieves details of a session.
+ * Retrieves details of a single session with answers.
+ * Normalizes DB field names to what the frontend expects.
  */
 const getSessionDetails = async (userId, sessionId) => {
   const session = await prisma.vivaSession.findUnique({
     where: { id: sessionId },
-    include: {
-      vivaAnswers: true
-    }
+    include: { vivaAnswers: { include: { question: true } } }
   });
 
   if (!session) throw new Error("Session not found");
   if (session.userId !== userId) throw new Error("Unauthorized");
 
-  return session;
+  return normalizeSession(session);
 };
 
 /**
@@ -283,10 +250,10 @@ const getSessionDetails = async (userId, sessionId) => {
 const getUserSessions = async (userId) => {
   const sessions = await prisma.vivaSession.findMany({
     where: { userId },
-    orderBy: { startedAt: 'desc' }
+    orderBy: { createdAt: 'desc' }
   });
 
-  return sessions;
+  return sessions.map(normalizeSession);
 };
 
 /**
@@ -294,14 +261,39 @@ const getUserSessions = async (userId) => {
  */
 const getSubjects = async () => {
   await seedQuestionsIfNeeded();
-  
-  // In a full app, we'd query distinct subjects
   const questions = await prisma.vivaQuestion.findMany({
     select: { subject: true },
     distinct: ['subject']
   });
-
   return questions.map(q => q.subject);
+};
+
+/**
+ * Normalizes DB field names to what the frontend expects.
+ * DB uses: score, createdAt, answerText
+ * Frontend expects: totalScore, startedAt, completedAt, totalQuestions, studentAnswer
+ */
+const normalizeSession = (session) => {
+  const normalized = {
+    ...session,
+    totalScore: session.score ?? 0,
+    startedAt: session.createdAt,
+    completedAt: session.status === "COMPLETED" ? session.updatedAt : null,
+  };
+
+  // Normalize answers if included
+  if (session.vivaAnswers) {
+    normalized.vivaAnswers = session.vivaAnswers.map(a => ({
+      ...a,
+      studentAnswer: a.answerText,
+      questionText: a.question?.questionText ?? a.questionText ?? ""
+    }));
+    normalized.totalQuestions = session.vivaAnswers.length > 0
+      ? normalized.vivaAnswers.length
+      : undefined;
+  }
+
+  return normalized;
 };
 
 module.exports = {

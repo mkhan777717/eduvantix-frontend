@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -9,10 +9,10 @@ import {
   Clock, BookOpen, BarChart2, Star, AlertCircle, TrendingUp, TrendingDown, Target
 } from "lucide-react";
 
-export default function VivaResultPage({ params }) {
+export default function VivaResultPage() {
   const { user, token, API_BASE } = useAuth();
   const router = useRouter();
-  const { sessionId } = params;
+  const { sessionId } = useParams();
 
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -64,9 +64,9 @@ export default function VivaResultPage({ params }) {
           <AlertCircle size={20} className="text-rose-500 shrink-0" />
           <p className="text-sm font-semibold text-rose-500">{error || "Session not found."}</p>
         </div>
-        <Link href="/student/viva/history" className="inline-flex items-center space-x-2 text-sm font-bold" style={{ color: "var(--text-accent)" }}>
+        <Link href="/student/viva" className="inline-flex items-center space-x-2 text-sm font-bold" style={{ color: "var(--text-accent)" }}>
           <ArrowLeft size={16} />
-          <span>Back to History</span>
+          <span>Back to AI Viva</span>
         </Link>
       </div>
     );
@@ -98,12 +98,12 @@ export default function VivaResultPage({ params }) {
       {/* Back Navigation */}
       <div className="flex items-center space-x-3">
         <Link
-          href="/student/viva/history"
+          href="/student/viva"
           className="flex items-center space-x-2 text-xs font-bold uppercase tracking-wider hover:underline transition-all"
           style={{ color: "var(--text-secondary)" }}
         >
           <ArrowLeft size={14} />
-          <span>Back to History</span>
+          <span>Back to AI Viva</span>
         </Link>
       </div>
 
@@ -326,7 +326,7 @@ export default function VivaResultPage({ params }) {
           style={{ background: "var(--accent-gradient)" }}
         >
           <Clock size={16} />
-          <span>View All History</span>
+          <span>View Session History</span>
         </Link>
       </div>
     </div>
