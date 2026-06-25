@@ -123,6 +123,7 @@ model LiveSession {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   host          User      @relation("SessionHost", fields: [hostId], references: [id])
+  polls         LivePoll[]
 }
 
 model VivaQuestion {
@@ -135,7 +136,6 @@ model VivaQuestion {
   difficulty     Difficulty   @default(EASY)
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
-  topic          String       @default("")
   vivaAnswers    VivaAnswer[]
 }
 
@@ -192,4 +192,33 @@ enum SubmissionStatus {
   MEMORY_LIMIT_EXCEEDED
   INTERNAL_ERROR
   PENDING
+}
+
+// ─── Live Polling ─────────────────────────────────────────────────────────────
+
+model LivePoll {
+  id          Int              @id @default(autoincrement())
+  sessionId   Int
+  question    String
+  options     String[]
+  correctIdx  Int
+  timerSecs   Int              @default(30)
+  launchedAt  DateTime         @default(now())
+  endedAt     DateTime?
+  session     LiveSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  answers     LivePollAnswer[]
+}
+
+model LivePollAnswer {
+  id          Int      @id @default(autoincrement())
+  pollId      Int
+  username    String
+  chosenIdx   Int
+  timeMs      Int
+  isCorrect   Boolean
+  points      Int      @default(0)
+  answeredAt  DateTime @default(now())
+  poll        LivePoll @relation(fields: [pollId], references: [id], onDelete: Cascade)
+
+  @@unique([pollId, username])
 }

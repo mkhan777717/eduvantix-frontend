@@ -50,9 +50,9 @@ function ChatMessage({ message, isOwnMessage, isHost, hostUsername, blockedUsers
         {(message.from?.identity || "U").charAt(0).toUpperCase()}
       </div>
 
-      {/* Message Bubble */}
-      <div className={`max-w-[75%] space-y-0.5 ${isOwnMessage ? "items-end text-right" : ""}`}>
-        <div className="flex items-center gap-1.5 flex-wrap">
+      {/* Message Bubble container */}
+      <div className={`flex flex-col max-w-[75%] space-y-1 ${isOwnMessage ? "items-end" : "items-start"}`}>
+        <div className={`flex items-center gap-1.5 flex-wrap ${isOwnMessage ? "justify-end" : "justify-start"}`}>
           <span
             className="text-[10px] font-bold truncate max-w-[120px]"
             style={{ color: "var(--text-secondary)" }}
@@ -88,7 +88,7 @@ function ChatMessage({ message, isOwnMessage, isHost, hostUsername, blockedUsers
           )}
         </div>
         <div
-          className={`px-3 py-2 rounded-xl text-xs leading-relaxed break-words ${
+          className={`w-fit px-3 py-2 rounded-2xl text-[13px] font-medium leading-relaxed break-words shadow-sm ${
             isOwnMessage
               ? "rounded-tr-sm bg-indigo-500 text-white"
               : "rounded-tl-sm"
@@ -99,6 +99,7 @@ function ChatMessage({ message, isOwnMessage, isHost, hostUsername, blockedUsers
               : {
                   backgroundColor: "var(--bg-primary)",
                   color: "var(--text-primary)",
+                  border: "1px solid var(--border-primary)",
                 }
           }
         >
@@ -122,11 +123,17 @@ function stringToColor(str) {
 // ─── Main LiveChat Component ─────────────────────────────────────────
 export default function LiveChat({
   collapsed = false,
+  persistent = false,
   className = "",
   blockedUsers = [],
   setBlockedUsers = () => {},
   hostUsername = "",
   sessionId = null,
+  isFullscreen: controlledIsFullscreen,
+  onToggleFullscreen,
+  onClose,
+  isOpen: controlledIsOpen,
+  onUnreadChange,
 }) {
   const { chatMessages, send, isSending } = useChat();
   const room = useRoomContext();
@@ -135,7 +142,10 @@ export default function LiveChat({
 
   const [activeTab, setActiveTab] = useState("chat"); // "chat" or "participants"
   const [inputValue, setInputValue] = useState("");
-  const [isOpen, setIsOpen] = useState(!collapsed);
+  const [internalIsOpen, setInternalIsOpen] = useState(persistent || !collapsed);
+  const isOpen = controlledIsOpen !== undefined ? controlledIsOpen : internalIsOpen;
+  
+  const [isFullscreenLocal, setIsFullscreenLocal] = useState(false);
   const [hasNewMessage, setHasNewMessage] = useState(false);
   const [dbMessages, setDbMessages] = useState([]);
   const messagesEndRef = useRef(null);
@@ -143,6 +153,9 @@ export default function LiveChat({
   const prevMessageCount = useRef(0);
 
   const isHost = user?.role === "ADMIN" || user?.role === "MENTOR";
+  const canCollapse = !isHost;
+  const isFullscreen = controlledIsFullscreen ?? isFullscreenLocal;
+  const toggleFullscreen = onToggleFullscreen || (() => setIsFullscreenLocal((prev) => !prev));
   const localIdentity = room?.localParticipant?.identity;
 
   // Fetch chat history from database on mount or when sessionId/authToken changes
@@ -195,22 +208,24 @@ export default function LiveChat({
     if (filteredMessages.length > prevMessageCount.current) {
       if (isOpen && activeTab === "chat") {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-      } else if (activeTab !== "chat") {
+      } else {
         setHasNewMessage(true);
+        if (onUnreadChange) onUnreadChange(true);
       }
     }
     prevMessageCount.current = filteredMessages.length;
-  }, [filteredMessages.length, isOpen, activeTab]);
+  }, [filteredMessages.length, isOpen, activeTab, onUnreadChange]);
 
   // Clear new message indicator when opening
   useEffect(() => {
     if (isOpen && activeTab === "chat") {
       setHasNewMessage(false);
+      if (onUnreadChange) onUnreadChange(false);
       setTimeout(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
     }
-  }, [isOpen, activeTab]);
+  }, [isOpen, activeTab, onUnreadChange]);
 
   const handleSend = async () => {
     const text = inputValue.trim();
@@ -287,10 +302,10 @@ export default function LiveChat({
   });
 
   // ─── Collapsed Toggle Button ───────────────────────────────────────
-  if (!isOpen) {
+  if (canCollapse && !isOpen) {
     return (
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => setInternalIsOpen(true)}
         className="relative flex items-center gap-2 px-4 py-3 rounded-xl border transition-all hover:scale-105 cursor-pointer shadow-md"
         style={{
           backgroundColor: "var(--bg-card)",
@@ -310,20 +325,20 @@ export default function LiveChat({
 
   // ─── Chat Panel ────────────────────────────────────────────────────
   return (
-    <div
-      className={`flex flex-col rounded-2xl border shadow-xl overflow-hidden ${className}`}
-      style={{
-        backgroundColor: "var(--bg-card)",
-        borderColor: "var(--border-primary)",
-        height: "100%",
-        minHeight: "0",
-      }}
-      id="live-chat-panel"
-    >
+    <div className={isFullscreen ? "fixed inset-0 z-[70] p-4 sm:p-6 bg-black/45 backdrop-blur-sm" : "flex flex-col min-h-0 h-full overflow-hidden"}>
+      <div
+        className={`flex flex-col rounded-[1.1rem] border overflow-hidden ${className} ${isFullscreen ? "w-full h-full max-h-none shadow-2xl" : "h-full"}`}
+        style={{
+          backgroundColor: "var(--bg-card)",
+          borderColor: "rgba(148, 163, 184, 0.18)",
+          minHeight: "0",
+        }}
+        id="live-chat-panel"
+      >
       {/* Tab Header */}
       <div
-        className="flex items-center justify-between px-4 py-3 border-b select-none"
-        style={{ borderColor: "var(--border-primary)" }}
+        className="flex items-center justify-between px-4 py-2.5 border-b select-none"
+        style={{ borderColor: "rgba(148, 163, 184, 0.16)" }}
       >
         <div className="flex items-center gap-3">
           <button
@@ -368,24 +383,39 @@ export default function LiveChat({
           </button>
         </div>
 
-        <button
-          onClick={() => setIsOpen(false)}
-          className="p-1 rounded-lg hover:bg-slate-500/10 transition-colors cursor-pointer"
-          style={{ color: "var(--text-secondary)" }}
-          id="chat-close-btn"
-        >
-          <X size={14} />
-        </button>
+        {canCollapse && (
+          <button
+            onClick={() => {
+              if (onClose) {
+                onClose();
+              } else {
+                if (controlledIsFullscreen !== undefined) {
+                  toggleFullscreen();
+                } else {
+                  setIsFullscreenLocal(false);
+                }
+                setInternalIsOpen(false);
+              }
+            }}
+            className="p-1 rounded-lg hover:bg-slate-500/10 transition-colors cursor-pointer"
+            style={{ color: "var(--text-secondary)" }}
+            id="chat-close-btn"
+            title="Hide chat"
+            aria-label="Hide chat"
+          >
+            <X size={14} />
+          </button>
+        )}
       </div>
 
       {/* Main Panel Content Area */}
-      <div className="flex-1 flex flex-col min-h-0">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {activeTab === "chat" ? (
           /* Messages Area */
           <div
             ref={chatContainerRef}
-            className="flex-1 overflow-y-auto px-4 py-3 space-y-3"
-            style={{ scrollbarWidth: "thin" }}
+            className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5"
+            style={{ scrollbarWidth: "thin", backgroundColor: "var(--bg-card)" }}
           >
             {filteredMessages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center space-y-2 py-8">
@@ -502,8 +532,8 @@ export default function LiveChat({
       {/* Input Area (only visible in Chat tab) */}
       {activeTab === "chat" && (
         <div
-          className="px-3 py-3 border-t"
-          style={{ borderColor: "var(--border-primary)" }}
+          className="px-3 py-2.5 border-t"
+          style={{ borderColor: "rgba(148, 163, 184, 0.16)" }}
         >
           <div
             className="flex items-center gap-2 px-3 py-2 rounded-xl border transition-all focus-within:ring-2 focus-within:ring-indigo-500/30"
@@ -547,6 +577,7 @@ export default function LiveChat({
           </p>
         </div>
       )}
+      </div>
     </div>
   );
 }

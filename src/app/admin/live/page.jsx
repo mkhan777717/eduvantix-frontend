@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useCallback, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import {
   LiveKitRoom,
@@ -14,7 +15,9 @@ import {
 } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { Track, RoomEvent } from "livekit-client";
+import LivePollCreator from "@/components/LivePollCreator";
 import LiveChat from "@/components/LiveChat";
+import { SessionLeaderboard, PollResultsOverlay } from "@/components/LiveLeaderboard";
 import {
   Radio,
   Mic,
@@ -33,9 +36,13 @@ import {
   AlertTriangle,
   Hand,
   XCircle,
+  BarChart2,
+  X,
+  ArrowLeft,
 } from "lucide-react";
 
 const LIVEKIT_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
 
 const playRaiseHandSound = () => {
   try {
@@ -209,12 +216,21 @@ function DraggableVideo({ track, name, isLocal = false, defaultPosition = { x: 2
 }
 
 // ─── Live Broadcasting Panel ─────────────────────────────────────────
-function BroadcastPanel({ session, onEndSession }) {
+function BroadcastPanel({ session, onEndSession, authToken }) {
   const room = useRoomContext();
   const [raisedHands, setRaisedHands] = useState([]);
   const [activeSpeaker, setActiveSpeaker] = useState(null);
   const [blockedUsers, setBlockedUsers] = useState([]);
   const [activeNotification, setActiveNotification] = useState(null);
+
+  // Poll state
+  const [isPollDrawerOpen, setIsPollDrawerOpen] = useState(false);
+  const [activePoll, setActivePoll] = useState(null);         // poll currently running
+  const [pollAnswers, setPollAnswers] = useState(new Map()); // Map<username, {chosenIdx, timeMs}>
+  const [pollResultData, setPollResultData] = useState(null); // fetched after poll ends
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [totalPolls, setTotalPolls] = useState(0);
+  const [showResultOverlay, setShowResultOverlay] = useState(false);
 
   const [connectionState, setConnectionState] = useState(room?.state || "disconnected");
   const [isBrowserOffline, setIsBrowserOffline] = useState(false);
@@ -409,25 +425,33 @@ function BroadcastPanel({ session, onEndSession }) {
     return () => clearInterval(interval);
   }, [room, activeSpeaker, raisedHands, blockedUsers]);
 
-  // Handle incoming data
+  // Handle incoming data (raise-hand-actions topic)
   useEffect(() => {
     if (!room) return;
 
-    const handleData = (payload, participant, block) => {
+    const handleData = (payload, participant, block, topic) => {
       const decoder = new TextDecoder();
       try {
         const data = JSON.parse(decoder.decode(payload));
-        if (data.action === "RAISE_HAND") {
-          // Ignore hand raises from blocked students
-          if (blockedUsers.includes(data.username)) return;
 
+        // ── Poll events ───────────────────────────────────────────
+        if (data.action === "POLL_ANSWER") {
+          setPollAnswers(prev => {
+            const next = new Map(prev);
+            next.set(data.username, { chosenIdx: data.chosenIdx, timeMs: data.timeMs });
+            return next;
+          });
+          return;
+        }
+
+        // ── Hand raise / speaker events ───────────────────────────
+        if (data.action === "RAISE_HAND") {
+          if (blockedUsers.includes(data.username)) return;
           playRaiseHandSound();
           setRaisedHands((prev) => {
             if (prev.includes(data.username)) return prev;
             return [...prev, data.username];
           });
-          // Disabled to prevent annoying hand raise popups
-          // setActiveNotification({ username: data.username });
         } else if (data.action === "LOWER_HAND") {
           setRaisedHands((prev) => prev.filter((u) => u !== data.username));
         } else if (data.action === "REMOVE_SPEAKER") {
@@ -446,6 +470,59 @@ function BroadcastPanel({ session, onEndSession }) {
       room.off(RoomEvent.DataReceived, handleData);
     };
   }, [room, activeSpeaker, raisedHands, blockedUsers]);
+
+
+  // Fetch leaderboard after each poll ends
+  const fetchLeaderboard = async () => {
+    if (!session?.id) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/livekit/session/${session.id}/leaderboard`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setLeaderboard(data.leaderboard);
+        setTotalPolls(data.totalPolls);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch leaderboard:", e);
+    }
+  };
+
+  // Fetch per-question results overlay
+  const fetchPollResults = async (pollId) => {
+    if (!session?.id) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/livekit/poll/${pollId}/results`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPollResultData(data);
+        setShowResultOverlay(true);
+        // Auto-dismiss after 12s
+        setTimeout(() => setShowResultOverlay(false), 12000);
+      }
+    } catch (e) {
+      console.warn("Failed to fetch poll results:", e);
+    }
+  };
+
+  const handlePollLaunched = (poll) => {
+    setActivePoll(poll);
+    setPollAnswers(new Map());
+  };
+
+  const handlePollEnded = async () => {
+    if (!activePoll) return;
+    const endedPollId = activePoll.id;
+    setActivePoll(null);
+    setPollAnswers(new Map());
+    // Fetch results and leaderboard from DB (source of truth)
+    await fetchPollResults(endedPollId);
+    await fetchLeaderboard();
+  };
+
 
   // Handle student disconnection
   useEffect(() => {
@@ -466,15 +543,15 @@ function BroadcastPanel({ session, onEndSession }) {
   }, [room, activeSpeaker]);
 
   return (
-    <div className="space-y-4 animate-fade-in h-full flex flex-col min-h-0 overflow-hidden">
+    <div className="space-y-3 animate-fade-in h-full flex flex-col min-h-0 overflow-hidden">
       {/* Live indicator header */}
-      <div className="flex items-center justify-between flex-wrap gap-4 shrink-0">
+      <div className="flex items-center justify-between flex-wrap gap-3 shrink-0 px-1">
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/15 text-red-500 text-xs font-extrabold uppercase tracking-wider">
-            <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-500/10 text-red-500 text-xs font-extrabold uppercase tracking-wider">
+            <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
             LIVE
           </div>
-          <h2 className="text-lg font-black" style={{ color: "var(--text-primary)" }}>
+          <h2 className="text-xl font-black tracking-tight" style={{ color: "var(--text-primary)" }}>
             {session.title}
           </h2>
         </div>
@@ -511,13 +588,145 @@ function BroadcastPanel({ session, onEndSession }) {
         </div>
       )}
 
-      {/* Video + Chat Side by Side */}
-      <div className="flex gap-4 flex-col lg:flex-row flex-1 min-h-0 overflow-hidden">
-        {/* Video Area (2/3) */}
-        <div className="flex-1 lg:flex-[2] flex flex-col gap-4 min-h-0 overflow-hidden">
+      {/* Left tools | Center board | Right chat */}
+      <div className="flex gap-4 flex-col xl:flex-row flex-1 min-h-0 overflow-hidden">
+        {/* Left Tools Rail — polls, leaderboard, hand raises */}
+        <div className="xl:w-[300px] xl:min-w-[280px] xl:max-w-[320px] flex flex-col gap-3 min-h-0 overflow-y-auto shrink-0 order-2 xl:order-1">
+
+          {/* ── Poll Drawer ───────────────────────────────────────── */}
+          {isPollDrawerOpen && (
+            <div className="rounded-[1.1rem] border overflow-hidden shrink-0 flex flex-col"
+              style={{ backgroundColor: "var(--bg-card)", borderColor: "rgba(148, 163, 184, 0.18)", maxHeight: "430px" }}>
+              <div className="flex items-center justify-between px-4 py-3 border-b shrink-0"
+                style={{ borderColor: "var(--border-primary)" }}>
+                <div className="flex items-center gap-2">
+                  <BarChart2 size={15} style={{ color: "var(--text-accent)" }} />
+                  <h3 className="text-xs font-black uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
+                    {activePoll ? "Poll in Progress" : "Create Poll"}
+                  </h3>
+                  {activePoll && (
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  )}
+                </div>
+                <button
+                  onClick={() => setIsPollDrawerOpen(false)}
+                  className="p-1 rounded-lg hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+                  style={{ color: "var(--text-muted)" }}
+                >
+                  <X size={14} />
+                </button>
+              </div>
+              <div className="flex-1 overflow-hidden min-h-0 pt-4">
+                <LivePollCreator
+                  sessionId={session?.id}
+                  authToken={authToken}
+                  room={room}
+                  activePoll={activePoll}
+                  onPollLaunched={handlePollLaunched}
+                  onPollEnded={handlePollEnded}
+                  incomingAnswers={pollAnswers}
+                />
+              </div>
+            </div>
+          )}
+
+          {showResultOverlay && pollResultData && (
+            <div className="rounded-2xl border shadow-xl overflow-hidden shrink-0"
+              style={{ borderColor: "var(--border-primary)" }}>
+              <PollResultsOverlay
+                pollData={pollResultData}
+                currentUsername={null}
+                onClose={() => setShowResultOverlay(false)}
+              />
+            </div>
+          )}
+
+          {leaderboard.length > 0 && (
+            <SessionLeaderboard
+              leaderboard={leaderboard}
+              totalPolls={totalPolls}
+              currentUsername={null}
+              compact={true}
+              title="Live Leaderboard"
+            />
+          )}
+
+          <div className="rounded-[1.1rem] border p-3.5 space-y-3 shrink-0"
+            style={{ backgroundColor: "var(--bg-card)", borderColor: "rgba(148, 163, 184, 0.18)" }}
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-black flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
+                <Hand size={16} className="text-amber-500" />
+                Hand Raises {raisedHands.length > 0 && `(${raisedHands.length})`}
+              </h3>
+              {raisedHands.length > 0 && (
+                <button
+                  onClick={clearAllHands}
+                  className="text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors"
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
+
+            {raisedHands.length === 0 ? (
+              <p className="text-[11px] font-semibold py-2 text-center" style={{ color: "var(--text-muted)" }}>
+                No active requests to speak.
+              </p>
+            ) : (
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {raisedHands.map((username) => (
+                  <div
+                    key={username}
+                    className="flex items-center justify-between p-2 rounded-xl border"
+                    style={{ backgroundColor: "var(--bg-primary)", borderColor: "var(--border-primary)" }}
+                  >
+                    <span className="text-xs font-bold font-mono" style={{ color: "var(--text-primary)" }}>
+                      {username}
+                    </span>
+                    <div className="flex gap-1.5">
+                      <button
+                        onClick={() => acceptSpeaker(username)}
+                        className="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold transition-all cursor-pointer"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => rejectHand(username)}
+                        className="px-2 py-1 rounded border hover:bg-red-500/10 text-red-400 text-[10px] font-bold transition-all cursor-pointer"
+                        style={{ borderColor: "var(--border-primary)" }}
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeSpeaker && (
+              <div className="pt-3 border-t flex items-center justify-between" style={{ borderColor: "var(--border-primary)" }}>
+                <div className="space-y-0.5">
+                  <p className="text-[10px] font-bold" style={{ color: "var(--text-muted)" }}>Speaking Student</p>
+                  <p className="text-xs font-black text-[var(--text-accent)]">{activeSpeaker}</p>
+                </div>
+                <button
+                  onClick={revokeSpeaker}
+                  className="px-3 py-1.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold transition-all cursor-pointer shadow-md shadow-red-500/25 flex items-center gap-1"
+                >
+                  <XCircle size={11} />
+                  Mute Student
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Center — Live Classroom Board */}
+        <div className="flex-1 xl:flex-[2] flex flex-col gap-3 min-h-0 overflow-hidden order-1 xl:order-2">
           {/* Video Preview Area */}
-          <div className="relative rounded-2xl overflow-hidden border shadow-2xl flex-1 min-h-0 bg-black"
-            style={{ borderColor: "var(--border-primary)" }}
+          <div className="relative rounded-[1.35rem] overflow-hidden border flex-1 min-h-0 bg-black shadow-[0_18px_55px_rgba(15,23,42,0.18)]"
+            style={{ borderColor: "rgba(148, 163, 184, 0.22)" }}
           >
             {localScreenTrack?.publication?.track ? (
               <VideoTrack
@@ -590,27 +799,49 @@ function BroadcastPanel({ session, onEndSession }) {
           </div>
 
           {/* Control Bar */}
-          <div className="flex items-center justify-center gap-3 p-4 rounded-2xl border shrink-0"
-            style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}
+          <div className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-[1.1rem] border shrink-0"
+            style={{ backgroundColor: "color-mix(in srgb, var(--bg-card) 88%, transparent)", borderColor: "rgba(148, 163, 184, 0.18)" }}
           >
             <TrackToggle
               source={Track.Source.Microphone}
-              className="p-3 rounded-xl border transition-all hover:scale-105 cursor-pointer bg-[var(--bg-primary)] border-[var(--border-primary)] text-[var(--text-primary)] data-[lk-on=true]:!bg-[var(--accent-primary)] data-[lk-on=true]:hover:!bg-[var(--accent-secondary)] data-[lk-on=true]:!text-white data-[lk-on=true]:!border-transparent data-[lk-on=false]:!bg-red-600 data-[lk-on=false]:hover:!bg-red-700 data-[lk-on=false]:!text-white data-[lk-on=false]:!border-transparent shadow-sm"
-            />
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[10px] font-bold uppercase tracking-wide transition-all hover:scale-105 cursor-pointer bg-[var(--bg-primary)] border-[var(--border-primary)] text-[var(--text-primary)] data-[lk-on=true]:!bg-[var(--accent-primary)] data-[lk-on=true]:hover:!bg-[var(--accent-secondary)] data-[lk-on=true]:!text-white data-[lk-on=true]:!border-transparent data-[lk-on=false]:!bg-red-600 data-[lk-on=false]:hover:!bg-red-700 data-[lk-on=false]:!text-white data-[lk-on=false]:!border-transparent shadow-sm"
+            >
+              Mic
+            </TrackToggle>
             <TrackToggle
               source={Track.Source.Camera}
-              className="p-3 rounded-xl border transition-all hover:scale-105 cursor-pointer bg-[var(--bg-primary)] border-[var(--border-primary)] text-[var(--text-primary)] data-[lk-on=true]:!bg-[var(--accent-primary)] data-[lk-on=true]:hover:!bg-[var(--accent-secondary)] data-[lk-on=true]:!text-white data-[lk-on=true]:!border-transparent data-[lk-on=false]:!bg-red-600 data-[lk-on=false]:hover:!bg-red-700 data-[lk-on=false]:!text-white data-[lk-on=false]:!border-transparent shadow-sm"
-            />
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[10px] font-bold uppercase tracking-wide transition-all hover:scale-105 cursor-pointer bg-[var(--bg-primary)] border-[var(--border-primary)] text-[var(--text-primary)] data-[lk-on=true]:!bg-[var(--accent-primary)] data-[lk-on=true]:hover:!bg-[var(--accent-secondary)] data-[lk-on=true]:!text-white data-[lk-on=true]:!border-transparent data-[lk-on=false]:!bg-red-600 data-[lk-on=false]:hover:!bg-red-700 data-[lk-on=false]:!text-white data-[lk-on=false]:!border-transparent shadow-sm"
+            >
+              Camera
+            </TrackToggle>
             <TrackToggle
               source={Track.Source.ScreenShare}
-              className="p-3 rounded-xl border transition-all hover:scale-105 cursor-pointer bg-[var(--bg-primary)] border-[var(--border-primary)] text-[var(--text-primary)] data-[lk-on=true]:!bg-[var(--accent-primary)] data-[lk-on=true]:hover:!bg-[var(--accent-secondary)] data-[lk-on=true]:!text-white data-[lk-on=true]:!border-transparent shadow-sm"
-            />
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[10px] font-bold uppercase tracking-wide transition-all hover:scale-105 cursor-pointer bg-[var(--bg-primary)] border-[var(--border-primary)] text-[var(--text-primary)] data-[lk-on=true]:!bg-[var(--accent-primary)] data-[lk-on=true]:hover:!bg-[var(--accent-secondary)] data-[lk-on=true]:!text-white data-[lk-on=true]:!border-transparent shadow-sm"
+            >
+              Share Screen
+            </TrackToggle>
+
+            <div className="w-px h-8 bg-slate-500/20 mx-2" />
+
+            {/* Poll Drawer Toggle Button */}
+            <button
+              onClick={() => setIsPollDrawerOpen(prev => !prev)}
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[10px] font-bold uppercase tracking-wide transition-all hover:scale-105 cursor-pointer shadow-sm ${
+                isPollDrawerOpen || activePoll
+                  ? "bg-[var(--accent-primary)] border-transparent text-white"
+                  : "bg-[var(--bg-primary)] border-[var(--border-primary)] text-[var(--text-primary)]"
+              } ${activePoll ? "animate-pulse" : ""}`}
+              id="poll-drawer-btn"
+            >
+              <BarChart2 size={14} />
+              {isPollDrawerOpen ? "Hide Polls" : "Show Polls"}
+            </button>
 
             <div className="w-px h-8 bg-slate-500/20 mx-2" />
 
             <button
               onClick={onEndSession}
-              className="flex items-center gap-2 px-5 py-3 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-extrabold uppercase tracking-wider transition-all hover:scale-105 shadow-lg shadow-red-500/25 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-xs font-extrabold uppercase tracking-wider transition-all hover:scale-105 shadow-lg shadow-red-500/20 cursor-pointer"
             >
               <StopCircle size={16} />
               End Session
@@ -618,88 +849,16 @@ function BroadcastPanel({ session, onEndSession }) {
           </div>
         </div>
 
-        {/* Sidebar (1/3) */}
-        <div className="lg:flex-1 lg:min-w-[300px] lg:max-w-[380px] flex flex-col gap-4 min-h-0 overflow-hidden">
-          {/* Raised Hands Control Panel */}
-          <div className="rounded-2xl border p-4 space-y-3 shrink-0"
-            style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-black flex items-center gap-2" style={{ color: "var(--text-primary)" }}>
-                <Hand size={16} className="text-amber-500" />
-                Hand Raises {raisedHands.length > 0 && `(${raisedHands.length})`}
-              </h3>
-              {raisedHands.length > 0 && (
-                <button
-                  onClick={clearAllHands}
-                  className="text-[10px] font-bold text-red-400 hover:text-red-300 transition-colors"
-                >
-                  Clear All
-                </button>
-              )}
-            </div>
-
-            {raisedHands.length === 0 ? (
-              <p className="text-[11px] font-semibold py-2 text-center" style={{ color: "var(--text-muted)" }}>
-                No active requests to speak.
-              </p>
-            ) : (
-              <div className="space-y-2 max-h-40 overflow-y-auto">
-                {raisedHands.map((username) => (
-                  <div
-                    key={username}
-                    className="flex items-center justify-between p-2 rounded-xl border"
-                    style={{ backgroundColor: "var(--bg-primary)", borderColor: "var(--border-primary)" }}
-                  >
-                    <span className="text-xs font-bold font-mono" style={{ color: "var(--text-primary)" }}>
-                      {username}
-                    </span>
-                    <div className="flex gap-1.5">
-                      <button
-                        onClick={() => acceptSpeaker(username)}
-                        className="px-2.5 py-1 rounded bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold transition-all cursor-pointer"
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={() => rejectHand(username)}
-                        className="px-2 py-1 rounded border hover:bg-red-500/10 text-red-400 text-[10px] font-bold transition-all cursor-pointer"
-                        style={{ borderColor: "var(--border-primary)" }}
-                      >
-                        Dismiss
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {activeSpeaker && (
-              <div className="pt-3 border-t flex items-center justify-between" style={{ borderColor: "var(--border-primary)" }}>
-                <div className="space-y-0.5">
-                  <p className="text-[10px] font-bold" style={{ color: "var(--text-muted)" }}>Speaking Student</p>
-                  <p className="text-xs font-black text-[var(--text-accent)]">{activeSpeaker}</p>
-                </div>
-                <button
-                  onClick={revokeSpeaker}
-                  className="px-3 py-1.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-[10px] font-bold transition-all cursor-pointer shadow-md shadow-red-500/25 flex items-center gap-1"
-                >
-                  <XCircle size={11} />
-                  Mute Student
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div className="flex-1 min-h-0">
-            <LiveChat 
-              blockedUsers={blockedUsers} 
-              setBlockedUsers={setBlockedUsers} 
-              hostUsername={session?.host?.username || user?.username} 
-              sessionId={session?.id}
-              className="h-full"
-            />
-          </div>
+        {/* Right — Live Chat */}
+        <div className="xl:w-[320px] xl:min-w-[300px] xl:max-w-[360px] flex flex-col min-h-0 overflow-hidden shrink-0 order-3">
+          <LiveChat
+            persistent
+            sessionId={session?.id}
+            hostUsername={session?.host?.username || ""}
+            blockedUsers={blockedUsers}
+            setBlockedUsers={setBlockedUsers}
+            className="flex-1 min-h-0"
+          />
         </div>
       </div>
 
@@ -713,6 +872,7 @@ function BroadcastPanel({ session, onEndSession }) {
 
 // ─── Main Admin Live Page ────────────────────────────────────────────
 export default function AdminLivePage() {
+  const router = useRouter();
   const { user, token: authToken, API_BASE, activeSession, setActiveSession } = useAuth();
   const [livekitToken, setLivekitToken] = useState(null);
   const [session, setSession] = useState(null);
@@ -727,6 +887,7 @@ export default function AdminLivePage() {
 
   const [pastSessions, setPastSessions] = useState([]);
   const [loadingPast, setLoadingPast] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true); // true until we've checked for active session
 
   const fetchPastSessions = async () => {
     try {
@@ -774,24 +935,37 @@ export default function AdminLivePage() {
     }
   }, [session]);
 
-  // Check for existing live session on mount
+  // Check for existing live session on mount — works for any admin/mentor (no hostId restriction)
   useEffect(() => {
     async function checkActive() {
+      setCheckingSession(true);
       try {
         const res = await fetch(`${API_BASE}/api/livekit/session/active`);
         const data = await res.json();
-        if (data.success && data.session && data.session.hostId === user?.id) {
+        if (data.success && data.session) {
+          // Any active session — reconnect regardless of who started it
           setSession(data.session);
           setActiveSession(data.session);
-          // Get a token for the existing session
-          fetchToken(data.session.roomName);
+          // fetchToken needs authToken — will be called once token is ready
+          if (authToken) {
+            fetchToken(data.session.roomName);
+          }
         }
       } catch (e) {
         console.error("Failed to check active session:", e);
+      } finally {
+        setCheckingSession(false);
       }
     }
-    if (user) checkActive();
-  }, [user]);
+    checkActive();
+  }, []); // Run once on mount — no user dependency needed
+
+  // If authToken becomes available after session was already found, fetch the token
+  useEffect(() => {
+    if (authToken && session && !livekitToken) {
+      fetchToken(session.roomName);
+    }
+  }, [authToken, session]);
 
   const fetchToken = async (roomName) => {
     try {
@@ -884,11 +1058,8 @@ export default function AdminLivePage() {
     }
   };
 
-  const handleEndSession = async () => {
-    if (!session) return;
-
-    const confirmed = window.confirm("Are you sure you want to end this live session?");
-    if (!confirmed) return;
+  const endActiveSession = async () => {
+    if (!session) return false;
 
     try {
       const res = await fetch(`${API_BASE}/api/livekit/session/${session.id}/end`, {
@@ -904,11 +1075,46 @@ export default function AdminLivePage() {
         setActiveSession(null);
         setLivekitToken(null);
         setFormState({ title: "", description: "", thumbnailPreview: null, thumbnailUrl: "" });
+        return true;
       }
     } catch (e) {
       console.error("Failed to end session:", e);
     }
+    return false;
   };
+
+  const handleEndSession = async () => {
+    if (!session) return;
+
+    const confirmed = window.confirm("Are you sure you want to end this live session?");
+    if (!confirmed) return;
+
+    await endActiveSession();
+  };
+
+  const handleBackToPortal = async () => {
+    const confirmed = window.confirm(
+      "Leaving will end the active live session for all students. Continue?"
+    );
+    if (!confirmed) return;
+
+    const ended = await endActiveSession();
+    if (ended) {
+      router.push("/admin/dashboard");
+    }
+  };
+
+  // ─── Checking for active session (loading state) ───────────────────
+  if (checkingSession) {
+    return (
+      <div className="flex items-center justify-center h-48">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-t-transparent rounded-full animate-spin" style={{ borderColor: "var(--text-accent)", borderTopColor: "transparent" }} />
+          <p className="text-xs font-semibold" style={{ color: "var(--text-muted)" }}>Checking for active session...</p>
+        </div>
+      </div>
+    );
+  }
 
   // ─── Pre-Session Form (Setup) ──────────────────────────────────────
   if (!session || !livekitToken) {
@@ -1145,6 +1351,20 @@ export default function AdminLivePage() {
   // ─── Active Session (Broadcasting) ─────────────────────────────────
   return (
     <div className="h-full flex flex-col min-h-0 overflow-hidden">
+      <button
+        type="button"
+        onClick={handleBackToPortal}
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 mb-2 rounded-lg border text-xs font-bold leading-none transition-all hover:scale-[1.02] cursor-pointer shrink-0 w-fit"
+        style={{
+          backgroundColor: "var(--bg-card)",
+          borderColor: "var(--border-primary)",
+          color: "var(--text-primary)",
+        }}
+      >
+        <ArrowLeft size={14} />
+        Back to Admin Portal
+      </button>
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
       {LIVEKIT_URL ? (
         <LiveKitRoom
           serverUrl={LIVEKIT_URL}
@@ -1154,7 +1374,7 @@ export default function AdminLivePage() {
           audio={true}
           style={{ height: "100%", display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}
         >
-          <BroadcastPanel session={session} onEndSession={handleEndSession} />
+          <BroadcastPanel session={session} onEndSession={handleEndSession} authToken={authToken} />
         </LiveKitRoom>
       ) : (
         <div className="flex flex-col items-center justify-center p-12 rounded-2xl border text-center space-y-4"
@@ -1169,6 +1389,7 @@ export default function AdminLivePage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }
