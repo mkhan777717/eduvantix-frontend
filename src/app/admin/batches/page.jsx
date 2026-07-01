@@ -5,57 +5,29 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Layers, Plus, Trash2, School, Users, Briefcase, Award, X,
-  CheckCircle2, AlertCircle, Calendar, GraduationCap, Check, Mail, ArrowLeft
+  CheckCircle2, AlertCircle, Calendar, GraduationCap, Check, Mail, ArrowLeft, Edit, RefreshCw
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function ManageBatchesPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, token, API_BASE } = useAuth();
 
   // Mock list of registered members in the institute (aligned with people list)
-  const [managers] = useState([
-    { id: 1, name: "Aditya", email: "aditya@dmx.com" },
+  const [managers, setManagers] = useState([
     { id: 4, name: "Sakshi", email: "sakshi@dmx.com" }
   ]);
 
-  const [mentors] = useState([
-    { id: 2, name: "Mohammed Majeed Khan", email: "majeed@dmx.com" },
-    { id: 5, name: "Nitin Singh", email: "nitin@dmx.com" },
-    { id: 6, name: "Divyashant Kumar", email: "divyashant@dmx.com" }
-  ]);
-
-  const [students] = useState([
-    { id: 3, name: "Arhan Khan", email: "arhan@dmx.com" },
-    { id: 7, name: "Shahazadi Syed", email: "shahazadi@dmx.com" },
-    { id: 8, name: "Abhishek Kumar", email: "abhishek@dmx.com" },
-    { id: 9, name: "Ishaan Khandelwaal", email: "ishaan@dmx.com" }
-  ]);
-
-  // Mock Batches Database State
-  const [batches, setBatches] = useState([
-    {
-      id: 101,
-      name: "Batch-A",
-      managerId: 1, // Aditya
-      mentorIds: [2, 5], // Mohammed Majeed Khan, Nitin Singh
-      studentIds: [3, 7], // Arhan Khan, Shahazadi Syed (assigned to same batch)
-      createdAt: "2026-06-20"
-    },
-    {
-      id: 102,
-      name: "Batch-B",
-      managerId: 4, // Sakshi
-      mentorIds: [5, 6], // Nitin Singh, Divyashant Kumar
-      studentIds: [8, 9], // Abhishek Kumar, Ishaan Khandelwaal
-      createdAt: "2026-06-22"
-    }
-  ]);
+  const [mentors, setMentors] = useState([]);
+  const [students, setStudents] = useState([]);
+  const [batches, setBatches] = useState([]);
 
   // View Navigation State: 'list' | 'details'
   const [activeView, setActiveView] = useState("list");
-  const [selectedBatchDetails, setSelectedBatchDetails] = useState(null);
+  const [selectedBatchId, setSelectedBatchId] = useState(null);
+  const selectedBatchDetails = batches.find(b => b.id === selectedBatchId) || null;
   const [activeDetailTab, setActiveDetailTab] = useState("manager"); // 'manager' | 'mentors' | 'students'
+  const [loading, setLoading] = useState(true);
 
   // Form States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -71,12 +43,92 @@ export default function ManageBatchesPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [batchToDelete, setBatchToDelete] = useState(null);
 
+  // Submitting States
+  const [submitting, setSubmitting] = useState(false);
+  const [editing, setEditing] = useState(false);
+
+  // Roster Assign States
+  const [isAssignMentorOpen, setIsAssignMentorOpen] = useState(false);
+  const [isAssignStudentOpen, setIsAssignStudentOpen] = useState(false);
+
+  // Edit States
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [itemToEdit, setItemToEdit] = useState(null);
+  const [editBatchName, setEditBatchName] = useState("");
+  const [editSelectedManagerId, setEditSelectedManagerId] = useState("");
+  const [editSelectedMentorIds, setEditSelectedMentorIds] = useState([]);
+  const [editSelectedStudentIds, setEditSelectedStudentIds] = useState([]);
+
+  const handleToggleEditMentor = (id) => {
+    setEditSelectedMentorIds(prev =>
+      prev.includes(id) ? prev.filter(mid => mid !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleEditStudent = (id) => {
+    setEditSelectedStudentIds(prev =>
+      prev.includes(id) ? prev.filter(sid => sid !== id) : [...prev, id]
+    );
+  };
+
   // Security check: Redirect if not institute admin or super admin
   useEffect(() => {
     if (user && user.role !== "INSTITUTE_ADMIN" && user.role !== "ADMIN") {
       router.replace("/admin/dashboard");
     }
   }, [user, router]);
+
+  const loadData = async () => {
+    try {
+      if (!token) return;
+      setLoading(true);
+      
+      // Fetch members
+      const membersRes = await fetch(`${API_BASE}/api/institutes/members`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const membersData = await membersRes.json();
+      if (membersData.success && Array.isArray(membersData.members)) {
+        const mgrs = [];
+        const ments = [];
+        const studs = [];
+        for (const m of membersData.members) {
+          const item = { id: m.id, name: m.username, email: m.email };
+          if (m.role === 'BATCH_MANAGER') mgrs.push(item);
+          else if (m.role === 'MENTOR') ments.push(item);
+          else if (m.role === 'USER') studs.push(item);
+        }
+        setManagers(mgrs);
+        setMentors(ments);
+        setStudents(studs);
+      }
+
+      // Fetch batches
+      const batchesRes = await fetch(`${API_BASE}/api/batches`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const batchesData = await batchesRes.json();
+      if (batchesData.success && Array.isArray(batchesData.batches)) {
+        const formatted = batchesData.batches.map(b => ({
+          id: b.id,
+          name: b.name,
+          managerId: b.managerId,
+          mentorIds: b.mentors.map(m => m.id),
+          studentIds: b.students.map(s => s.id),
+          createdAt: b.createdAt.split("T")[0]
+        }));
+        setBatches(formatted);
+      }
+    } catch (err) {
+      console.error("Failed to load batches/members:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [token]);
 
   // Auto-select first available manager on open
   useEffect(() => {
@@ -100,38 +152,82 @@ export default function ManageBatchesPage() {
     );
   };
 
-  const handleCreateBatchSubmit = (e) => {
+  const handleCreateBatchSubmit = async (e) => {
     e.preventDefault();
     setFormError("");
     setFormSuccess("");
+    setSubmitting(true);
 
     if (!batchName.trim()) {
       setFormError("Batch name is required.");
+      setSubmitting(false);
       return;
     }
     if (!selectedManagerId) {
       setFormError("Please select a Batch Manager.");
+      setSubmitting(false);
       return;
     }
 
+    try {
+      if (token) {
+        const res = await fetch(`${API_BASE}/api/batches`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name: batchName.trim(),
+            managerId: parseInt(selectedManagerId, 10),
+            mentorIds: selectedMentorIds,
+            studentIds: selectedStudentIds
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const newBatch = {
+            id: data.batch.id,
+            name: data.batch.name,
+            managerId: data.batch.managerId,
+            mentorIds: data.batch.mentors.map(m => m.id),
+            studentIds: data.batch.students.map(s => s.id),
+            createdAt: data.batch.createdAt.split("T")[0]
+          };
+          setBatches(prev => [newBatch, ...prev]);
+          setFormSuccess("Batch created successfully!");
+        } else {
+          setFormError(data.message || "Failed to create batch.");
+          setSubmitting(false);
+          return;
+        }
+      } else {
+        // Offline mockup fallback
+        const newBatch = {
+          id: Date.now(),
+          name: batchName.trim(),
+          managerId: parseInt(selectedManagerId, 10),
+          mentorIds: selectedMentorIds,
+          studentIds: selectedStudentIds,
+          createdAt: new Date().toISOString().split("T")[0]
+        };
+        setBatches(prev => [newBatch, ...prev]);
+        setFormSuccess("Batch created successfully (Offline Mock)!");
+      }
 
-
-    const newBatch = {
-      id: Date.now(),
-      name: batchName.trim(),
-      managerId: parseInt(selectedManagerId, 10),
-      mentorIds: selectedMentorIds,
-      studentIds: selectedStudentIds,
-      createdAt: new Date().toISOString().split("T")[0]
-    };
-
-    setBatches(prev => [...prev, newBatch]);
-    setFormSuccess("Batch created and configured successfully!");
-
-    setTimeout(() => {
-      setIsAddModalOpen(false);
-      setFormSuccess("");
-    }, 1500);
+      setBatchName("");
+      setSelectedMentorIds([]);
+      setSelectedStudentIds([]);
+      setTimeout(() => {
+        setIsAddModalOpen(false);
+        setFormSuccess("");
+      }, 1200);
+    } catch (err) {
+      console.error(err);
+      setFormError("Error connecting to backend server.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const triggerDelete = (batch) => {
@@ -139,15 +235,199 @@ export default function ManageBatchesPage() {
     setIsDeleteModalOpen(true);
   };
 
-  const confirmDelete = () => {
+  const confirmDelete = async () => {
     if (!batchToDelete) return;
+    try {
+      if (token) {
+        const res = await fetch(`${API_BASE}/api/batches/${batchToDelete.id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+        const data = await res.json();
+        if (!data.success) {
+          console.warn("Delete batch API returned failure, fallback to UI delete:", data.message);
+        }
+      }
+    } catch (err) {
+      console.error("Failed to delete batch via API, fallback to UI delete:", err);
+    }
     setBatches(prev => prev.filter(b => b.id !== batchToDelete.id));
     setIsDeleteModalOpen(false);
     setBatchToDelete(null);
-    if (selectedBatchDetails?.id === batchToDelete.id) {
+    if (selectedBatchId === batchToDelete.id) {
       setActiveView("list");
-      setSelectedBatchDetails(null);
+      setSelectedBatchId(null);
     }
+  };
+
+  const triggerEdit = (batch) => {
+    setItemToEdit(batch);
+    setEditBatchName(batch.name);
+    setEditSelectedManagerId(batch.managerId ? batch.managerId.toString() : "");
+    setEditSelectedMentorIds(batch.mentorIds || []);
+    setEditSelectedStudentIds(batch.studentIds || []);
+    setFormError("");
+    setFormSuccess("");
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditBatchSubmit = async (e) => {
+    e.preventDefault();
+    setFormError("");
+    setFormSuccess("");
+    setEditing(true);
+
+    if (!editBatchName.trim()) {
+      setFormError("Batch name is required.");
+      setEditing(false);
+      return;
+    }
+    if (!editSelectedManagerId) {
+      setFormError("Please select a Batch Manager.");
+      setEditing(false);
+      return;
+    }
+
+    try {
+      if (token) {
+        const res = await fetch(`${API_BASE}/api/batches/${itemToEdit.id}`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            name: editBatchName.trim(),
+            managerId: parseInt(editSelectedManagerId, 10),
+            mentorIds: editSelectedMentorIds,
+            studentIds: editSelectedStudentIds
+          })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const updated = {
+            id: data.batch.id,
+            name: data.batch.name,
+            managerId: data.batch.managerId,
+            mentorIds: data.batch.mentors.map(m => m.id),
+            studentIds: data.batch.students.map(s => s.id),
+            createdAt: data.batch.createdAt.split("T")[0]
+          };
+          setBatches(prev => prev.map(b => b.id === itemToEdit.id ? updated : b));
+          setFormSuccess("Batch updated successfully!");
+        } else {
+          setFormError(data.message || "Failed to update batch.");
+          setEditing(false);
+          return;
+        }
+      } else {
+        // Fallback for offline mock mode
+        const updated = {
+          ...itemToEdit,
+          name: editBatchName.trim(),
+          managerId: parseInt(editSelectedManagerId, 10),
+          mentorIds: editSelectedMentorIds,
+          studentIds: editSelectedStudentIds
+        };
+        setBatches(prev => prev.map(b => b.id === itemToEdit.id ? updated : b));
+        setFormSuccess("Batch updated successfully (Offline Mock)!");
+      }
+
+      setTimeout(() => {
+        setIsEditModalOpen(false);
+        setFormSuccess("");
+        setItemToEdit(null);
+      }, 1200);
+    } catch (err) {
+      console.error(err);
+      setFormError("Error connecting to backend server.");
+    } finally {
+      setEditing(false);
+    }
+  };
+
+  const handleRemoveMentorFromBatch = async (menId) => {
+    if (!selectedBatchDetails) return;
+    const mentorName = mentors.find(m => m.id === menId)?.name || "this mentor";
+    if (!window.confirm(`Are you sure you want to remove ${mentorName} from the batch ${selectedBatchDetails.name}?`)) {
+      return;
+    }
+    try {
+      if (token) {
+        await fetch(`${API_BASE}/api/batches/batch-manager/batches/${selectedBatchDetails.id}/mentors/${menId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+    } catch (err) {
+      console.error("Failed to remove mentor:", err);
+    }
+    const updatedMentorIds = selectedBatchDetails.mentorIds.filter(id => id !== menId);
+    setBatches(prev => prev.map(b => b.id === selectedBatchDetails.id ? { ...b, mentorIds: updatedMentorIds } : b));
+  };
+
+  const handleAddMentorToBatch = async (menId) => {
+    if (!selectedBatchDetails) return;
+    if (selectedBatchDetails.mentorIds.includes(menId)) return;
+    try {
+      if (token) {
+        await fetch(`${API_BASE}/api/batches/batch-manager/batches/${selectedBatchDetails.id}/mentors`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ mentorId: menId })
+        });
+      }
+    } catch (err) {
+      console.error("Failed to add mentor:", err);
+    }
+    const updatedMentorIds = [...selectedBatchDetails.mentorIds, menId];
+    setBatches(prev => prev.map(b => b.id === selectedBatchDetails.id ? { ...b, mentorIds: updatedMentorIds } : b));
+  };
+
+  const handleRemoveStudentFromBatch = async (stdId) => {
+    if (!selectedBatchDetails) return;
+    const studentName = students.find(s => s.id === stdId)?.name || "this student";
+    if (!window.confirm(`Are you sure you want to remove ${studentName} from the batch ${selectedBatchDetails.name}?`)) {
+      return;
+    }
+    try {
+      if (token) {
+        await fetch(`${API_BASE}/api/batches/batch-manager/batches/${selectedBatchDetails.id}/students/${stdId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+    } catch (err) {
+      console.error("Failed to remove student:", err);
+    }
+    const updatedStudentIds = selectedBatchDetails.studentIds.filter(id => id !== stdId);
+    setBatches(prev => prev.map(b => b.id === selectedBatchDetails.id ? { ...b, studentIds: updatedStudentIds } : b));
+  };
+
+  const handleAddStudentToBatch = async (stdId) => {
+    if (!selectedBatchDetails) return;
+    if (selectedBatchDetails.studentIds.includes(stdId)) return;
+    try {
+      if (token) {
+        await fetch(`${API_BASE}/api/batches/batch-manager/batches/${selectedBatchDetails.id}/students`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ studentId: stdId })
+        });
+      }
+    } catch (err) {
+      console.error("Failed to add student:", err);
+    }
+    const updatedStudentIds = [...selectedBatchDetails.studentIds, stdId];
+    setBatches(prev => prev.map(b => b.id === selectedBatchDetails.id ? { ...b, studentIds: updatedStudentIds } : b));
   };
 
   if (!user || (user.role !== "INSTITUTE_ADMIN" && user.role !== "ADMIN")) {
@@ -175,6 +455,14 @@ export default function ManageBatchesPage() {
 
   const detailsList = getActiveRoster();
 
+  const availableMentors = selectedBatchDetails
+    ? mentors.filter(m => !selectedBatchDetails.mentorIds.includes(m.id))
+    : [];
+
+  const availableStudents = selectedBatchDetails
+    ? students.filter(s => !selectedBatchDetails.studentIds.includes(s.id))
+    : [];
+
   return (
     <div className="space-y-6 p-6 min-h-0 flex flex-col flex-1" style={{ color: "var(--text-primary)" }}>
 
@@ -193,7 +481,7 @@ export default function ManageBatchesPage() {
               </h1>
               <p className="text-xs" style={{ color: "var(--text-muted)" }}>
                 Create academic cohorts, bind dedicated Batch Managers, and map mentor/student rosters.
-              </p>
+              </p> 
             </div>
 
             <button
@@ -211,7 +499,12 @@ export default function ManageBatchesPage() {
 
           {/* Grid of Batches */}
           <div className="flex-1 min-h-0 overflow-y-auto">
-            {batches.length === 0 ? (
+            {loading ? (
+              <div className="flex h-64 flex-col items-center justify-center space-y-4 rounded-3xl border bg-[var(--bg-card)]" style={{ borderColor: "var(--border-primary)" }}>
+                <div className="w-8 h-8 rounded-full border-2 border-[var(--text-accent)] border-t-transparent animate-spin" />
+                <span className="text-xs font-semibold text-[var(--text-muted)]">Fetching Batches...</span>
+              </div>
+            ) : batches.length === 0 ? (
               <div className="flex h-64 flex-col items-center justify-center space-y-4 rounded-3xl border bg-[var(--bg-card)]" style={{ borderColor: "var(--border-primary)" }}>
                 <div className="w-16 h-16 rounded-3xl bg-[var(--bg-badge)] flex items-center justify-center text-[var(--text-accent)]">
                   <Layers size={28} />
@@ -232,7 +525,7 @@ export default function ManageBatchesPage() {
                       key={batch.id}
                       layout
                       onClick={() => {
-                        setSelectedBatchDetails(batch);
+                        setSelectedBatchId(batch.id);
                         setActiveDetailTab("manager");
                         setActiveView("details");
                       }}
@@ -248,15 +541,26 @@ export default function ManageBatchesPage() {
                             Created on {new Date(batch.createdAt).toLocaleDateString()}
                           </p>
                         </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            triggerDelete(batch);
-                          }}
-                          className="p-2 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                        >
-                          <Trash2 size={16} />
-                        </button>
+                         <div className="flex items-center gap-1">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              triggerEdit(batch);
+                            }}
+                            className="p-2 rounded-xl text-emerald-500 hover:bg-emerald-500/10 transition-colors cursor-pointer"
+                          >
+                            <Edit size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              triggerDelete(batch);
+                            }}
+                            className="p-2 rounded-xl text-rose-500 hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </div>
 
                       {/* Association badges */}
@@ -295,7 +599,7 @@ export default function ManageBatchesPage() {
               <button
                 onClick={() => {
                   setActiveView("list");
-                  setSelectedBatchDetails(null);
+                  setSelectedBatchId(null);
                 }}
                 className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-accent)] hover:underline cursor-pointer"
               >
@@ -310,13 +614,40 @@ export default function ManageBatchesPage() {
               </p>
             </div>
 
-            <button
-              onClick={() => triggerDelete(selectedBatchDetails)}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg border border-transparent shrink-0"
-            >
-              <Trash2 size={16} />
-              <span>Delete Batch</span>
-            </button>
+            <div className="flex items-center gap-2 shrink-0">
+              {activeDetailTab === "mentors" && (
+                <button
+                  onClick={() => setIsAssignMentorOpen(true)}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white text-xs font-black uppercase transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg border border-transparent shrink-0"
+                >
+                  <Plus size={16} />
+                  <span>Configure Mentors</span>
+                </button>
+              )}
+              {activeDetailTab === "students" && (
+                <button
+                  onClick={() => setIsAssignStudentOpen(true)}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white text-xs font-black uppercase transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg border border-transparent shrink-0"
+                >
+                  <Plus size={16} />
+                  <span>Configure Students</span>
+                </button>
+              )}
+              <button
+                onClick={() => triggerEdit(selectedBatchDetails)}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-black uppercase transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg border border-transparent shrink-0"
+              >
+                <Edit size={16} />
+                <span>Edit Batch</span>
+              </button>
+              <button
+                onClick={() => triggerDelete(selectedBatchDetails)}
+                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-lg border border-transparent shrink-0"
+              >
+                <Trash2 size={16} />
+                <span>Delete Batch</span>
+              </button>
+            </div>
           </div>
 
           {/* Roster Tabs List */}
@@ -375,6 +706,9 @@ export default function ManageBatchesPage() {
                       <th className="px-6 py-4">Name</th>
                       <th className="px-6 py-4">Email Address</th>
                       <th className="px-6 py-4">Role Permission</th>
+                      {activeDetailTab !== "manager" && (
+                        <th className="px-6 py-4">Actions</th>
+                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y text-xs font-semibold" style={{ borderColor: "var(--border-primary)", color: "var(--text-primary)" }}>
@@ -392,6 +726,23 @@ export default function ManageBatchesPage() {
                             {member.role.replace("_", " ")}
                           </span>
                         </td>
+                        {activeDetailTab !== "manager" && (
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => {
+                                if (activeDetailTab === "mentors") {
+                                  handleRemoveMentorFromBatch(member.id);
+                                } else {
+                                  handleRemoveStudentFromBatch(member.id);
+                                }
+                              }}
+                              className="flex items-center gap-1.5 text-[10px] font-black uppercase text-rose-500 hover:text-rose-600 transition-colors cursor-pointer border border-rose-500/20 bg-rose-500/5 px-2.5 py-1.5 rounded-xl hover:bg-rose-500/10"
+                            >
+                              <Trash2 size={12} />
+                              <span>Remove</span>
+                            </button>
+                          </td>
+                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -433,119 +784,131 @@ export default function ManageBatchesPage() {
 
               {/* Scrollable form body */}
               <form onSubmit={handleCreateBatchSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0">
-                {formError && (
-                  <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-semibold">
-                    <AlertCircle size={14} className="shrink-0" />
-                    <span>{formError}</span>
+                <fieldset disabled={submitting} className="space-y-4 border-none p-0 m-0">
+                  {formError && (
+                    <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-semibold">
+                      <AlertCircle size={14} className="shrink-0" />
+                      <span>{formError}</span>
+                    </div>
+                  )}
+                  {formSuccess && (
+                    <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-semibold">
+                      <CheckCircle2 size={14} className="shrink-0" />
+                      <span>{formSuccess}</span>
+                    </div>
+                  )}
+
+                  {/* Batch Name */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
+                      Batch Name / Cohort Title
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={batchName}
+                      onChange={(e) => setBatchName(e.target.value)}
+                      placeholder="e.g. Batch-A"
+                      className="w-full bg-[var(--bg-primary)] border rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-[var(--border-accent)] transition-all placeholder:text-[var(--text-muted)]"
+                      style={{ borderColor: "var(--border-primary)" }}
+                    />
                   </div>
-                )}
-                {formSuccess && (
-                  <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-semibold">
-                    <CheckCircle2 size={14} className="shrink-0" />
-                    <span>{formSuccess}</span>
+
+                  {/* Manager Selector */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
+                      Assign Batch Manager (1 Role Max)
+                    </label>
+                    <select
+                      value={selectedManagerId}
+                      onChange={(e) => setSelectedManagerId(e.target.value)}
+                      className="w-full bg-[var(--bg-primary)] border rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-[var(--border-accent)] transition-all"
+                      style={{ borderColor: "var(--border-primary)", color: "var(--text-primary)" }}
+                    >
+                      <option value="">-- Select Manager --</option>
+                      {managers.map((mgr) => (
+                        <option key={mgr.id} value={mgr.id}>
+                          {mgr.name} ({mgr.email})
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                )}
 
-                {/* Batch Name */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
-                    Batch Name / Cohort Title
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={batchName}
-                    onChange={(e) => setBatchName(e.target.value)}
-                    placeholder="e.g. Batch-A"
-                    className="w-full bg-[var(--bg-primary)] border rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-[var(--border-accent)] transition-all placeholder:text-[var(--text-muted)]"
-                    style={{ borderColor: "var(--border-primary)" }}
-                  />
-                </div>
-
-                {/* Manager Selector */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
-                    Assign Batch Manager (1 Role Max)
-                  </label>
-                  <select
-                    value={selectedManagerId}
-                    onChange={(e) => setSelectedManagerId(e.target.value)}
-                    className="w-full bg-[var(--bg-primary)] border rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-[var(--border-accent)] transition-all"
-                    style={{ borderColor: "var(--border-primary)", color: "var(--text-primary)" }}
-                  >
-                    {managers.map((mgr) => (
-                      <option key={mgr.id} value={mgr.id}>
-                        {mgr.name} ({mgr.email})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Mentors Checklist */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
-                    Select Mentors (Multi-Batch Enabled)
-                  </label>
-                  <div className="max-h-28 overflow-y-auto p-3 rounded-2xl bg-[var(--bg-primary)] border space-y-2" style={{ borderColor: "var(--border-primary)" }}>
-                    {mentors.map((men) => (
-                      <div
-                        key={men.id}
-                        onClick={() => handleToggleMentor(men.id)}
-                        className="flex items-center justify-between p-2 rounded-xl hover:bg-[var(--bg-card)] transition-colors cursor-pointer"
-                      >
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold">{men.name}</span>
-                          <span className="text-[10px] text-[var(--text-muted)]">{men.email}</span>
+                  {/* Mentors Checklist */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
+                      Select Mentors (Multi-Batch Enabled)
+                    </label>
+                    <div className="max-h-28 overflow-y-auto p-3 rounded-2xl bg-[var(--bg-primary)] border space-y-2" style={{ borderColor: "var(--border-primary)" }}>
+                      {mentors.map((men) => (
+                        <div
+                          key={men.id}
+                          onClick={() => handleToggleMentor(men.id)}
+                          className="flex items-center justify-between p-2 rounded-xl hover:bg-[var(--bg-card)] transition-colors cursor-pointer"
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold">{men.name}</span>
+                            <span className="text-[10px] text-[var(--text-muted)]">{men.email}</span>
+                          </div>
+                          {selectedMentorIds.includes(men.id) && (
+                            <Check size={16} className="text-[var(--text-accent)]" />
+                          )}
                         </div>
-                        {selectedMentorIds.includes(men.id) && (
-                          <Check size={16} className="text-[var(--text-accent)]" />
-                        )}
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
 
-                {/* Student Checklist */}
-                <div className="space-y-2">
-                  <label className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
-                    Select Students (Multi-Batch Enabled)
-                  </label>
-                  <div className="max-h-36 overflow-y-auto p-3 rounded-2xl bg-[var(--bg-primary)] border space-y-2" style={{ borderColor: "var(--border-primary)" }}>
-                    {students.map((std) => (
-                      <div
-                        key={std.id}
-                        onClick={() => handleToggleStudent(std.id)}
-                        className="flex items-center justify-between p-2 rounded-xl hover:bg-[var(--bg-card)] transition-colors cursor-pointer"
-                      >
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold">{std.name}</span>
-                          <span className="text-[10px] text-[var(--text-muted)]">{std.email}</span>
+                  {/* Student Checklist */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
+                      Select Students (Multi-Batch Enabled)
+                    </label>
+                    <div className="max-h-36 overflow-y-auto p-3 rounded-2xl bg-[var(--bg-primary)] border space-y-2" style={{ borderColor: "var(--border-primary)" }}>
+                      {students.map((std) => (
+                        <div
+                          key={std.id}
+                          onClick={() => handleToggleStudent(std.id)}
+                          className="flex items-center justify-between p-2 rounded-xl hover:bg-[var(--bg-card)] transition-colors cursor-pointer"
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold">{std.name}</span>
+                            <span className="text-[10px] text-[var(--text-muted)]">{std.email}</span>
+                          </div>
+                          {selectedStudentIds.includes(std.id) && (
+                            <Check size={16} className="text-[var(--text-accent)]" />
+                          )}
                         </div>
-                        {selectedStudentIds.includes(std.id) && (
-                          <Check size={16} className="text-[var(--text-accent)]" />
-                        )}
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
-                </div>
+                </fieldset>
               </form>
 
               {/* Modal Actions */}
               <div className="p-6 border-t shrink-0 flex justify-end gap-3 bg-[var(--bg-card)]" style={{ borderColor: "var(--border-primary)" }}>
                 <button
                   type="button"
+                  disabled={submitting}
                   onClick={() => setIsAddModalOpen(false)}
-                  className="px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all hover:bg-[var(--bg-primary)] cursor-pointer text-[var(--text-secondary)]"
+                  className="px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all hover:bg-[var(--bg-primary)] cursor-pointer text-[var(--text-secondary)] disabled:opacity-50 disabled:cursor-not-allowed"
                   style={{ borderColor: "var(--border-primary)" }}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
+                  disabled={submitting}
                   onClick={handleCreateBatchSubmit}
-                  className="px-5 py-2.5 rounded-2xl bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white text-xs font-black uppercase transition-all shadow-lg hover:scale-[1.02] cursor-pointer"
+                  className="px-5 py-2.5 rounded-2xl bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white text-xs font-black uppercase transition-all shadow-lg hover:scale-[1.02] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
-                  Configure Batch
+                  {submitting ? (
+                    <>
+                      <RefreshCw size={12} className="animate-spin" />
+                      <span>Configuring...</span>
+                    </>
+                  ) : (
+                    "Configure Batch"
+                  )}
                 </button>
               </div>
             </motion.div>
@@ -590,6 +953,323 @@ export default function ManageBatchesPage() {
                   className="px-5 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black uppercase transition-all shadow-lg hover:scale-[1.02] cursor-pointer"
                 >
                   Delete
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Batch Modal */}
+      <AnimatePresence>
+        {isEditModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-md max-h-[85vh] flex flex-col rounded-3xl border shadow-2xl overflow-hidden bg-[var(--bg-card)]"
+              style={{ borderColor: "var(--border-primary)" }}
+            >
+              {/* Modal Header */}
+              <div className="px-6 pt-6 pb-4 flex items-center justify-between border-b animate-slideDown" style={{ borderColor: "var(--border-primary)" }}>
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-xl bg-[var(--bg-badge)] text-[var(--text-accent)]">
+                    <Edit size={16} />
+                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">
+                    Edit Batch Cohort
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-[var(--bg-primary)] transition-colors cursor-pointer text-[var(--text-muted)]"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Scrollable form body */}
+              <form onSubmit={handleEditBatchSubmit} className="flex-1 overflow-y-auto p-6 space-y-4 min-h-0">
+                <fieldset disabled={editing} className="space-y-4 border-none p-0 m-0">
+                  {formError && (
+                    <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-rose-500 text-xs font-semibold animate-shake">
+                      <AlertCircle size={14} className="shrink-0" />
+                      <span>{formError}</span>
+                    </div>
+                  )}
+                  {formSuccess && (
+                    <div className="flex items-center gap-2 p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-semibold animate-bounce">
+                      <CheckCircle2 size={14} className="shrink-0" />
+                      <span>{formSuccess}</span>
+                    </div>
+                  )}
+
+                  {/* Batch Name */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
+                      Batch Name / Cohort Title
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={editBatchName}
+                      onChange={(e) => setEditBatchName(e.target.value)}
+                      placeholder="e.g. Batch-A"
+                      className="w-full bg-[var(--bg-primary)] border rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-[var(--border-accent)] transition-all placeholder:text-[var(--text-muted)]"
+                      style={{ borderColor: "var(--border-primary)" }}
+                    />
+                  </div>
+
+                  {/* Manager Selector */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
+                      Assign Batch Manager (1 Role Max)
+                    </label>
+                    <select
+                      value={editSelectedManagerId}
+                      onChange={(e) => setEditSelectedManagerId(e.target.value)}
+                      className="w-full bg-[var(--bg-primary)] border rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-[var(--border-accent)] transition-all"
+                      style={{ borderColor: "var(--border-primary)", color: "var(--text-primary)" }}
+                    >
+                      <option value="">-- Select Manager --</option>
+                      {managers.map((mgr) => (
+                        <option key={mgr.id} value={mgr.id}>
+                          {mgr.name} ({mgr.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Mentors Checklist */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
+                      Select Mentors (Multi-Batch Enabled)
+                    </label>
+                    <div className="max-h-28 overflow-y-auto p-3 rounded-2xl bg-[var(--bg-primary)] border space-y-2" style={{ borderColor: "var(--border-primary)" }}>
+                      {mentors.map((men) => (
+                        <div
+                          key={men.id}
+                          onClick={() => handleToggleEditMentor(men.id)}
+                          className="flex items-center justify-between p-2 rounded-xl hover:bg-[var(--bg-card)] transition-colors cursor-pointer"
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold">{men.name}</span>
+                            <span className="text-[10px] text-[var(--text-muted)]">{men.email}</span>
+                          </div>
+                          {editSelectedMentorIds.includes(men.id) && (
+                            <Check size={16} className="text-[var(--text-accent)]" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Student Checklist */}
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-secondary)]">
+                      Select Students (Multi-Batch Enabled)
+                    </label>
+                    <div className="max-h-36 overflow-y-auto p-3 rounded-2xl bg-[var(--bg-primary)] border space-y-2" style={{ borderColor: "var(--border-primary)" }}>
+                      {students.map((std) => (
+                        <div
+                          key={std.id}
+                          onClick={() => handleToggleEditStudent(std.id)}
+                          className="flex items-center justify-between p-2 rounded-xl hover:bg-[var(--bg-card)] transition-colors cursor-pointer"
+                        >
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold">{std.name}</span>
+                            <span className="text-[10px] text-[var(--text-muted)]">{std.email}</span>
+                          </div>
+                          {editSelectedStudentIds.includes(std.id) && (
+                            <Check size={16} className="text-[var(--text-accent)]" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </fieldset>
+              </form>
+
+              {/* Modal Actions */}
+              <div className="p-6 border-t shrink-0 flex justify-end gap-3 bg-[var(--bg-card)]" style={{ borderColor: "var(--border-primary)" }}>
+                <button
+                  type="button"
+                  disabled={editing}
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2.5 rounded-2xl border text-xs font-bold transition-all hover:bg-[var(--bg-primary)] cursor-pointer text-[var(--text-secondary)] disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ borderColor: "var(--border-primary)" }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editing}
+                  onClick={handleEditBatchSubmit}
+                  className="px-5 py-2.5 rounded-2xl bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white text-xs font-black uppercase transition-all shadow-lg hover:scale-[1.02] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {editing ? (
+                    <>
+                      <RefreshCw size={12} className="animate-spin" />
+                      <span>Saving...</span>
+                    </>
+                  ) : (
+                    "Save Changes"
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Assign Mentors Configuration Modal */}
+      <AnimatePresence>
+        {isAssignMentorOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-md rounded-3xl border shadow-2xl overflow-hidden bg-[var(--bg-card)] flex flex-col max-h-[80vh]"
+              style={{ borderColor: "var(--border-primary)" }}
+            >
+              {/* Header */}
+              <div className="px-6 py-5 flex items-center justify-between border-b shrink-0" style={{ borderColor: "var(--border-primary)" }}>
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-xl bg-[var(--bg-badge)] text-[var(--text-accent)]">
+                    <Award size={16} />
+                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">
+                    Assign Batch Mentors
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setIsAssignMentorOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-[var(--bg-primary)] transition-colors cursor-pointer text-[var(--text-muted)]"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Roster Selector List */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-3 min-h-0">
+                <span className="text-[10px] font-black uppercase text-[var(--text-muted)] tracking-wider">
+                  Available Institute Mentors
+                </span>
+                {availableMentors.length === 0 ? (
+                  <p className="text-xs text-[var(--text-muted)] text-center py-6">
+                    All mentors have already been assigned to this batch teaching roster.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {availableMentors.map((men) => (
+                      <div
+                        key={men.id}
+                        onClick={() => handleAddMentorToBatch(men.id)}
+                        className="flex items-center justify-between p-3 rounded-2xl border bg-[var(--bg-primary)]/40 hover:bg-[var(--bg-primary)] transition-all cursor-pointer"
+                        style={{ borderColor: "var(--border-primary)" }}
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-xs font-black">{men.name}</span>
+                          <span className="text-[9px] text-[var(--text-muted)]">{men.email}</span>
+                        </div>
+                        <span className="text-[9px] font-black text-[var(--text-accent)] bg-[var(--bg-badge)] px-2.5 py-1.5 rounded-xl border border-[var(--border-primary)] uppercase">
+                          Assign
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 border-t shrink-0 flex justify-end bg-[var(--bg-card)]" style={{ borderColor: "var(--border-primary)" }}>
+                <button
+                  onClick={() => setIsAssignMentorOpen(false)}
+                  className="px-5 py-2.5 rounded-2xl bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white text-xs font-black uppercase transition-all shadow-lg hover:scale-[1.02] cursor-pointer"
+                >
+                  Done
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* Assign Students Configuration Modal */}
+      <AnimatePresence>
+        {isAssignStudentOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-md rounded-3xl border shadow-2xl overflow-hidden bg-[var(--bg-card)] flex flex-col max-h-[80vh]"
+              style={{ borderColor: "var(--border-primary)" }}
+            >
+              {/* Header */}
+              <div className="px-6 py-5 flex items-center justify-between border-b shrink-0" style={{ borderColor: "var(--border-primary)" }}>
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-xl bg-[var(--bg-badge)] text-[var(--text-accent)]">
+                    <GraduationCap size={16} />
+                  </div>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-[var(--text-primary)]">
+                    Assign Batch Students
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setIsAssignStudentOpen(false)}
+                  className="p-1.5 rounded-lg hover:bg-[var(--bg-primary)] transition-colors cursor-pointer text-[var(--text-muted)]"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              {/* Roster Selector List */}
+              <div className="flex-1 overflow-y-auto p-6 space-y-3 min-h-0">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-black uppercase text-[var(--text-muted)] tracking-wider">
+                    Add Students to Batch
+                  </span>
+                  <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                    Select students to enroll them in this cohort roster.
+                  </p>
+                </div>
+
+                {availableStudents.length === 0 ? (
+                  <p className="text-xs text-[var(--text-muted)] text-center py-6">
+                    No unassigned students found. All registered students are already mapping to batches.
+                  </p>
+                ) : (
+                  <div className="space-y-2">
+                    {availableStudents.map((std) => (
+                      <div
+                        key={std.id}
+                        onClick={() => handleAddStudentToBatch(std.id)}
+                        className="flex items-center justify-between p-3 rounded-2xl border bg-[var(--bg-primary)]/40 hover:bg-[var(--bg-primary)] transition-all cursor-pointer"
+                        style={{ borderColor: "var(--border-primary)" }}
+                      >
+                        <div className="flex flex-col">
+                          <span className="text-xs font-black">{std.name}</span>
+                          <span className="text-[9px] text-[var(--text-muted)]">{std.email}</span>
+                        </div>
+                        <span className="text-[9px] font-black text-[var(--text-accent)] bg-[var(--bg-badge)] px-2.5 py-1.5 rounded-xl border border-[var(--border-primary)] uppercase">
+                          Assign
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="p-6 border-t shrink-0 flex justify-end bg-[var(--bg-card)]" style={{ borderColor: "var(--border-primary)" }}>
+                <button
+                  onClick={() => setIsAssignStudentOpen(false)}
+                  className="px-5 py-2.5 rounded-2xl bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white text-xs font-black uppercase transition-all shadow-lg hover:scale-[1.02] cursor-pointer"
+                >
+                  Done
                 </button>
               </div>
             </motion.div>

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect, restrictTo } = require('../middleware/authMiddleware');
+const { protect, restrictTo, fetchUserIfExists } = require('../middleware/authMiddleware');
 const {
   createSession,
   generateToken,
@@ -17,8 +17,8 @@ const {
 } = require('../controllers/livekitController');
 
 // ─── Public Routes ──────────────────────────────────────────────────
-router.get('/session/active', getActiveSession);    // Anyone can check if a session is live
-router.get('/sessions', getAllSessions);             // Anyone can see past sessions
+router.get('/session/active', fetchUserIfExists, getActiveSession);    // Anyone can check if a session is live
+router.get('/sessions', fetchUserIfExists, getAllSessions);             // Anyone can see past sessions
 
 // ─── Protected Routes ───────────────────────────────────────────────
 router.post('/token', protect, generateToken);      // Any logged-in user can request a token

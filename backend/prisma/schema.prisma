@@ -22,6 +22,9 @@ submissions Submission[]
 vivaSessions VivaSession[]
 instituteId Int?
 institute Institute? @relation(fields: [instituteId], references: [id])
+managedBatches  Batch[]   @relation("BatchManager")
+batchesTaught Batch[]  @relation("BatchMentors")
+batchesStudied Batch[] @relation("BatchStudents")
 }
 
 model Problem {
@@ -87,8 +90,9 @@ createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 category String?
 creator User? @relation("ContestCreator", fields: [creatorId], references: [id])
-contestParticipations ContestParticipation[]
-contestProblems ContestProblem[]
+  contestParticipations ContestParticipation[]
+  contestProblems ContestProblem[]
+  batches Batch[]
 }
 
 model ContestProblem {
@@ -133,7 +137,8 @@ createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 host User @relation("SessionHost", fields: [hostId], references: [id])
 polls LivePoll[]
-chatMessages LiveChatMessage[]
+  chatMessages LiveChatMessage[]
+  batches Batch[]
 }
 
 model VivaQuestion {
@@ -208,6 +213,7 @@ enum Role {
   ADMIN
   MENTOR
   INSTITUTE_ADMIN
+  BATCH_MANAGER
 }
 
 enum Difficulty {
@@ -283,6 +289,22 @@ model Institute {
   id        Int      @id @default(autoincrement())
   name      String   @unique
   users     User[]
+  batches   Batch[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Batch {
+  id          Int       @id @default(autoincrement())
+  name        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  instituteId Int
+  institute   Institute @relation(fields: [instituteId], references: [id], onDelete: Cascade)
+  managerId   Int?
+  manager     User?     @relation("BatchManager", fields: [managerId], references: [id], onDelete: SetNull)
+  mentors     User[]    @relation("BatchMentors")
+  students    User[]    @relation("BatchStudents")
+  contests    Contest[]
+  liveSessions LiveSession[]
 }

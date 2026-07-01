@@ -70,7 +70,7 @@ export default function AdminLayout({ children }) {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const session = localStorage.getItem("synapse_admin_session") || localStorage.getItem("synapse_mentor_session");
+      const session = localStorage.getItem("synapse_admin_session") === "true";
       const isLoginRoute = pathname === "/admin";
 
       if (!session) {
@@ -78,18 +78,13 @@ export default function AdminLayout({ children }) {
       } else if (isLoginRoute) {
         router.push("/admin/dashboard");
       } else {
-        const isMentor = localStorage.getItem("synapse_mentor_session") === "true";
-        const name = user?.username || (isMentor ? "DMX Mentor" : "DMX Admin");
-        const email = user?.email || (isMentor ? "mentor@synapse.com" : "admin@synapse.com");
+        const name = user?.username || "DMX Admin";
+        const email = user?.email || "admin@synapse.com";
         const roleName = user?.role === "INSTITUTE_ADMIN"
           ? "Institute Admin"
           : user?.role === "BATCH_MANAGER"
             ? "Batch Manager"
-            : user?.role === "ADMIN"
-              ? "Super Admin"
-              : isMentor
-                ? "Senior Mentor"
-                : "Super Admin";
+            : "Super Admin";
         const avatar = name.slice(0, 2).toUpperCase();
 
         setAdminUser({
