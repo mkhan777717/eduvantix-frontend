@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { 
   LayoutDashboard, Trophy, LogOut, 
-  Menu, X, ChevronLeft, ChevronRight, BookOpen, ArrowLeftRight, Code, Brain, Radio, AlertTriangle
+  Menu, X, ChevronLeft, ChevronRight, BookOpen, ArrowLeftRight, Code, Brain, Radio, AlertTriangle, FileText
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
@@ -112,6 +112,11 @@ export default function StudentLayout({ children }) {
       label: "Live Sessions",
       href: "/live-classes",
       icon: Radio
+    },
+    {
+      label: "Study Materials",
+      href: "/student/materials",
+      icon: FileText
     }
   ];
 
