@@ -52,7 +52,6 @@ router.get('/questions/topics',   protect, listTopics);
 router.get('/questions',          protect, listQuestions);
 router.get('/questions/:id',      protect, getQuestion);
 
-// ── Question Bank (write: mentor/admin only) ─────────────────────────
 router.post(  '/questions',      protect, restrictTo('INSTITUTE_ADMIN', 'BATCH_MANAGER', 'MENTOR'), createQuestion);
 router.put(   '/questions/:id',  protect, restrictTo('INSTITUTE_ADMIN', 'BATCH_MANAGER', 'MENTOR'), updateQuestion);
 router.delete('/questions/:id',  protect, restrictTo('INSTITUTE_ADMIN', 'BATCH_MANAGER', 'MENTOR'), deleteQuestion);

@@ -41,6 +41,26 @@ export default function CreateVivaPage() {
   const [error, setError] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [questionPage, setQuestionPage] = useState(1);
+
+  // Tab state: "institute" or "global"
+  const [activeTab, setActiveTab] = useState("institute");
+
+  useEffect(() => {
+    if (user) {
+      setActiveTab(user.role === "ADMIN" ? "global" : "institute");
+    }
+  }, [user]);
+
+  const filteredQuestions = useMemo(() => {
+    return questions.filter(q => {
+      const isGlobal = q.instituteId === null;
+      if (activeTab === "global" && !isGlobal) return false;
+      if (activeTab === "institute" && isGlobal) return false;
+      return true;
+    });
+  }, [questions, activeTab]);
+
+  // Subjects & topics for folder view and modal datalists
   const [allSubjects, setAllSubjects] = useState([]);
   const [allTopics, setAllTopics] = useState([]);
 
@@ -232,6 +252,7 @@ export default function CreateVivaPage() {
     finally { setDeleteLoading(false); }
   };
 
+<<<<<<< HEAD
   // --- Extraction Upload & Retry Handlers ---
   const handleUploadPDF = async () => {
     if (!uploadFile) return setUploadError("Please select a PDF file.");
@@ -353,20 +374,23 @@ export default function CreateVivaPage() {
   };
 
   // --- Questions List Computations ---
-  const total = questions.length;
+  // Stats
+  const total = filteredQuestions.length;
   const byDiff = { EASY: 0, MEDIUM: 0, HARD: 0 };
-  questions.forEach(q => { if (byDiff[q.difficulty] !== undefined) byDiff[q.difficulty]++; });
+  filteredQuestions.forEach(q => { if (byDiff[q.difficulty] !== undefined) byDiff[q.difficulty]++; });
 
   const subjectNames = useMemo(() => {
     const names = new Set([
       ...customSubjects,
       ...allSubjects,
-      ...questions.map(q => q.subject)
+      ...filteredQuestions.map(q => q.subject)
     ].filter(Boolean));
     return Array.from(names).sort((a, b) => a.localeCompare(b));
-  }, [allSubjects, questions, customSubjects]);
+  }, [allSubjects, filteredQuestions, customSubjects]);
 
-  const selectedQuestions = selectedSubject ? questions.filter(q => q.subject === selectedSubject) : [];
+  const selectedQuestions = selectedSubject
+    ? filteredQuestions.filter(q => q.subject === selectedSubject)
+    : [];
   const questionPageCount = Math.max(1, Math.ceil(selectedQuestions.length / QUESTIONS_PER_PAGE));
   const currentQuestionPage = Math.min(questionPage, questionPageCount);
   const questionPageStart = (currentQuestionPage - 1) * QUESTIONS_PER_PAGE;
@@ -663,20 +687,73 @@ export default function CreateVivaPage() {
             onClick={() => setView(VIEWS.EXTRACT)}
             className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-2xl font-bold text-sm transition-all border hover:scale-105 cursor-pointer"
             style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)", color: "var(--text-primary)" }}
+        {activeTab === "institute" && (
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => { setSubjectModalError(""); setNewFolderSubjectName(""); setSubjectModalOpen(true); }}
+              className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-2xl font-bold text-sm transition-all border hover:scale-105 cursor-pointer"
+              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)", color: "var(--text-primary)" }}
+            >
+              <Plus size={15} className="text-indigo-400" />
+              <span>Add Folder</span>
+            </button>
+            <button
+              onClick={() => setView(VIEWS.EXTRACT)}
+              className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-2xl font-bold text-sm transition-all border hover:scale-105 cursor-pointer"
+              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)", color: "var(--text-primary)" }}
+            >
+              <Sparkles size={15} className="text-indigo-400" />
+              <span>Extract from PDF</span>
+            </button>
+            <button
+              onClick={openCreate}
+              className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-2xl font-bold text-sm text-white shadow-md transition-all hover:scale-105 cursor-pointer"
+              style={{ background: "var(--accent-gradient)" }}
+            >
+              <Plus size={16} />
+              <span>Add Question</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Tab Switcher */}
+      {user?.role !== "ADMIN" && (
+        <div className="flex space-x-1 p-1 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-2xl max-w-sm">
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab("institute");
+              setSelectedSubject("");
+              setQuestionPage(1);
+            }}
+            className={`flex-1 py-2 px-4 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+              activeTab === "institute"
+                ? "shadow-sm text-white"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            }`}
+            style={activeTab === "institute" ? { background: "var(--accent-gradient)" } : {}}
           >
-            <Sparkles size={15} className="text-indigo-400" />
-            <span>Extract from PDF</span>
+            Your Institute
           </button>
           <button
-            onClick={openCreate}
-            className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-2xl font-bold text-sm text-white shadow-md transition-all hover:scale-105 cursor-pointer"
-            style={{ background: "var(--accent-gradient)" }}
+            type="button"
+            onClick={() => {
+              setActiveTab("global");
+              setSelectedSubject("");
+              setQuestionPage(1);
+            }}
+            className={`flex-1 py-2 px-4 rounded-xl font-bold text-xs transition-all cursor-pointer ${
+              activeTab === "global"
+                ? "shadow-sm text-white"
+                : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+            }`}
+            style={activeTab === "global" ? { background: "var(--accent-gradient)" } : {}}
           >
-            <Plus size={16} />
-            <span>Add Question</span>
+            Global Questions
           </button>
         </div>
-      </div>
+      )}
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -727,7 +804,7 @@ export default function CreateVivaPage() {
             <p className="text-xs font-bold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Subjects</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
               {subjectNames.map(subject => {
-                const count = questions.filter(q => q.subject === subject).length;
+                const count = filteredQuestions.filter(q => q.subject === subject).length;
                 const active = selectedSubject === subject;
                 const Icon = active ? FolderOpen : Folder;
                 return (
@@ -777,18 +854,20 @@ export default function CreateVivaPage() {
                         <p className="mt-1 text-xs" style={{ color: "var(--text-muted)" }}>{q.topic}</p>
                       )}
                     </div>
-                    <div className="flex items-center space-x-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button onClick={() => openEdit(q)}
-                              className="p-2 rounded-xl hover:bg-indigo-500/10 hover:text-indigo-500 transition-colors cursor-pointer"
-                              style={{ color: "var(--text-secondary)" }} title="Edit">
-                        <Edit2 size={14} />
-                      </button>
-                      <button onClick={() => setDeleteTarget({ id: q.id, questionText: q.questionText })}
-                              className="p-2 rounded-xl hover:bg-rose-500/10 hover:text-rose-500 transition-colors cursor-pointer"
-                              style={{ color: "var(--text-secondary)" }} title="Delete">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
+                    {!(q.instituteId === null && user?.role !== "ADMIN") && (
+                      <div className="flex items-center space-x-1 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onClick={() => openEdit(q)}
+                                className="p-2 rounded-xl hover:bg-indigo-500/10 hover:text-indigo-500 transition-colors cursor-pointer"
+                                style={{ color: "var(--text-secondary)" }} title="Edit">
+                          <Edit2 size={14} />
+                        </button>
+                        <button onClick={() => setDeleteTarget({ id: q.id, questionText: q.questionText })}
+                                className="p-2 rounded-xl hover:bg-rose-500/10 hover:text-rose-500 transition-colors cursor-pointer"
+                                style={{ color: "var(--text-secondary)" }} title="Delete">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

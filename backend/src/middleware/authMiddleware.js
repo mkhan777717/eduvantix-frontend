@@ -67,6 +67,7 @@ const protect = async (req, res, next) => {
         email: true,
         role: true,
         createdAt: true,
+        instituteId: true,
       },
     });
 
