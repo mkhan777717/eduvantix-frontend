@@ -8,7 +8,7 @@ const { broadcastParticipationReport, broadcastLeaderboardUpdate } = require('..
 const createContest = async (req, res, next) => {
   try {
     const validatedData = contestSchema.parse(req.body);
-    const { title, description, category, startTime, endTime } = validatedData;
+    const { title, description, category, startTime, endTime, batchIds } = validatedData;
     const creatorId = req.user.id;
 
     const contest = await prisma.contest.create({
@@ -19,6 +19,9 @@ const createContest = async (req, res, next) => {
         startTime: new Date(startTime),
         endTime: new Date(endTime),
         creatorId,
+        batches: batchIds && batchIds.length > 0 ? {
+          connect: batchIds.map(id => ({ id }))
+        } : undefined
       },
     });
 
@@ -92,7 +95,39 @@ const addProblemToContest = async (req, res, next) => {
  */
 const getAllContests = async (req, res, next) => {
   try {
+    let whereClause = {};
+
+    if (req.user && req.user.role === 'USER') {
+      const student = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: {
+          batchesStudied: { select: { id: true } }
+        }
+      });
+      const batchIds = student ? student.batchesStudied.map(b => b.id) : [];
+
+      whereClause = {
+        OR: [
+          {
+            batches: {
+              some: { id: { in: batchIds } }
+            }
+          },
+          {
+            batches: { none: {} },
+            creator: {
+              OR: [
+                { role: 'ADMIN' },
+                { instituteId: req.user.instituteId }
+              ]
+            }
+          }
+        ]
+      };
+    }
+
     const contests = await prisma.contest.findMany({
+      where: whereClause,
       include: {
         creator: {
           select: {

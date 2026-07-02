@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function CreateContest() {
   const router = useRouter();
-  const { token, API_BASE } = useAuth();
+  const { token, API_BASE, user } = useAuth();
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [category, setCategory] = useState("Algorithms & Frontend");
@@ -25,6 +25,31 @@ export default function CreateContest() {
   const [success, setSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+
+  // Batches targeting state
+  const [batches, setBatches] = useState([]);
+  const [selectedBatchIds, setSelectedBatchIds] = useState([]);
+
+  useEffect(() => {
+    const fetchBatches = async () => {
+      try {
+        if (!token) return;
+        const url = user?.role === "BATCH_MANAGER" 
+          ? `${API_BASE}/api/batches/batch-manager/batches`
+          : `${API_BASE}/api/batches`;
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success && Array.isArray(data.batches)) {
+          setBatches(data.batches);
+        }
+      } catch (err) {
+        console.error("Failed to load batches in contest view:", err);
+      }
+    };
+    fetchBatches();
+  }, [token, user]);
 
   // Custom problems states
   const [availableProblems, setAvailableProblems] = useState([]);
@@ -137,7 +162,8 @@ export default function CreateContest() {
           description: desc,
           category,
           startTime: start.toISOString(),
-          endTime: end.toISOString()
+          endTime: end.toISOString(),
+          batchIds: selectedBatchIds
         })
       });
       const data = await res.json();
@@ -278,26 +304,54 @@ export default function CreateContest() {
                 />
               </div>
 
-              {/* Category */}
-              <div className="space-y-1.5">
+
+
+              {/* Target Cohorts (Batches) */}
+              <div className="space-y-1.5 md:col-span-2">
                 <label className="text-[10px] font-extrabold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
-                  Category
+                  Target Cohorts (Batches)
                 </label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full rounded-2xl py-3 px-4 text-xs outline-none border transition-all"
+                <div 
+                  className="w-full rounded-2xl p-4 border grid grid-cols-1 sm:grid-cols-2 gap-2"
                   style={{
                     backgroundColor: "var(--bg-input)",
                     borderColor: "var(--border-primary)",
-                    color: "var(--text-primary)"
                   }}
                 >
-                  <option value="Algorithms & Frontend">Algorithms & Frontend</option>
-                  <option value="System Design & Security">System Design & Security</option>
-                  <option value="Full Stack Mastery">Full Stack Mastery</option>
-                  <option value="Machine Learning & Data">Machine Learning & Data</option>
-                </select>
+                  {batches.length === 0 ? (
+                    <span className="text-xs text-[var(--text-muted)] italic col-span-2">
+                      No cohorts found. This contest will be published globally.
+                    </span>
+                  ) : (
+                    batches.map(b => (
+                      <label 
+                        key={b.id} 
+                        className="flex items-center gap-2 cursor-pointer text-xs font-semibold py-1 hover:text-[var(--text-accent)] transition-colors"
+                        style={{ color: "var(--text-primary)" }}
+                      >
+                        <input 
+                          type="checkbox" 
+                          checked={selectedBatchIds.includes(b.id)}
+                          onChange={() => {
+                            setSelectedBatchIds(prev => 
+                              prev.includes(b.id) 
+                                ? prev.filter(id => id !== b.id) 
+                                : [...prev, b.id]
+                            );
+                          }}
+                          className="rounded border-[var(--border-primary)] text-[var(--accent-primary)] focus:ring-[var(--accent-primary)] cursor-pointer"
+                        />
+                        <span>{b.name}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+                <p className="text-[9px] text-[var(--text-muted)] italic">
+                  {user?.role === "ADMIN" 
+                    ? "Leave all unchecked to publish this contest globally to all students in the world."
+                    : "Leave all unchecked to target all cohorts in your institute."
+                  }
+                </p>
               </div>
 
               {/* Status */}

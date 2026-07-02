@@ -63,26 +63,24 @@ function LoginForm() {
   const isMismatched = (() => {
     if (!user || !redirectTo) return false;
     const path = redirectTo.toLowerCase();
-    const emailLower = (user.email || "").toLowerCase();
 
-    const isUserAdmin = user.role === 'ADMIN' || user.role === 'INSTITUTE_ADMIN' || user.role === 'BATCH_MANAGER' || emailLower.includes('admin');
-    const isUserMentor = user.role === 'MENTOR' || user.role === 'BATCH_MANAGER' || emailLower.includes('mentor');
+    const isUserAdmin = user.role === 'ADMIN' || user.role === 'INSTITUTE_ADMIN' || user.role === 'BATCH_MANAGER';
+    const isUserMentor = user.role === 'MENTOR';
+    const isUserStudent = user.role === 'USER';
 
-    if (path.startsWith('/admin') && !isUserAdmin && !isUserMentor) return true;
+    if (path.startsWith('/admin') && !isUserAdmin) return true;
     if (path.startsWith('/mentor') && !isUserMentor) return true;
-    // Admins and Mentors are allowed to access student views/desks without mismatch errors
+    if (path.startsWith('/student') && !isUserStudent) return true;
     return false;
   })();
 
   // Redirect if user is already logged in
   useEffect(() => {
     if (user && !isMismatched) {
-      // Determine correct redirect route if it's default
       let targetRoute = redirectTo;
       if (redirectTo === "/") {
-        const emailLower = (user.email || "").toLowerCase();
-        const isUserAdmin = user.role === 'ADMIN' || user.role === 'INSTITUTE_ADMIN' || user.role === 'BATCH_MANAGER' || emailLower.includes('admin');
-        const isUserMentor = user.role === 'MENTOR' || emailLower.includes('mentor');
+        const isUserAdmin = user.role === 'ADMIN' || user.role === 'INSTITUTE_ADMIN' || user.role === 'BATCH_MANAGER';
+        const isUserMentor = user.role === 'MENTOR';
         if (isUserAdmin) targetRoute = '/admin/dashboard';
         else if (isUserMentor) targetRoute = '/mentor/dashboard';
         else targetRoute = '/student/dashboard';
@@ -93,8 +91,8 @@ function LoginForm() {
 
   if (user && isMismatched) {
     const emailLower = (user.email || "").toLowerCase();
-    const isUserAdmin = user.role === 'ADMIN' || user.role === 'INSTITUTE_ADMIN' || user.role === 'BATCH_MANAGER' || emailLower.includes('admin');
-    const isUserMentor = user.role === 'MENTOR' || emailLower.includes('mentor');
+    const isUserAdmin = user.role === 'ADMIN' || user.role === 'INSTITUTE_ADMIN' || user.role === 'BATCH_MANAGER';
+    const isUserMentor = user.role === 'MENTOR';
 
     const userRoleLabel = isUserMentor
       ? 'Mentor'

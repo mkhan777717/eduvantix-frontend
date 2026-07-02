@@ -20,7 +20,7 @@ export default function MentorLayout({ children }) {
   const [mentorUser, setMentorUser] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  const { activeSession, setActiveSession, token, API_BASE, logout } = useAuth();
+  const { activeSession, setActiveSession, token, API_BASE, user, logout } = useAuth();
   const [showEndConfirmModal, setShowEndConfirmModal] = useState(false);
   const [pendingNavAction, setPendingNavAction] = useState(null);
 
@@ -70,35 +70,29 @@ export default function MentorLayout({ children }) {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const mentorSession = localStorage.getItem("synapse_mentor_session");
-      const adminSession = localStorage.getItem("synapse_admin_session");
-      const hasSession = mentorSession || adminSession;
+      const session = localStorage.getItem("synapse_mentor_session") === "true";
       const isLoginRoute = pathname === "/mentor";
 
-      if (!hasSession) {
+      if (!session) {
         router.push("/login?redirect=/mentor/dashboard");
       } else if (isLoginRoute) {
         router.push("/mentor/dashboard");
       } else {
-        if (adminSession) {
-          setMentorUser({
-            name: "DMX Admin",
-            email: "admin@synapse.com",
-            role: "Super Admin",
-            avatar: "SA"
-          });
-        } else {
-          setMentorUser({
-            name: "DMX Mentor",
-            email: "mentor@synapse.com",
-            role: "Senior Mentor",
-            avatar: "SM"
-          });
-        }
+        const name = user?.username || "DMX Mentor";
+        const email = user?.email || "mentor@synapse.com";
+        const roleName = "Senior Mentor";
+        const avatar = name.slice(0, 2).toUpperCase();
+
+        setMentorUser({
+          name,
+          email,
+          role: roleName,
+          avatar
+        });
       }
       setCheckingAuth(false);
     }
-  }, [pathname, router]);
+  }, [pathname, router, user]);
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);

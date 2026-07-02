@@ -11,109 +11,173 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function BatchManagerDashboard() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, token, API_BASE } = useAuth();
 
   // Mock global lists of mentors in the institute
-  const [instituteMentors] = useState([
-    { id: 2, name: "Mohammed Majeed Khan", email: "majeed@dmx.com" },
-    { id: 5, name: "Nitin Singh", email: "nitin@dmx.com" },
-    { id: 6, name: "Divyashant Kumar", email: "divyashant@dmx.com" },
-    { id: 10, name: "Siddharth Ray", email: "sid.fac@dmx.com" }
-  ]);
+  const [instituteMentors, setInstituteMentors] = useState([]);
 
   // Mock global students roster in the institute database
-  const [instituteStudents] = useState([
-    { id: 3, name: "Arhan Khan", email: "arhan@dmx.com" },
-    { id: 7, name: "Shahazadi Syed", email: "shahazadi@dmx.com" },
-    { id: 8, name: "Abhishek Kumar", email: "abhishek@dmx.com" },
-    { id: 9, name: "Ishaan Khandelwaal", email: "ishaan@dmx.com" }
-  ]);
+  const [instituteStudents, setInstituteStudents] = useState([]);
 
   // Mock Batches Database state
-  const [batches, setBatches] = useState([
-    {
-      id: 101,
-      name: "Batch-A",
-      managerId: 999, // Current logged-in manager (simulated)
-      mentorIds: [2, 5],
-      studentIds: [3, 7] 
-    },
-    {
-      id: 102,
-      name: "Batch-B",
-      managerId: 999, // Current logged-in manager (simulated)
-      mentorIds: [5, 6],
-      studentIds: [8]
-    }
-  ]);
+  const [batches, setBatches] = useState([]);
 
   // View Navigation States: 'list' | 'details'
   const [activeView, setActiveView] = useState("list");
-  const [selectedBatch, setSelectedBatch] = useState(null);
+  const [selectedBatchId, setSelectedBatchId] = useState(null);
+  const selectedBatch = batches.find(b => b.id === selectedBatchId) || null;
   const [activeDetailTab, setActiveDetailTab] = useState("mentors"); // 'mentors' | 'students'
+  const [loading, setLoading] = useState(true);
 
   // Modal states
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [isAssignStudentOpen, setIsAssignStudentOpen] = useState(false);
 
-  // Security check: Redirect if not Batch Manager or Admin
+  // Security check: Redirect if not Batch Manager, Admin, or Institute Admin
   useEffect(() => {
-    if (user && user.role !== "BATCH_MANAGER" && user.role !== "ADMIN") {
+    if (user && user.role !== "BATCH_MANAGER" && user.role !== "ADMIN" && user.role !== "INSTITUTE_ADMIN") {
       router.replace("/admin/dashboard");
     }
   }, [user, router]);
 
-  const handleRemoveMentorFromBatch = (menId) => {
-    if (!selectedBatch) return;
+  const loadData = async () => {
+    try {
+      if (!token) return;
+      setLoading(true);
 
-    const updatedMentorIds = selectedBatch.mentorIds.filter(id => id !== menId);
+      // Load members
+      const membersRes = await fetch(`${API_BASE}/api/institutes/members`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const membersData = await membersRes.json();
+      if (membersData.success && Array.isArray(membersData.members)) {
+        const ments = [];
+        const studs = [];
+        for (const m of membersData.members) {
+          const item = { id: m.id, name: m.username, email: m.email };
+          if (m.role === 'MENTOR') ments.push(item);
+          else if (m.role === 'USER') studs.push(item);
+        }
+        setInstituteMentors(ments);
+        setInstituteStudents(studs);
+      }
 
-    // Update local state database
-    setBatches(prev => prev.map(b => b.id === selectedBatch.id ? { ...b, mentorIds: updatedMentorIds } : b));
+      // Load assigned batches (conditional endpoint for Inst Admins)
+      const isInstAdmin = user?.role === 'INSTITUTE_ADMIN' || user?.role === 'ADMIN';
+      const batchesEndpoint = isInstAdmin
+        ? `${API_BASE}/api/batches`
+        : `${API_BASE}/api/batches/batch-manager/batches`;
 
-    // Update active details view state
-    setSelectedBatch(prev => ({ ...prev, mentorIds: updatedMentorIds }));
+      const batchesRes = await fetch(batchesEndpoint, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const batchesData = await batchesRes.json();
+      if (batchesData.success && Array.isArray(batchesData.batches)) {
+        const formatted = batchesData.batches.map(b => ({
+          id: b.id,
+          name: b.name,
+          managerId: b.managerId,
+          mentorIds: b.mentors.map(m => m.id),
+          studentIds: b.students.map(s => s.id)
+        }));
+        setBatches(formatted);
+      }
+    } catch (err) {
+      console.error("Failed to load batch manager data:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleAddMentorToBatch = (menId) => {
+  useEffect(() => {
+    if (user) {
+      loadData();
+    }
+  }, [token, user]);
+
+  const handleRemoveMentorFromBatch = async (menId) => {
+    if (!selectedBatch) return;
+    const mentorName = instituteMentors.find(m => m.id === menId)?.name || "this mentor";
+    if (!window.confirm(`Are you sure you want to remove ${mentorName} from the batch ${selectedBatch.name}?`)) {
+      return;
+    }
+    try {
+      if (token) {
+        await fetch(`${API_BASE}/api/batches/batch-manager/batches/${selectedBatch.id}/mentors/${menId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+    } catch (err) {
+      console.error("Failed to remove mentor:", err);
+    }
+    const updatedMentorIds = selectedBatch.mentorIds.filter(id => id !== menId);
+    setBatches(prev => prev.map(b => b.id === selectedBatch.id ? { ...b, mentorIds: updatedMentorIds } : b));
+  };
+
+  const handleAddMentorToBatch = async (menId) => {
     if (!selectedBatch) return;
     if (selectedBatch.mentorIds.includes(menId)) return;
-
+    try {
+      if (token) {
+        await fetch(`${API_BASE}/api/batches/batch-manager/batches/${selectedBatch.id}/mentors`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ mentorId: menId })
+        });
+      }
+    } catch (err) {
+      console.error("Failed to add mentor:", err);
+    }
     const updatedMentorIds = [...selectedBatch.mentorIds, menId];
-
-    // Update database state
     setBatches(prev => prev.map(b => b.id === selectedBatch.id ? { ...b, mentorIds: updatedMentorIds } : b));
-
-    // Update active details view state
-    setSelectedBatch(prev => ({ ...prev, mentorIds: updatedMentorIds }));
   };
 
-  const handleRemoveStudentFromBatch = (stdId) => {
+  const handleRemoveStudentFromBatch = async (stdId) => {
     if (!selectedBatch) return;
-
+    const studentName = instituteStudents.find(s => s.id === stdId)?.name || "this student";
+    if (!window.confirm(`Are you sure you want to remove ${studentName} from the batch ${selectedBatch.name}?`)) {
+      return;
+    }
+    try {
+      if (token) {
+        await fetch(`${API_BASE}/api/batches/batch-manager/batches/${selectedBatch.id}/students/${stdId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+    } catch (err) {
+      console.error("Failed to remove student:", err);
+    }
     const updatedStudentIds = selectedBatch.studentIds.filter(id => id !== stdId);
-
-    // Update database state
     setBatches(prev => prev.map(b => b.id === selectedBatch.id ? { ...b, studentIds: updatedStudentIds } : b));
-
-    // Update active details view state
-    setSelectedBatch(prev => ({ ...prev, studentIds: updatedStudentIds }));
   };
 
-  const handleAddStudentToBatch = (stdId) => {
+  const handleAddStudentToBatch = async (stdId) => {
     if (!selectedBatch) return;
     if (selectedBatch.studentIds.includes(stdId)) return;
-
+    try {
+      if (token) {
+        await fetch(`${API_BASE}/api/batches/batch-manager/batches/${selectedBatch.id}/students`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ studentId: stdId })
+        });
+      }
+    } catch (err) {
+      console.error("Failed to add student:", err);
+    }
     const updatedStudentIds = [...selectedBatch.studentIds, stdId];
-
-    // Update database state
     setBatches(prev => prev.map(b => b.id === selectedBatch.id ? { ...b, studentIds: updatedStudentIds } : b));
-
-    // Update active details view state
-    setSelectedBatch(prev => ({ ...prev, studentIds: updatedStudentIds }));
   };
 
-  if (!user || (user.role !== "BATCH_MANAGER" && user.role !== "ADMIN")) {
+  if (!user || (user.role !== "BATCH_MANAGER" && user.role !== "ADMIN" && user.role !== "INSTITUTE_ADMIN")) {
     return null;
   }
 
@@ -172,13 +236,31 @@ export default function BatchManagerDashboard() {
 
           {/* Grid view of batches */}
           <div className="flex-1 min-h-0 overflow-y-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {loading ? (
+              <div className="flex h-64 flex-col items-center justify-center space-y-4 rounded-3xl border bg-[var(--bg-card)]" style={{ borderColor: "var(--border-primary)" }}>
+                <div className="w-8 h-8 rounded-full border-2 border-[var(--text-accent)] border-t-transparent animate-spin" />
+                <span className="text-xs font-semibold text-[var(--text-muted)]">Fetching roster logs...</span>
+              </div>
+            ) : batches.length === 0 ? (
+              <div className="flex h-64 flex-col items-center justify-center space-y-4 rounded-3xl border bg-[var(--bg-card)]" style={{ borderColor: "var(--border-primary)" }}>
+                <div className="w-16 h-16 rounded-3xl bg-[var(--bg-badge)] flex items-center justify-center text-[var(--text-accent)]">
+                  <Layers size={28} />
+                </div>
+                <div className="text-center space-y-1">
+                  <h3 className="text-sm font-black" style={{ color: "var(--text-primary)" }}>No assigned cohorts</h3>
+                  <p className="text-xs max-w-xs" style={{ color: "var(--text-muted)" }}>
+                    You have no cohorts assigned to manage.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {batches.map((batch) => {
                 return (
                   <div
                     key={batch.id}
                     onClick={() => {
-                      setSelectedBatch(batch);
+                      setSelectedBatchId(batch.id);
                       setActiveDetailTab("mentors");
                       setActiveView("details");
                     }}
@@ -209,6 +291,7 @@ export default function BatchManagerDashboard() {
                 );
               })}
             </div>
+            )}
           </div>
         </>
       ) : (
@@ -220,7 +303,7 @@ export default function BatchManagerDashboard() {
               <button
                 onClick={() => {
                   setActiveView("list");
-                  setSelectedBatch(null);
+                  setSelectedBatchId(null);
                 }}
                 className="flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[var(--text-accent)] hover:underline cursor-pointer"
               >
@@ -259,7 +342,7 @@ export default function BatchManagerDashboard() {
           <div className="flex gap-2.5 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-semibold shrink-0">
             <ShieldAlert size={16} className="shrink-0 mt-0.5" />
             <p className="leading-relaxed">
-              <strong>Batch Manager Permissions:</strong> You can assign/remove existing mentors and students to this specific batch. You cannot register new student accounts or delete core profiles from the database.
+              <strong>{(user.role === 'INSTITUTE_ADMIN' || user.role === 'ADMIN') ? "Institute Admin" : "Batch Manager"} Permissions:</strong> You can assign/remove existing mentors and students to this specific batch.
             </p>
           </div>
 
