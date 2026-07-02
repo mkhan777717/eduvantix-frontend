@@ -277,10 +277,11 @@ export default function AdminProblemsPage() {
               setActiveTab("institute");
               setFilterDiff("all");
             }}
-            className={`px-6 py-3.5 text-xs font-black uppercase tracking-wider transition-all border-b-2 -mb-[2px] cursor-pointer ${activeTab === "institute"
+            className={`px-6 py-3.5 text-xs font-black uppercase tracking-wider transition-all border-b-2 -mb-[2px] cursor-pointer ${
+              activeTab === "institute"
                 ? "border-[var(--accent-primary)] text-[var(--accent-primary)]"
                 : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              }`}
+            }`}
           >
             Your Institute Problems
           </button>
@@ -289,10 +290,11 @@ export default function AdminProblemsPage() {
               setActiveTab("global");
               setFilterDiff("all");
             }}
-            className={`px-6 py-3.5 text-xs font-black uppercase tracking-wider transition-all border-b-2 -mb-[2px] cursor-pointer ${activeTab === "global"
+            className={`px-6 py-3.5 text-xs font-black uppercase tracking-wider transition-all border-b-2 -mb-[2px] cursor-pointer ${
+              activeTab === "global"
                 ? "border-[var(--accent-primary)] text-[var(--accent-primary)]"
                 : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              }`}
+            }`}
           >
             Global Problems
           </button>
@@ -554,7 +556,7 @@ export default function AdminProblemsPage() {
                                 style={{ color: "var(--text-secondary)" }}
                               />
                             </button>
-                            {problem.isDbProblem && (
+                            {canDeleteProblem(problem) && (
                               <>
                                 <button
                                   onClick={() =>
@@ -562,7 +564,7 @@ export default function AdminProblemsPage() {
                                       `/admin/problems/${problem.slug || problem.id}/edit`
                                     )
                                   }
-                                  className="p-1.5 rounded-lg border transition-all cursor-pointer hover:bg-slate-500/10 group"
+                                  className="p-1.5 rounded-lg border transition-all cursor-pointer hover:bg-slate-500/10"
                                   style={{ borderColor: "var(--border-primary)" }}
                                   title="Edit Problem"
                                 >
