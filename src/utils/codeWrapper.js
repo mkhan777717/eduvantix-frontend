@@ -958,14 +958,14 @@ if _fn is not None:
       }
     }
 
-    // 2. Parse imports from user code to merge them with our required imports
-    const imports = new Set(["fmt", "io", "os", "strings", "encoding/json"]);
-    
+    // 2. Parse imports from user code to collect what the user already imports
+    const userImports = new Set();
+
     // Parse single line imports
     const singleImportRegex = /import\s+"([^"]+)"/g;
     let singleMatch;
     while ((singleMatch = singleImportRegex.exec(userCode)) !== null) {
-      imports.add(singleMatch[1]);
+      userImports.add(singleMatch[1]);
     }
 
     // Parse block imports
@@ -976,7 +976,7 @@ if _fn is not None:
       const lines = inner.split("\n");
       lines.forEach(line => {
         const lineMatch = line.match(/"([^"]+)"/);
-        if (lineMatch) imports.add(lineMatch[1]);
+        if (lineMatch) userImports.add(lineMatch[1]);
       });
     }
 
@@ -987,9 +987,12 @@ if _fn is not None:
       .replace(/import\s+"[^"]+"/g, "")
       .replace(/\bfunc\s+main\s*\(\s*\)/g, "func user_main()");
 
-    // 4. If no solution function was extracted, output standard fallback
+    // 4. If no solution function was extracted (user wrote their own main), use a minimal wrapper.
+    // Only add imports that the generated harness actually uses — do NOT force encoding/json.
     if (!fnName) {
-      const importBlock = Array.from(imports).map(imp => `\t"${imp}"`).join("\n");
+      // The fallback wrapper only uses fmt, io, os, strings — no JSON
+      const fallbackImports = new Set(["fmt", "io", "os", "strings", ...userImports]);
+      const importBlock = Array.from(fallbackImports).map(imp => `\t"${imp}"`).join("\n");
       return `package main
 
 import (
@@ -1006,6 +1009,9 @@ func main() {
 }
 `;
     }
+
+    // For the full harness (solution function found), we DO use encoding/json
+    const imports = new Set(["fmt", "io", "os", "strings", "encoding/json", ...userImports]);
 
     // 5. Parse parameter types to generate unmarshalling logic
     const params = [];
