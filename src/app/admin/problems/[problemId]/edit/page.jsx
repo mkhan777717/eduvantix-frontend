@@ -135,6 +135,8 @@ const STEPS = [
 export default function CreateProblem() {
   const router = useRouter();
   const { token, API_BASE, user } = useAuth();
+  const params = useParams();
+  const { problemId } = params;
 
   const [activeTab,  setActiveTab]  = useState("details");
   const [templatesVisited, setTemplatesVisited] = useState(true);
