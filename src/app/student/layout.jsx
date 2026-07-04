@@ -13,12 +13,73 @@ import { useAuth } from "@/context/AuthContext";
 export default function StudentLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { logout, user } = useAuth();
+  const { logout, user, token, API_BASE } = useAuth();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [studentUser, setStudentUser] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [roleName, setRoleName] = useState("Scholar");
+
+  useEffect(() => {
+    if (!user) return;
+
+    async function fetchRank() {
+      const headers = {
+        "Content-Type": "application/json",
+        ...(token && !token.startsWith("demo-") && !token.startsWith("local-")
+          ? { Authorization: `Bearer ${token}` }
+          : { "x-bypass-auth": "true", "x-bypass-role": user.role === "ADMIN" ? "ADMIN" : "USER" }),
+      };
+
+      try {
+        const subRes = await fetch(`${API_BASE}/api/submissions?userId=${user.id}`, { headers });
+        let uniqueSolved = 0;
+        if (subRes.ok) {
+          const subData = await subRes.json();
+          if (subData.success) {
+            const accepted = (subData.submissions || []).filter(s => s.status === "ACCEPTED");
+            uniqueSolved = new Set(accepted.map(s => s.problemId)).size;
+          }
+        }
+
+        const contestRes = await fetch(`${API_BASE}/api/contests`, { headers });
+        let bestScore = 0;
+        if (contestRes.ok) {
+          const contestData = await contestRes.json();
+          if (contestData.success) {
+            const myParticipations = (contestData.contests || []).filter(c =>
+              c.userParticipation && c.userParticipation.completed
+            );
+            bestScore = myParticipations.length > 0
+              ? Math.max(...myParticipations.map(c => c.userParticipation?.score || 0))
+              : 0;
+          }
+        }
+
+        const points = uniqueSolved * 10 + bestScore;
+
+        const RANKS = [
+          { name: "Novice Scholar", minPoints: 0, maxPoints: 100 },
+          { name: "Bronze Scholar", minPoints: 100, maxPoints: 200 },
+          { name: "Silver Scholar", minPoints: 200, maxPoints: 300 },
+          { name: "Gold Scholar", minPoints: 300, maxPoints: 400 },
+          { name: "Elite Scholar III", minPoints: 400, maxPoints: 500 },
+          { name: "Elite Scholar II", minPoints: 500, maxPoints: 600 },
+          { name: "Elite Scholar I", minPoints: 600, maxPoints: 750 },
+          { name: "Grandmaster Scholar", minPoints: 750, maxPoints: 1000 },
+          { name: "Legendary Coder", minPoints: 1000, maxPoints: Infinity }
+        ];
+
+        const matchedRank = RANKS.find(r => points >= r.minPoints && points < r.maxPoints) || RANKS[0];
+        setRoleName(matchedRank.name);
+      } catch (e) {
+        console.error("Failed to fetch user rank for layout:", e);
+      }
+    }
+
+    fetchRank();
+  }, [user, token, API_BASE]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -32,7 +93,6 @@ export default function StudentLayout({ children }) {
       } else {
         const name = user?.username || "DMX Student";
         const email = user?.email || "student@synapse.com";
-        const roleName = "Elite Scholar";
         const avatar = name.slice(0, 2).toUpperCase();
 
         setStudentUser({
@@ -44,7 +104,7 @@ export default function StudentLayout({ children }) {
       }
       setCheckingAuth(false);
     }
-  }, [pathname, router, user]);
+  }, [pathname, router, user, roleName]);
 
   const handleLogout = () => {
     setShowLogoutConfirm(true);

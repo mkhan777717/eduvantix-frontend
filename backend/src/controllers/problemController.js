@@ -258,25 +258,13 @@ const getSingleProblem = async (req, res, next) => {
   try {
     const { slug } = req.params;
 
-    let problem;
-    const numericId = parseInt(slug);
-    if (!isNaN(numericId)) {
-      problem = await prisma.problem.findUnique({
-        where: { id: numericId },
-        include: {
-          testCases: true,
-        },
-      });
-    }
-
-    if (!problem) {
-      problem = await prisma.problem.findUnique({
-        where: { slug },
-        include: {
-          testCases: true,
-        },
-      });
-    }
+    const isId = /^\d+$/.test(slug);
+    const problem = await prisma.problem.findUnique({
+      where: isId ? { id: parseInt(slug) } : { slug },
+      include: {
+        testCases: true,
+      },
+    });
 
     if (!problem) {
       return res.status(404).json({

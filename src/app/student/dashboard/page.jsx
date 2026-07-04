@@ -134,10 +134,82 @@ export default function StudentDashboard() {
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 5);
 
-  // Gamification metrics
-  const targetNextRankPoints = 500;
+  // Dynamic Ranks Definition
+  const RANKS = [
+    { name: "Novice Scholar", minPoints: 0, maxPoints: 100, color: "text-slate-400" },
+    { name: "Bronze Scholar", minPoints: 100, maxPoints: 200, color: "text-amber-600" },
+    { name: "Silver Scholar", minPoints: 200, maxPoints: 300, color: "text-slate-300" },
+    { name: "Gold Scholar", minPoints: 300, maxPoints: 400, color: "text-yellow-400" },
+    { name: "Elite Scholar III", minPoints: 400, maxPoints: 500, color: "text-indigo-400" },
+    { name: "Elite Scholar II", minPoints: 500, maxPoints: 600, color: "text-indigo-400" },
+    { name: "Elite Scholar I", minPoints: 600, maxPoints: 750, color: "text-rose-400" },
+    { name: "Grandmaster Scholar", minPoints: 750, maxPoints: 1000, color: "text-purple-400" },
+    { name: "Legendary Coder", minPoints: 1000, maxPoints: Infinity, color: "text-amber-400 animate-pulse" }
+  ];
+
   const currentPoints = uniqueSolved * 10 + bestScore;
-  const progressPercent = Math.min(100, Math.round((currentPoints / targetNextRankPoints) * 100));
+
+  // Find user's current rank
+  const currentRank = RANKS.find(
+    (r) => currentPoints >= r.minPoints && currentPoints < r.maxPoints
+  ) || RANKS[0];
+
+  const minPointsForCurrentRank = currentRank.minPoints;
+  const targetNextRankPoints = currentRank.maxPoints === Infinity ? currentPoints : currentRank.maxPoints;
+
+  // Calculate progress percent within the current rank
+  const progressPercent = currentRank.maxPoints === Infinity
+    ? 100
+    : Math.min(100, Math.round(((currentPoints - minPointsForCurrentRank) / (targetNextRankPoints - minPointsForCurrentRank)) * 100));
+
+  // Calculate dynamic active streak from user submissions
+  const calculateStreak = (subs) => {
+    if (!subs || subs.length === 0) return 0;
+    
+    // Extract unique dates of submissions (YYYY-MM-DD) in local time
+    const datesList = subs.map(s => {
+      const d = new Date(s.createdAt);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    });
+    
+    const uniqueDates = Array.from(new Set(datesList)).sort((a, b) => new Date(b) - new Date(a));
+    if (uniqueDates.length === 0) return 0;
+
+    const today = new Date();
+    const formatDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    
+    const todayStr = formatDate(today);
+    
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = formatDate(yesterday);
+
+    // If the user hasn't submitted today or yesterday, streak is 0
+    if (!uniqueDates.includes(todayStr) && !uniqueDates.includes(yesterdayStr)) {
+      return 0;
+    }
+
+    let streak = 0;
+    // Start counting from the most recent date of submission in the active window (today or yesterday)
+    const startDateStr = uniqueDates.includes(todayStr) ? todayStr : yesterdayStr;
+    let currentDate = new Date(startDateStr);
+
+    const dateSet = new Set(uniqueDates);
+    while (true) {
+      const checkStr = formatDate(currentDate);
+      if (dateSet.has(checkStr)) {
+        streak++;
+        // Move to the previous day
+        currentDate.setDate(currentDate.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+    
+    return streak;
+  };
+
+  const activeStreak = calculateStreak(submissions);
   
   // Custom SVG solved breakdown (Difficulties solved)
   const easySolved = acceptedSubs.filter(s => s.problem?.difficulty === "EASY" || !s.problem?.difficulty).length;
@@ -243,7 +315,9 @@ export default function StudentDashboard() {
             <div className="absolute flex flex-col items-center justify-center text-center">
               <span className="text-[9px] uppercase font-bold text-slate-400">Rank Progress</span>
               <span className="text-lg font-black" style={{ color: "var(--text-primary)" }}>{progressPercent}%</span>
-              <span className="text-[9px]" style={{ color: "var(--text-secondary)" }}>{currentPoints} / {targetNextRankPoints} pts</span>
+              <span className="text-[9px]" style={{ color: "var(--text-secondary)" }}>
+                {currentRank.maxPoints === Infinity ? `${currentPoints} pts` : `${currentPoints} / ${targetNextRankPoints} pts`}
+              </span>
             </div>
           </div>
 
@@ -255,18 +329,27 @@ export default function StudentDashboard() {
               </div>
               <div>
                 <p className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Active Streak</p>
-                <p className="text-xs font-black text-amber-500">7 Days Running 🔥</p>
+                <p className="text-xs font-black text-amber-500">
+                  {activeStreak > 0 ? `${activeStreak} Day${activeStreak > 1 ? "s" : ""} Running 🔥` : "0 Days Running"}
+                </p>
               </div>
             </div>
 
             {/* Rank badge card */}
-            <div className="flex items-center space-x-3.5 p-3 rounded-2xl bg-indigo-500/5 border border-indigo-500/10">
-              <div className="p-2.5 rounded-xl bg-indigo-500/10 text-indigo-400">
+            <div className={`flex items-center space-x-3.5 p-3 rounded-2xl border ${
+              currentRank.name.includes("Bronze") ? "bg-amber-600/5 border-amber-600/10" :
+              currentRank.name.includes("Silver") ? "bg-slate-300/5 border-slate-300/10" :
+              currentRank.name.includes("Gold") ? "bg-yellow-400/5 border-yellow-400/10" :
+              currentRank.name.includes("Elite") ? "bg-indigo-500/5 border-indigo-500/10" :
+              currentRank.name.includes("Legendary") ? "bg-amber-400/5 border-amber-400/10" :
+              "bg-purple-500/5 border-purple-500/10"
+            }`}>
+              <div className={`p-2.5 rounded-xl bg-slate-500/10 ${currentRank.color}`}>
                 <Award size={18} />
               </div>
               <div>
                 <p className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Current Standing</p>
-                <p className="text-xs font-black text-indigo-400">Elite Scholar III</p>
+                <p className={`text-xs font-black ${currentRank.color}`}>{currentRank.name}</p>
               </div>
             </div>
           </div>
