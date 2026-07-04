@@ -91,7 +91,9 @@ creatorId Int?
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 category String?
-creator User? @relation("ContestCreator", fields: [creatorId], references: [id])
+  creator User? @relation("ContestCreator", fields: [creatorId], references: [id])
+  instituteId Int?
+  institute   Institute? @relation(fields: [instituteId], references: [id], onDelete: Cascade)
   contestParticipations ContestParticipation[]
   contestProblems ContestProblem[]
   batches Batch[]
@@ -297,6 +299,7 @@ model Institute {
   users          User[]
   batches        Batch[]
   problems       Problem[]
+  contests       Contest[]
   vivaQuestions  VivaQuestion[]
   studyMaterials StudyMaterial[]
   createdAt      DateTime        @default(now())

@@ -118,7 +118,7 @@ const initSocket = (server) => {
     cors: {
       origin: '*',
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-bypass-auth', 'x-bypass-role']
+      allowedHeaders: ['Content-Type', 'Authorization', 'x-bypass-auth', 'x-bypass-role', 'x-bypass-userid']
     }
   });
 
