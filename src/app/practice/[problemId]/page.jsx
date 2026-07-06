@@ -84,12 +84,21 @@ export default function PracticeWorkspace() {
                 java: `// Java Starter Code\nimport java.util.*;\n\npublic class Main {\n  public static void main(String[] args) {\n    // Write your code here\n  }\n}`
               },
               testcases: dynamicTC,
+              followup: dbp.followup,
+              editorial: dbp.editorial,
+              solution: dbp.solution,
+              evaluation: dbp.evaluation,
+              inputFormat: dbp.inputFormat,
+              outputFormat: dbp.outputFormat,
+              constraints: dbp.constraints,
+              timeout: dbp.timeout,
+              memoryLimit: dbp.memoryLimit,
               tabs: {
                 description: dbp.statement,
-                followup: "Review complexity bounds and optimize your implementation.",
-                editorial: dbp.explanation || "No editorial guide published yet.",
-                solution: "No official reference solutions yet.",
-                evaluation: "Verify against sample assertions below."
+                followup: dbp.followup || "Review complexity bounds and optimize your implementation.",
+                editorial: dbp.editorial || "No editorial guide published yet.",
+                solution: dbp.solution || "No official reference solutions yet.",
+                evaluation: dbp.evaluation || "Verify against sample assertions below."
               }
             });
             setLoadingProblem(false);
