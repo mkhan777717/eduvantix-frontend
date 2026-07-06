@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Resolves the backend API base URL dynamically.
  */
 export function getApiBase(fallbackPort = 5001) {
@@ -7,11 +7,13 @@ export function getApiBase(fallbackPort = 5001) {
   }
   if (typeof window !== "undefined") {
     const hostname = window.location.hostname;
-    if (hostname && hostname !== "localhost" && hostname !== "127.0.0.1" && hostname !== "::1") {
-      return window.location.origin;
+    // Local dev checking
+    if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") {
+      return "http://127.0.0.1:" + fallbackPort;
     }
   }
-  return "http://127.0.0.1:" + fallbackPort;
+  // Production fallback for the VPS server
+  return "http://72.61.239.20";
 }
 
 /**

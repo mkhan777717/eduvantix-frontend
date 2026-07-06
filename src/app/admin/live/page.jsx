@@ -46,7 +46,7 @@ import {
 import { ReactionOverlay, ReactionPicker } from "@/components/LiveReactions";
 
 const LIVEKIT_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL;
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5001";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://72.61.239.20";
 
 const playRaiseHandSound = () => {
   try {
