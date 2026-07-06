@@ -93,7 +93,7 @@ const generateBoilerplate = (language, functionName, parameters, returnType) => 
   }
 };
 
-// Generate Driver Code Wrapper (executed on judge backend)
+/// Generate Driver Code Wrapper (executed on judge backend)
 const generateDriverCode = (language, functionName, parameters, returnType, userCode) => {
   const langKey = language.toUpperCase();
   const paramNames = parameters.map(p => p.name).join(', ');
@@ -110,7 +110,7 @@ const generateDriverCode = (language, functionName, parameters, returnType, user
         return `const ${p.name} = lines[${idx}];`;
       }).join('\n    ');
 
-      return `${userCode}\n\n// --- DRIVER CODE (AUTO-GENERATED) ---\nconst fs = require('fs');\n\nfunction main() {\n    const input = fs.readFileSync(0, 'utf-8').trim();\n    if (input) {\n        const lines = input.split(/\\r?\\n/);\n        if (lines.length >= ${parameters.length}) {\n            ${parsingLines}\n            const result = ${functionName}(${paramNames});\n            console.log(typeof result === 'object' ? JSON.stringify(result) : result);\n        }\n    }\n}\nmain();`;
+      return `${userCode}\n\n// --- DRIVER CODE (AUTO-GENERATED) ---\nconst fs = require('fs');\n\nfunction main() {\n    const input = fs.readFileSync(0, 'utf-8').trim();\n    if (input) {\n        let lines = input.split(/\\r?\\n/);\n        if (lines.length < ${parameters.length}) {\n            lines = input.split(/\\s+/);\n        }\n        if (lines.length >= ${parameters.length}) {\n            ${parsingLines}\n            const result = ${functionName}(${paramNames});\n            console.log(typeof result === 'object' ? JSON.stringify(result) : result);\n        }\n    }\n}\nmain();`;
     }
 
     case 'PYTHON': {
@@ -123,22 +123,120 @@ const generateDriverCode = (language, functionName, parameters, returnType, user
         return `${p.name} = lines[${idx}].strip()`;
       }).join('\n        ');
 
-      return `${userCode}\n\n# --- DRIVER CODE (AUTO-GENERATED) ---\nimport sys\nimport json\n\ndef main():\n    lines = sys.stdin.read().splitlines()\n    if len(lines) >= ${parameters.length}:\n        ${parsingLines}\n        result = ${functionName}(${paramNames})\n        if isinstance(result, (list, dict)):\n            print(json.dumps(result))\n        else:\n            print(result)\n\nif __name__ == '__main__':\n    main()`;
+      return `${userCode}\n\n# --- DRIVER CODE (AUTO-GENERATED) ---\nimport sys\nimport json\n\ndef main():\n    raw_input = sys.stdin.read().strip()\n    if raw_input:\n        lines = raw_input.splitlines()\n        if len(lines) < ${parameters.length}:\n            lines = raw_input.split()\n        if len(lines) >= ${parameters.length}:\n            ${parsingLines}\n            result = ${functionName}(${paramNames})\n            if isinstance(result, (list, dict)):\n                print(json.dumps(result))\n            else:\n                print(result)\n\nif __name__ == '__main__':\n    main()`;
     }
 
     case 'CPP': {
       const parsingDeclarations = parameters.map(p => `${getCppType(p.type)} ${p.name};`).join('\n    ');
       const readingLines = parameters.map((p, idx) => {
         if (p.type === 'STRING') {
-          return `getline(cin, ${p.name});`;
+          return `getline(cin, ${p.name});\n    ${p.name}.erase(remove(${p.name}.begin(), ${p.name}.end(), '\\r'), ${p.name}.end());`;
         }
-        if (p.type.startsWith('ARRAY') || p.type.startsWith('MATRIX')) {
-          return `string raw_${p.name};\n    getline(cin, raw_${p.name});\n    ${p.name} = parseVectorInt(raw_${p.name});`;
+        if (p.type === 'ARRAY_INT') {
+          return `string raw_${p.name};\n    getline(cin, raw_${p.name});\n    raw_${p.name}.erase(remove(raw_${p.name}.begin(), raw_${p.name}.end(), '\\r'), raw_${p.name}.end());\n    ${p.name} = parseVectorInt(raw_${p.name});`;
         }
-        return `string raw_${p.name};\n    getline(cin, raw_${p.name});\n    ${p.name} = ${p.type === 'INT' ? 'stoi' : 'stod'}(raw_${p.name});`;
+        if (p.type === 'ARRAY_STRING') {
+          return `string raw_${p.name};\n    getline(cin, raw_${p.name});\n    raw_${p.name}.erase(remove(raw_${p.name}.begin(), raw_${p.name}.end(), '\\r'), raw_${p.name}.end());\n    ${p.name} = parseVectorString(raw_${p.name});`;
+        }
+        if (p.type === 'MATRIX_INT') {
+          return `string raw_${p.name};\n    getline(cin, raw_${p.name});\n    raw_${p.name}.erase(remove(raw_${p.name}.begin(), raw_${p.name}.end(), '\\r'), raw_${p.name}.end());\n    ${p.name} = parseMatrixInt(raw_${p.name});`;
+        }
+        return `string raw_${p.name};\n    getline(cin, raw_${p.name});\n    raw_${p.name}.erase(remove(raw_${p.name}.begin(), raw_${p.name}.end(), '\\r'), raw_${p.name}.end());\n    ${p.name} = ${p.type === 'INT' ? 'stoi' : 'stod'}(raw_${p.name});`;
       }).join('\n    ');
 
-      return `#include <iostream>\n#include <string>\n#include <vector>\n#include <sstream>\n#include <algorithm>\n\nusing namespace std;\n\n// Parsing Helper for integer array\nvector<int> parseVectorInt(string str) {\n    vector<int> res;\n    str.erase(remove(str.begin(), str.end(), '['), str.end());\n    str.erase(remove(str.begin(), str.end(), ']'), str.end());\n    stringstream ss(str);\n    string temp;\n    while(getline(ss, temp, ',')) {\n        if(!temp.empty()) res.push_back(stoi(temp));\n    }\n    return res;\n}\n\n${userCode}\n\n// --- DRIVER CODE (AUTO-GENERATED) ---\nint main() {\n    ${parsingDeclarations}\n    ${readingLines}\n    cout << ${functionName}(${paramNames}) << endl;\n    return 0;\n}`;
+      const parsingHelpers = `
+// Parsing Helper for integer array
+vector<int> parseVectorInt(string str) {
+    vector<int> res;
+    str.erase(remove(str.begin(), str.end(), '['), str.end());
+    str.erase(remove(str.begin(), str.end(), ']'), str.end());
+    stringstream ss(str);
+    string temp;
+    while(getline(ss, temp, ',')) {
+        if(!temp.empty()) res.push_back(stoi(temp));
+    }
+    return res;
+}
+
+// Parsing Helper for string array
+vector<string> parseVectorString(string str) {
+    vector<string> res;
+    str.erase(remove(str.begin(), str.end(), '['), str.end());
+    str.erase(remove(str.begin(), str.end(), ']'), str.end());
+    stringstream ss(str);
+    string temp;
+    while(getline(ss, temp, ',')) {
+        temp.erase(remove(temp.begin(), temp.end(), '"'), temp.end());
+        temp.erase(remove(temp.begin(), temp.end(), '\\''), temp.end());
+        if(!temp.empty()) {
+            size_t first = temp.find_first_not_of(" ");
+            size_t last = temp.find_last_not_of(" ");
+            if(first != string::npos && last != string::npos) {
+                res.push_back(temp.substr(first, last - first + 1));
+            } else {
+                res.push_back(temp);
+            }
+        }
+    }
+    return res;
+}
+
+// Parsing Helper for matrix of integers
+vector<vector<int>> parseMatrixInt(string str) {
+    vector<vector<int>> res;
+    size_t pos = 0;
+    while ((pos = str.find('[', pos)) != string::npos) {
+        if (pos > 0 && str[pos-1] == '[') {
+            pos++;
+            continue; // Skip outer bracket
+        }
+        size_t end = str.find(']', pos);
+        if (end != string::npos) {
+            string sub = str.substr(pos + 1, end - pos - 1);
+            stringstream ss(sub);
+            string temp;
+            vector<int> row;
+            while (getline(ss, temp, ',')) {
+                if (!temp.empty()) row.push_back(stoi(temp));
+            }
+            res.push_back(row);
+            pos = end + 1;
+        } else {
+            break;
+        }
+    }
+    return res;
+}
+`;
+
+      return `#include <iostream>\n#include <string>\n#include <vector>\n#include <sstream>\n#include <algorithm>\n\nusing namespace std;\n${parsingHelpers}\n\n${userCode}\n\n// --- DRIVER CODE (AUTO-GENERATED) ---\nint main() {\n    ${parsingDeclarations}\n    ${readingLines}\n    cout << ${functionName}(${paramNames}) << endl;\n    return 0;\n}`;
+    }
+
+    case 'JAVA': {
+      const parsingDeclarations = parameters.map(p => `${getJavaType(p.type)} ${p.name};`).join('\n        ');
+      const readingLines = parameters.map((p, idx) => {
+        if (p.type === 'INT') return `${p.name} = Integer.parseInt(sc.nextLine().trim());`;
+        if (p.type === 'FLOAT') return `${p.name} = Double.parseDouble(sc.nextLine().trim());`;
+        if (p.type === 'STRING') return `${p.name} = sc.nextLine().trim().replaceAll("^\\"|\\"$", "");`;
+        if (p.type === 'BOOLEAN') return `${p.name} = Boolean.parseBoolean(sc.nextLine().trim());`;
+        if (p.type === 'ARRAY_INT') return `String raw_${p.name} = sc.nextLine().trim();\n        ${p.name} = parseVectorInt(raw_${p.name});`;
+        return `${p.name} = sc.nextLine().trim();`;
+      }).join('\n        ');
+
+      const parseHelper = `
+    private static int[] parseVectorInt(String str) {
+        str = str.replace("[", "").replace("]", "").trim();
+        if (str.isEmpty()) return new int[0];
+        String[] parts = str.split(",");
+        int[] res = new int[parts.length];
+        for (int i = 0; i < parts.length; i++) {
+            res[i] = Integer.parseInt(parts[i].trim());
+        }
+        return res;
+    }
+`;
+
+      return `${userCode}\n\n// --- DRIVER CODE (AUTO-GENERATED) ---\nimport java.util.*;\n\npublic class Main {\n    ${parseHelper}\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        try {\n            ${parsingDeclarations}\n            ${readingLines}\n            Solution solver = new Solution();\n            System.out.println(solver.${functionName}(${paramNames}));\n        } catch (Exception e) {\n            e.printStackTrace();\n        }\n    }\n}`;
     }
 
     default:
