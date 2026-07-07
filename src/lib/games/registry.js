@@ -3,8 +3,44 @@ import DebugTheBug from "@/components/games/DebugTheBug";
 import TypeRacer from "@/components/games/TypeRacer";
 import CodeFillIn from "@/components/games/CodeFillIn";
 import SqlDojo from "@/components/games/SqlDojo";
+import QuizBlitz from "@/components/games/QuizBlitz";
+import CodeMatch from "@/components/games/CodeMatch";
+import DebugRush from "@/components/games/DebugRush";
 
 export const gamesRegistry = [
+  {
+    slug: "quiz-blitz",
+    title: "Quiz Blitz",
+    track: "Arcade",
+    difficulty: "Beginner",
+    description: "Fast-paced timed multiple-choice questions. Pick your subject track, maintain your streak multiplier, and beat the ticking countdown!",
+    estimatedMinutes: 10,
+    component: QuizBlitz,
+    status: "live",
+    totalLevels: 10
+  },
+  {
+    slug: "code-match",
+    title: "Code Match",
+    track: "Arcade",
+    difficulty: "Intermediate",
+    description: "Test your memory and code vocabulary! Match terminology blocks with their correct definition in a neon memory-flip card grid.",
+    estimatedMinutes: 8,
+    component: CodeMatch,
+    status: "live",
+    totalLevels: 6
+  },
+  {
+    slug: "debug-rush",
+    title: "Debug Rush",
+    track: "Arcade",
+    difficulty: "Advanced",
+    description: "Scan code blocks inside a simulated terminal window and click the buggy line. Speed and lives (hearts) control your high score!",
+    estimatedMinutes: 12,
+    component: DebugRush,
+    status: "live",
+    totalLevels: 5
+  },
   {
     slug: "flex-dojo",
     title: "Flex Dojo",
