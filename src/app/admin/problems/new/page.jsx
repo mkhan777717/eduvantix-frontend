@@ -149,6 +149,7 @@ export default function CreateProblem() {
   // Step 1
   const [title,      setTitle]      = useState("");
   const [slug,       setSlug]       = useState("");
+  const [isSlugManuallyEdited, setIsSlugManuallyEdited] = useState(false);
   const [difficulty, setDifficulty] = useState("MEDIUM");
   const [category,   setCategory]   = useState("Algorithms");
   const [tags,       setTags]       = useState("");
@@ -195,7 +196,9 @@ export default function CreateProblem() {
 
   const handleTitleChange = (v) => {
     setTitle(v);
-    if (!slug) setSlug(v.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""));
+    if (!isSlugManuallyEdited) {
+      setSlug(v.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, ""));
+    }
   };
 
   const handlePublish = async () => {
@@ -421,7 +424,14 @@ export default function CreateProblem() {
                         <label className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
                           Slug / ID <span className="text-slate-600 normal-case font-normal text-[10px]">(auto-generated)</span>
                         </label>
-                        <DarkInput placeholder="e.g. invert-binary-tree" value={slug} onChange={e => setSlug(e.target.value)} />
+                        <DarkInput
+                          placeholder="e.g. invert-binary-tree"
+                          value={slug}
+                          onChange={e => {
+                            setSlug(e.target.value);
+                            setIsSlugManuallyEdited(true);
+                          }}
+                        />
                       </div>
                       <div className="space-y-2">
                         <label className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">

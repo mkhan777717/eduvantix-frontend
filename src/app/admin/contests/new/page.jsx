@@ -108,6 +108,25 @@ export default function CreateContest() {
     }
   }, [title]);
 
+  // Auto-calculate status based on timing
+  useEffect(() => {
+    if (!startDate || !startTime) {
+      setStatus("upcoming");
+      return;
+    }
+    const start = new Date(`${startDate}T${startTime}`);
+    const end = new Date(start.getTime() + (durationMins || 60) * 60000);
+    const now = new Date();
+
+    if (now >= start && now <= end) {
+      setStatus("active");
+    } else if (now > end) {
+      setStatus("past");
+    } else {
+      setStatus("upcoming");
+    }
+  }, [startDate, startTime, durationMins]);
+
   const toggleProblemSelection = (problemId) => {
     if (selectedProblemIds.includes(problemId)) {
       setSelectedProblemIds(selectedProblemIds.filter(id => id !== problemId));
@@ -371,26 +390,7 @@ export default function CreateContest() {
                 </p>
               </div>
 
-              {/* Status */}
-              <div className="space-y-1.5">
-                <label className="text-[10px] font-extrabold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
-                  Initial Status
-                </label>
-                <select
-                  value={status}
-                  onChange={(e) => setStatus(e.target.value)}
-                  className="w-full rounded-2xl py-3 px-4 text-xs outline-none border transition-all"
-                  style={{
-                    backgroundColor: "var(--bg-input)",
-                    borderColor: "var(--border-primary)",
-                    color: "var(--text-primary)"
-                  }}
-                >
-                  <option value="upcoming">Upcoming</option>
-                  <option value="active">Active (Live Now)</option>
-                  <option value="past">Past / Completed</option>
-                </select>
-              </div>
+
 
               {/* Duration */}
               <div className="space-y-1.5">
