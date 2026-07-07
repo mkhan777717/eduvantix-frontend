@@ -272,20 +272,30 @@ function VideoPlayer({
   const [reactions, setReactions] = useState([]);
 
   const handleReaction = useCallback((emoji) => {
+    // username must be derived from props or session, since 'user' is not defined
+    let username = null;
+    if (session?.user?.username) {
+      username = session.user.username;
+    } else if (session?.username) {
+      username = session.username;
+    } else {
+      username = "Unknown User";
+    }
+
     const reaction = {
       id: Date.now() + Math.random(),
       emoji,
-      username: user?.username,
+      username,
       xOffset: (Math.random() - 0.5) * 60, // random spread
     };
     setReactions((prev) => [...prev, reaction]);
     sendData({ action: "REACTION", reaction });
     
-    // Auto cleanup after animation (2.5s)
+    // Auto cleanup after animation (3.0s)
     setTimeout(() => {
       setReactions((prev) => prev.filter((r) => r.id !== reaction.id));
     }, 3000);
-  }, [user]);
+  }, [session]);
 
   const handleShareLink = useCallback(() => {
     if (!session?.id) return;
