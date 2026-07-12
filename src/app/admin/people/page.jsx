@@ -149,6 +149,27 @@ export default function ManagePeoplePage() {
     // Use the backend's expected role mapping
     const payloadRole = memberRole === 'STUDENT' ? 'USER' : memberRole;
 
+    // Get id from localStorage dmx_auth_user
+    let instituteId = undefined;
+    try {
+      const userStr = typeof window !== "undefined" ? localStorage.getItem("dmx_auth_user") : null;
+
+      if (userStr) {
+        const userObj = JSON.parse(userStr);
+        console.log("userObj", userObj);
+        if (userObj && userObj.id) instituteId = userObj.id;
+      }
+    } catch(e) {
+      console.warn("Could not parse dmx_auth_user id from localStorage", e);
+    }
+
+    // PROACTIVE GUARD: Make sure we have an instituteId
+    if (!instituteId) {
+      setFormError("Cannot determine your institute context. Please re-login or contact the admin.");
+      setSubmitting(false);
+      return;
+    }
+
     try {
       if (token) {
         // Prepare payload exactly as backend expects
@@ -171,7 +192,18 @@ export default function ManagePeoplePage() {
             // "Origin": "http://localhost:3000",
             // "Referer": "http://localhost:3000/",
           },
+<<<<<<< Updated upstream
           body: JSON.stringify(payload)
+=======
+          body: JSON.stringify({
+            username: name.trim(),
+            email: email.trim().toLowerCase(),
+            password: password.trim(),
+            role: payloadRole,
+            batchIds: selectedBatchIds,
+            instituteId // this will now always be present and non-undefined
+          })
+>>>>>>> Stashed changes
         });
 
         // Check for HTTP errors directly - sometimes the API doesn't return a JSON success on non-200 responses
@@ -190,6 +222,31 @@ export default function ManagePeoplePage() {
 
         const data = await res.json();
 
+<<<<<<< Updated upstream
+=======
+        // Specific handling for Prisma foreign key error
+        if (
+          data &&
+          typeof data.message === "string" &&
+          (
+            data.message.includes("Database integrity error") ||
+            data.message.includes("Foreign key constraint") ||
+            (
+              data.stack &&
+              typeof data.stack === "string" &&
+              (
+                data.stack.includes("PrismaClientKnownRequestError") ||
+                data.stack.includes("Foreign key constraint")
+              )
+            )
+          )
+        ) {
+          setFormError("Failed to register member: The selected institute or associated batch does not exist. Please check your institute and batch assignments, or try re-logging in.");
+          setSubmitting(false);
+          return;
+        }
+
+>>>>>>> Stashed changes
         if (data.success) {
           const assignedBatchNames = batches
             .filter(b => selectedBatchIds.includes(b.id))
@@ -236,8 +293,17 @@ export default function ManagePeoplePage() {
         setFormSuccess("");
       }, 1200);
     } catch (err) {
+      // More specific error handling for Prisma constraint error
+      if (
+        err &&
+        typeof err.message === "string" &&
+        err.message.includes("Foreign key constraint")
+      ) {
+        setFormError("Failed to register member: The referenced institute or batch does not exist. Please check your selections.");
+      } else {
+        setFormError("Error connecting to backend server.");
+      }
       console.error(err);
-      setFormError("Error connecting to backend server.");
     } finally {
       setSubmitting(false);
     }
