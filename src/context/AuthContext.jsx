@@ -329,8 +329,38 @@ export function AuthProvider({ children }) {
 
   // ---------------------------------------------------------------------------
 
+  const forgotPassword = async (email) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+        signal: AbortSignal.timeout(30000),
+      });
+      const data = await res.json();
+      return { success: res.ok && data.success, message: data.message || formatBackendError(data) };
+    } catch (e) {
+      return { success: false, message: "Network error occurred." };
+    }
+  };
+
+  const resetPassword = async (token, password) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/reset-password/${token}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+        signal: AbortSignal.timeout(30000),
+      });
+      const data = await res.json();
+      return { success: res.ok && data.success, message: data.message || formatBackendError(data) };
+    } catch (e) {
+      return { success: false, message: "Network error occurred." };
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, API_BASE, activeSession, setActiveSession, isInstituteBlocked, setIsInstituteBlocked }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, logout, API_BASE, activeSession, setActiveSession, isInstituteBlocked, setIsInstituteBlocked, forgotPassword, resetPassword }}>
       {children}
 
       {/* Cross-Device Single Session Countdown Overlay */}

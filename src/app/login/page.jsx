@@ -9,13 +9,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Mail, Lock, User, ShieldAlert, ArrowRight, RefreshCw, AlertCircle, GraduationCap, Users, Eye, EyeOff, Ban } from "lucide-react";
 
 function LoginForm() {
-  const { login, register, user, logout } = useAuth();
+  const { login, register, user, logout, forgotPassword } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
 
   // Auth toggle
   const [isRegistering, setIsRegistering] = useState(false);
+  const [isForgot, setIsForgot] = useState(false);
+  const [forgotSuccess, setForgotSuccess] = useState(false);
 
   // Form fields
   const [username, setUsername] = useState("");
@@ -222,6 +224,27 @@ function LoginForm() {
     setErrorMsg("");
     setLoading(true);
 
+    if (isForgot) {
+      if (!email) {
+        setErrorMsg("Please enter your email address.");
+        setLoading(false);
+        return;
+      }
+      try {
+        const result = await forgotPassword(email);
+        if (result.success) {
+          setForgotSuccess(true);
+        } else {
+          setErrorMsg(result.message || "Failed to send reset link.");
+        }
+      } catch (err) {
+        setErrorMsg("Unable to connect to the authentication server.");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
     if (!email || !password) {
       setErrorMsg("Please fill in all required fields.");
       setLoading(false);
@@ -368,13 +391,13 @@ function LoginForm() {
             className="inline-flex h-12 w-12 items-center justify-center rounded-2xl shadow-md mx-auto transition-all"
             style={{ background: theme.accentGradient }}
           >
-            {theme.icon}
+            {isForgot ? <RefreshCw size={22} className="text-white animate-pulse" /> : theme.icon}
           </div>
           <h1 className="text-xl font-black font-display tracking-tight" style={{ color: "var(--text-primary)" }}>
-            {theme.title}
+            {isForgot ? "Reset Password" : theme.title}
           </h1>
           <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-            {theme.desc}
+            {isForgot ? "Enter your email to receive a password reset link" : theme.desc}
           </p>
         </div>
 
@@ -397,160 +420,248 @@ function LoginForm() {
         </AnimatePresence>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <AnimatePresence mode="popLayout">
-            {isRegistering && (
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                className="space-y-1.5"
-              >
-                <label className="text-[10px] font-extrabold uppercase tracking-wider pl-1" style={{ color: "var(--text-secondary)" }}>
-                  Username
-                </label>
-                <div className="relative">
-                  <User size={15} className="absolute left-4 top-3.5 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="coder_name"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full rounded-2xl py-3 pl-11 pr-4 text-xs outline-none border transition-all"
-                    style={{
-                      backgroundColor: "var(--bg-input)",
-                      borderColor: "var(--border-primary)",
-                      color: "var(--text-primary)"
-                    }}
-                  />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Email */}
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-extrabold uppercase tracking-wider pl-1" style={{ color: "var(--text-secondary)" }}>
-              Email Address
-            </label>
-            <div className="relative">
-              <Mail size={15} className="absolute left-4 top-3.5 text-slate-400" />
-              <input
-                type="email"
-                placeholder="name@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-2xl py-3 pl-11 pr-4 text-xs outline-none border transition-all"
-                style={{
-                  backgroundColor: "var(--bg-input)",
-                  borderColor: "var(--border-primary)",
-                  color: "var(--text-primary)"
-                }}
-                required
-              />
+        {/* Content based on Forgot Password state */}
+        {isForgot && forgotSuccess ? (
+          <div className="space-y-4 text-center">
+            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-xs font-bold leading-relaxed">
+              ✅ A secure password reset link has been sent to your email address! Please check your inbox.
             </div>
+            <button
+              type="button"
+              onClick={() => {
+                setIsForgot(false);
+                setForgotSuccess(false);
+                setErrorMsg("");
+              }}
+              className="w-full py-3.5 rounded-2xl font-bold text-xs text-white shadow-md transition-all cursor-pointer hover:scale-102"
+              style={{ background: theme.accentGradient }}
+            >
+              Back to Sign In
+            </button>
           </div>
-
-          {/* Password */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between items-center px-1">
-              <label className="text-[10px] font-extrabold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
-                Password
-              </label>
-              {!isRegistering && (
-                <button type="button" className="text-[9px] font-bold text-indigo-500 hover:underline">
-                  Forgot?
-                </button>
-              )}
-            </div>
-            <div className="relative">
-              <Lock size={15} className="absolute left-4 top-3.5 text-slate-400" />
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-2xl py-3 pl-11 pr-11 text-xs outline-none border transition-all"
-                style={{
-                  backgroundColor: "var(--bg-input)",
-                  borderColor: "var(--border-primary)",
-                  color: "var(--text-primary)"
-                }}
-                required
-              />
-              <button type="button" onClick={() => setShowPassword(v => !v)}
-                className="absolute right-4 top-3.5 cursor-pointer" style={{ color: "var(--text-muted)" }}>
-                {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
-              </button>
-            </div>
-          </div>
-
-          {/* Confirm Password (register only) */}
-          {isRegistering && (
+        ) : isForgot ? (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email */}
             <div className="space-y-1.5">
               <label className="text-[10px] font-extrabold uppercase tracking-wider pl-1" style={{ color: "var(--text-secondary)" }}>
-                Confirm Password
+                Email Address
               </label>
               <div className="relative">
-                <Lock size={15} className="absolute left-4 top-3.5 text-slate-400" />
+                <Mail size={15} className="absolute left-4 top-3.5 text-slate-400" />
                 <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-2xl py-3 pl-11 pr-11 text-xs outline-none border transition-all"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-2xl py-3 pl-11 pr-4 text-xs outline-none border transition-all"
                   style={{
                     backgroundColor: "var(--bg-input)",
-                    borderColor: confirmPassword && confirmPassword !== password ? "#f43f5e" : "var(--border-primary)",
+                    borderColor: "var(--border-primary)",
                     color: "var(--text-primary)"
                   }}
                   required
                 />
-                <button type="button" onClick={() => setShowConfirmPassword(v => !v)}
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 mt-2 rounded-2xl font-bold text-xs text-white shadow-md transition-all flex items-center justify-center space-x-2 hover:scale-102 cursor-pointer disabled:opacity-50"
+              style={{ background: theme.accentGradient }}
+            >
+              {loading ? (
+                <>
+                  <RefreshCw size={14} className="animate-spin" />
+                  <span>Sending link...</span>
+                </>
+              ) : (
+                <>
+                  <span>Send Reset Link</span>
+                  <ArrowRight size={14} />
+                </>
+              )}
+            </button>
+
+            <div className="border-t pt-4 text-center" style={{ borderColor: "var(--border-primary)" }}>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsForgot(false);
+                  setErrorMsg("");
+                }}
+                className="text-xs font-bold text-indigo-500 hover:underline"
+              >
+                Back to Sign In
+              </button>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <AnimatePresence mode="popLayout">
+              {isRegistering && (
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
+                  className="space-y-1.5"
+                >
+                  <label className="text-[10px] font-extrabold uppercase tracking-wider pl-1" style={{ color: "var(--text-secondary)" }}>
+                    Username
+                  </label>
+                  <div className="relative">
+                    <User size={15} className="absolute left-4 top-3.5 text-slate-400" />
+                    <input
+                      type="text"
+                      placeholder="coder_name"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      className="w-full rounded-2xl py-3 pl-11 pr-4 text-xs outline-none border transition-all"
+                      style={{
+                        backgroundColor: "var(--bg-input)",
+                        borderColor: "var(--border-primary)",
+                        color: "var(--text-primary)"
+                      }}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Email */}
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-extrabold uppercase tracking-wider pl-1" style={{ color: "var(--text-secondary)" }}>
+                Email Address
+              </label>
+              <div className="relative">
+                <Mail size={15} className="absolute left-4 top-3.5 text-slate-400" />
+                <input
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full rounded-2xl py-3 pl-11 pr-4 text-xs outline-none border transition-all"
+                  style={{
+                    backgroundColor: "var(--bg-input)",
+                    borderColor: "var(--border-primary)",
+                    color: "var(--text-primary)"
+                  }}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center px-1">
+                <label className="text-[10px] font-extrabold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+                  Password
+                </label>
+                {!isRegistering && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsForgot(true);
+                      setErrorMsg("");
+                    }}
+                    className="text-[9px] font-bold text-indigo-500 hover:underline cursor-pointer"
+                  >
+                    Forgot?
+                  </button>
+                )}
+              </div>
+              <div className="relative">
+                <Lock size={15} className="absolute left-4 top-3.5 text-slate-400" />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-2xl py-3 pl-11 pr-11 text-xs outline-none border transition-all"
+                  style={{
+                    backgroundColor: "var(--bg-input)",
+                    borderColor: "var(--border-primary)",
+                    color: "var(--text-primary)"
+                  }}
+                  required
+                />
+                <button type="button" onClick={() => setShowPassword(v => !v)}
                   className="absolute right-4 top-3.5 cursor-pointer" style={{ color: "var(--text-muted)" }}>
-                  {showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
                 </button>
               </div>
-              {confirmPassword && confirmPassword !== password && (
-                <p className="text-[10px] text-rose-500 font-bold pl-1">Passwords do not match</p>
-              )}
             </div>
-          )}
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full py-3.5 mt-2 rounded-2xl font-bold text-xs text-white shadow-md transition-all flex items-center justify-center space-x-2 hover:scale-102 cursor-pointer disabled:opacity-50"
-            style={{ background: theme.accentGradient }}
-          >
-            {loading ? (
-              <>
-                <RefreshCw size={14} className="animate-spin" />
-                <span>Processing...</span>
-              </>
-            ) : (
-              <>
-                <span>{isRegistering ? `Register ${theme.label}` : `Sign In as ${theme.label}`}</span>
-                <ArrowRight size={14} />
-              </>
+            {/* Confirm Password (register only) */}
+            {isRegistering && (
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-extrabold uppercase tracking-wider pl-1" style={{ color: "var(--text-secondary)" }}>
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <Lock size={15} className="absolute left-4 top-3.5 text-slate-400" />
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full rounded-2xl py-3 pl-11 pr-11 text-xs outline-none border transition-all"
+                    style={{
+                      backgroundColor: "var(--bg-input)",
+                      borderColor: confirmPassword && confirmPassword !== password ? "#f43f5e" : "var(--border-primary)",
+                      color: "var(--text-primary)"
+                    }}
+                    required
+                  />
+                  <button type="button" onClick={() => setShowConfirmPassword(v => !v)}
+                    className="absolute right-4 top-3.5 cursor-pointer" style={{ color: "var(--text-muted)" }}>
+                    {showConfirmPassword ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+                {confirmPassword && confirmPassword !== password && (
+                  <p className="text-[10px] text-rose-500 font-bold pl-1">Passwords do not match</p>
+                )}
+              </div>
             )}
-          </button>
-        </form>
 
-        <div className="border-t pt-4 text-center space-y-3" style={{ borderColor: "var(--border-primary)" }}>
-          <button
-            type="button"
-            onClick={() => {
-              setErrorMsg("");
-              setIsRegistering(!isRegistering);
-            }}
-            className="text-xs font-bold transition-all text-indigo-500 hover:underline"
-          >
-            {isRegistering ? "Already have an account? Sign In" : "New to DMX? Register an account"}
-          </button>
+            {/* Submit Button */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 mt-2 rounded-2xl font-bold text-xs text-white shadow-md transition-all flex items-center justify-center space-x-2 hover:scale-102 cursor-pointer disabled:opacity-50"
+              style={{ background: theme.accentGradient }}
+            >
+              {loading ? (
+                <>
+                  <RefreshCw size={14} className="animate-spin" />
+                  <span>Processing...</span>
+                </>
+              ) : (
+                <>
+                  <span>{isRegistering ? `Register ${theme.label}` : `Sign In as ${theme.label}`}</span>
+                  <ArrowRight size={14} />
+                </>
+              )}
+            </button>
+          </form>
+        )}
 
-        </div>
+        {/* Footer Toggle (only show when not in Forgot Password state) */}
+        {!isForgot && (
+          <div className="border-t pt-4 text-center space-y-3" style={{ borderColor: "var(--border-primary)" }}>
+            <button
+              type="button"
+              onClick={() => {
+                setErrorMsg("");
+                setIsRegistering(!isRegistering);
+              }}
+              className="text-xs font-bold transition-all text-indigo-500 hover:underline"
+            >
+              {isRegistering ? "Already have an account? Sign In" : "New to DMX? Register an account"}
+            </button>
+          </div>
+        )}
       </div>
     </motion.div>
   );
