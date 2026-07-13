@@ -104,42 +104,48 @@ export default function ResumeBuilderPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-[calc(100vh-4rem)] relative">
       {/* Header - Hidden when printing */}
-      <div className="bg-white border-b border-gray-200 sticky top-0 z-10 print:hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-gray-900">Resume Builder</h1>
-            <p className="text-sm text-gray-500">Create an ATS-friendly resume</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="flex items-center px-4 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
-            >
-              {isSaving ? (
-                <Loader2 className="w-4 h-4 mr-2 animate-spin text-gray-500" />
-              ) : saveSuccess ? (
-                <CheckCircle2 className="w-4 h-4 mr-2 text-green-500" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
-              )}
-              {saveSuccess ? 'Saved!' : 'Save Progress'}
-            </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm shadow-sm shadow-blue-200"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Export PDF
-            </button>
-          </div>
+      <div className="sticky top-0 z-40 -mt-6 md:-mt-8 px-6 py-2.5 mb-6 border border-t-0 border-[var(--glass-border)] rounded-b-2xl bg-[var(--glass-bg)] backdrop-blur-xl shadow-md print:hidden flex flex-col sm:flex-row items-center justify-between gap-4 transition-all">
+        <div className="flex flex-col justify-center">
+          <h1 className="text-xl font-bold text-[var(--text-primary)]">Resume Builder</h1>
+          <p className="text-sm text-[var(--text-secondary)]">Create an ATS-friendly resume</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleSave}
+            disabled={isSaving}
+            className="flex items-center px-4 py-2 border rounded-lg font-medium text-sm transition-colors shadow-sm"
+            style={{ 
+              backgroundColor: "var(--bg-card)", 
+              borderColor: "var(--border-primary)",
+              color: "var(--text-primary)"
+            }}
+          >
+            {isSaving ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin text-[var(--text-muted)]" />
+            ) : saveSuccess ? (
+              <CheckCircle2 className="w-4 h-4 mr-2 text-green-500" />
+            ) : (
+              <Save className="w-4 h-4 mr-2 text-[var(--text-accent)]" />
+            )}
+            {saveSuccess ? 'Saved!' : 'Save Progress'}
+          </button>
+          <button
+            onClick={handlePrint}
+            className="flex items-center px-4 py-2 rounded-lg font-bold text-white text-sm transition-all hover:scale-105 shadow-lg"
+            style={{ 
+              background: "var(--accent-gradient)"
+            }}
+          >
+            <Download className="w-4 h-4 mr-2" />
+            Export PDF
+          </button>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div className="max-w-[1600px] mx-auto p-4 sm:p-6 lg:p-8">
+      <div className="max-w-[1600px] mx-auto">
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 h-full">
           
           {/* Left Column: Form Editor (Hidden when printing) */}

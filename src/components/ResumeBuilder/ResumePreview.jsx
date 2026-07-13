@@ -23,7 +23,7 @@ export default function ResumePreview({ data }) {
       <div className="font-sans text-gray-900 max-w-full">
         
         {/* Header / Personal Info */}
-        <header className="text-center mb-5 border-b border-gray-400 pb-4">
+        <div className="text-center mb-5 border-b border-gray-400 pb-4">
           <h1 className="text-3xl font-bold uppercase tracking-wide mb-2 text-gray-900">
             {fullName || 'Your Name'}
           </h1>
@@ -52,7 +52,7 @@ export default function ResumePreview({ data }) {
               </>
             )}
           </div>
-        </header>
+        </div>
 
         {/* Summary */}
         {summary && (
@@ -143,7 +143,7 @@ export default function ResumePreview({ data }) {
               Skills
             </h2>
             <div className="text-[11pt] text-gray-800 leading-relaxed">
-              {skills.map(s => s.name).join(' • ')}
+              {skills.map(s => s.name).join(', ')}
             </div>
           </section>
         )}
