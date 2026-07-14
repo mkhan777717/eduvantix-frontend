@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -43,6 +43,12 @@ import {
   Share2,
   Check,
   MessageSquare,
+  Maximize,
+  Minimize,
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { ReactionOverlay, ReactionPicker } from "@/components/LiveReactions";
 
@@ -751,8 +757,8 @@ function BroadcastPanel({ session, onEndSession, authToken, shouldRecord }) {
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950">
                 <div className="text-center space-y-4">
-                  <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto shadow-inner">
-                    <Radio size={40} className="text-indigo-400 animate-pulse" />
+                  <div className="w-20 h-20 rounded-3xl bg-zinc-500/10 border border-zinc-500/20 flex items-center justify-center mx-auto shadow-inner">
+                    <Radio size={40} className="text-zinc-400 animate-pulse" />
                   </div>
                   <div className="space-y-1">
                     <h3 className="text-sm font-black uppercase tracking-wider text-slate-200">
@@ -880,7 +886,7 @@ function BroadcastPanel({ session, onEndSession, authToken, shouldRecord }) {
                 }}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[10px] font-bold uppercase tracking-wide transition-all hover:scale-105 cursor-pointer shadow-sm ${
                   activeTab === "polls" || activePoll
-                    ? "bg-indigo-600 border-transparent text-white animate-pulse"
+                    ? "bg-zinc-600 border-transparent text-white animate-pulse"
                     : "bg-[var(--bg-primary)] border-[var(--border-primary)] text-[var(--text-primary)]"
                 }`}
                 id="poll-tab-btn"
@@ -896,7 +902,7 @@ function BroadcastPanel({ session, onEndSession, authToken, shouldRecord }) {
                 onClick={() => setIsChatOpen((prev) => !prev)}
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-xl border text-[10px] font-bold uppercase tracking-wide transition-all hover:scale-105 cursor-pointer shadow-sm ${
                   isChatOpen
-                    ? "bg-indigo-600 border-transparent text-white"
+                    ? "bg-zinc-600 border-transparent text-white"
                     : "bg-[var(--bg-primary)] border-[var(--border-primary)] text-[var(--text-primary)]"
                 }`}
                 title={isChatOpen ? "Hide Live Chat" : "Show Live Chat"}
@@ -985,6 +991,12 @@ export default function AdminLivePage() {
     thumbnailPreview: null,
     thumbnailUrl: "",
   });
+  const [showWatermark, setShowWatermark] = useState(false);
+  const [watermarkOpts, setWatermarkOpts] = useState({
+    inst: true,
+    username: true,
+    email: true,
+  });
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -1019,7 +1031,151 @@ export default function AdminLivePage() {
   const [loadingPast, setLoadingPast] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true); // true until we've checked for active session
   const [selectedVideoUrl, setSelectedVideoUrl] = useState(null);
+  const [selectedVideoSession, setSelectedVideoSession] = useState(null);
   const [watermarkPos, setWatermarkPos] = useState({ top: "15%", left: "15%" });
+
+  const containerRef = useRef(null);
+  const videoRef = useRef(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    if (!selectedVideoUrl) return;
+
+    const handleFullscreenChange = () => {
+      const currentFullscreenEl =
+        document.fullscreenElement ||
+        document.webkitFullscreenElement ||
+        document.mozFullScreenElement ||
+        document.msFullscreenElement;
+
+      const isCurrentlyFullscreen = !!currentFullscreenEl;
+      setIsFullscreen(isCurrentlyFullscreen);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", handleFullscreenChange);
+    document.addEventListener("mozfullscreenchange", handleFullscreenChange);
+    document.addEventListener("MSFullscreenChange", handleFullscreenChange);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+      document.removeEventListener("webkitfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("mozfullscreenchange", handleFullscreenChange);
+      document.removeEventListener("MSFullscreenChange", handleFullscreenChange);
+    };
+  }, [selectedVideoUrl]);
+
+  const toggleFullscreen = (e) => {
+    e.stopPropagation();
+    const container = containerRef.current;
+    if (!container) return;
+
+    const isCurrentlyFullscreen = !!(
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement
+    );
+
+    if (!isCurrentlyFullscreen) {
+      const requestFullscreen =
+        container.requestFullscreen ||
+        container.webkitRequestFullscreen ||
+        container.mozRequestFullScreen ||
+        container.msRequestFullscreen;
+
+      if (requestFullscreen) {
+        requestFullscreen.call(container).catch((err) => {
+          console.error("Error entering container fullscreen:", err);
+        });
+      }
+    } else {
+      const exitFullscreen =
+        document.exitFullscreen ||
+        document.webkitExitFullscreen ||
+        document.mozCancelFullScreen ||
+        document.msExitFullscreen;
+
+      if (exitFullscreen) {
+        exitFullscreen.call(document).catch(console.error);
+      }
+    }
+  };
+
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+
+  useEffect(() => {
+    if (!selectedVideoUrl) {
+      setIsPlaying(false);
+      setCurrentTime(0);
+      setDuration(0);
+    } else {
+      setIsPlaying(true);
+    }
+  }, [selectedVideoUrl]);
+
+  const handlePlayPause = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+        setIsPlaying(false);
+      } else {
+        videoRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(console.error);
+      }
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (videoRef.current) {
+      setDuration(videoRef.current.duration);
+    }
+  };
+
+  const handleSeek = (e) => {
+    const time = parseFloat(e.target.value);
+    if (videoRef.current) {
+      videoRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  const handleVolumeChange = (e) => {
+    const vol = parseFloat(e.target.value);
+    setVolume(vol);
+    setIsMuted(vol === 0);
+    if (videoRef.current) {
+      videoRef.current.volume = vol;
+      videoRef.current.muted = vol === 0;
+    }
+  };
+
+  const handleToggleMute = () => {
+    const nextMute = !isMuted;
+    setIsMuted(nextMute);
+    if (videoRef.current) {
+      videoRef.current.muted = nextMute;
+      videoRef.current.volume = nextMute ? 0 : volume;
+    }
+  };
+
+  const formatTime = (secs) => {
+    if (isNaN(secs)) return "00:00";
+    const minutes = Math.floor(secs / 60);
+    const seconds = Math.floor(secs % 60);
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  };
 
   useEffect(() => {
     if (!selectedVideoUrl) return;
@@ -1191,6 +1347,8 @@ export default function AdminLivePage() {
           description: formState.description,
           thumbnailUrl: formState.thumbnailUrl,
           batchIds: selectedBatchIds,
+          showWatermark,
+          watermarkOptions: Object.keys(watermarkOpts).filter(k => watermarkOpts[k]).join(','),
         }),
       });
 
@@ -1221,8 +1379,7 @@ export default function AdminLivePage() {
       return;
     }
     setError(null);
-    console.log("[LIVE] Setting showRecordPrompt to true");
-    setShowRecordPrompt(true);
+    startActualSession();
   };
 
   const endActiveSession = async () => {
@@ -1287,27 +1444,23 @@ export default function AdminLivePage() {
   if (!session || !livekitToken) {
     return (
       <>
-        <div className="max-w-2xl mx-auto space-y-8 animate-fade-in">
+        <div className="max-w-2xl mx-auto space-y-8 animate-fade-in px-0 sm:px-6">
         {/* Page Header */}
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl" style={{ backgroundColor: "var(--bg-badge)", color: "var(--text-accent)" }}>
-              <Radio size={20} />
-            </div>
-            <div>
-              <h1 className="text-2xl font-black" style={{ color: "var(--text-primary)" }}>
-                Go Live
-              </h1>
-              <p className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-                Start a live session for your students
-              </p>
-            </div>
+        <section className="flex flex-col gap-2 border-b pb-6 shrink-0" style={{ borderColor: "var(--border-primary)" }}>
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border mb-3 w-fit"
+            style={{ borderColor: "var(--border-primary)", color: "var(--text-secondary)", backgroundColor: "var(--bg-secondary)" }}>
+            <Radio size={12} className="text-rose-500 animate-pulse" />
+            Live Broadcast
           </div>
-        </div>
+          <h1 className="text-4xl font-serif tracking-tight" style={{ color: "var(--text-primary)" }}>Go Live</h1>
+          <p className="text-sm max-w-xl" style={{ color: "var(--text-secondary)" }}>
+            Start a live session for your students in real-time.
+          </p>
+        </section>
 
         {/* Setup Form */}
-        <div className="rounded-2xl border p-6 space-y-6 shadow-xl"
-          style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}
+        <div className="rounded-2xl border p-6 space-y-6 shadow-sm"
+          style={{ backgroundColor: "var(--bg-primary)", borderColor: "var(--border-primary)" }}
         >
           {/* Title */}
           <div className="space-y-2">
@@ -1319,9 +1472,9 @@ export default function AdminLivePage() {
               value={formState.title}
               onChange={(e) => setFormState((p) => ({ ...p, title: e.target.value }))}
               placeholder="e.g. DSA Masterclass — Trees & Graphs"
-              className="w-full px-4 py-3 rounded-xl border text-sm font-semibold outline-none transition-all focus:ring-2 focus:ring-indigo-500/30"
+              className="w-full px-4 py-3 rounded-xl border text-sm font-medium outline-none transition-colors focus:border-[var(--text-muted)]"
               style={{
-                backgroundColor: "var(--bg-primary)",
+                backgroundColor: "var(--bg-secondary)",
                 borderColor: "var(--border-primary)",
                 color: "var(--text-primary)",
               }}
@@ -1339,9 +1492,9 @@ export default function AdminLivePage() {
               onChange={(e) => setFormState((p) => ({ ...p, description: e.target.value }))}
               placeholder="Brief description of what you'll cover..."
               rows={3}
-              className="w-full px-4 py-3 rounded-xl border text-sm font-semibold outline-none transition-all focus:ring-2 focus:ring-indigo-500/30 resize-none"
+              className="w-full px-4 py-3 rounded-xl border text-sm font-medium outline-none transition-colors focus:border-[var(--text-muted)] resize-none"
               style={{
-                backgroundColor: "var(--bg-primary)",
+                backgroundColor: "var(--bg-secondary)",
                 borderColor: "var(--border-primary)",
                 color: "var(--text-primary)",
               }}
@@ -1362,7 +1515,7 @@ export default function AdminLivePage() {
             <div className="flex items-start gap-4">
               <label
                 htmlFor="thumbnail-upload"
-                className="flex flex-col items-center justify-center w-40 h-24 rounded-xl border-2 border-dashed cursor-pointer transition-all hover:border-indigo-500/50 hover:bg-indigo-500/5 p-2 text-center"
+                className="flex flex-col items-center justify-center w-40 h-24 rounded-xl border-2 border-dashed cursor-pointer transition-all hover:border-zinc-500/50 hover:bg-zinc-500/5 p-2 text-center"
                 style={{ borderColor: "var(--border-primary)" }}
               >
                 {formState.thumbnailPreview ? (
@@ -1404,7 +1557,7 @@ export default function AdminLivePage() {
             <div 
               className="w-full rounded-xl p-4 border grid grid-cols-1 sm:grid-cols-2 gap-2"
               style={{
-                backgroundColor: "var(--bg-primary)",
+                backgroundColor: "var(--bg-secondary)",
                 borderColor: "var(--border-primary)",
               }}
             >
@@ -1446,6 +1599,89 @@ export default function AdminLivePage() {
             </p>
           </div>
 
+          {/* Record Session Configuration */}
+          <div className="space-y-4 rounded-xl p-4 border" style={{ borderColor: "var(--border-primary)" }}>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <label className="text-xs font-extrabold uppercase tracking-wider block" style={{ color: "var(--text-secondary)" }}>
+                  Record Session
+                </label>
+                <p className="text-[10px] text-[var(--text-muted)]">
+                  Automatically record this session for playback later.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={shouldRecord}
+                  onChange={(e) => setShouldRecord(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-slate-700/60 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-600"></div>
+              </label>
+            </div>
+          </div>
+
+          {/* Watermark Configuration */}
+          <div className="space-y-4 rounded-xl p-4 border" style={{ borderColor: "var(--border-primary)" }}>
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <label className="text-xs font-extrabold uppercase tracking-wider block" style={{ color: "var(--text-secondary)" }}>
+                  Show Watermark
+                </label>
+                <p className="text-[10px] text-[var(--text-muted)]">
+                  Add secure watermark overlay to the stream for students.
+                </p>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={showWatermark}
+                  onChange={(e) => setShowWatermark(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-slate-700/60 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+              </label>
+            </div>
+
+            {showWatermark && (
+              <div className="space-y-2 border-t border-slate-800/40 pt-3 transition-all animate-fadeIn">
+                <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 block">
+                  Watermark Contents to Show:
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold py-1 hover:text-[var(--text-accent)] transition-colors text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={watermarkOpts.inst}
+                      onChange={(e) => setWatermarkOpts(p => ({ ...p, inst: e.target.checked }))}
+                      className="rounded border-[var(--border-primary)] text-[var(--accent-primary)] focus:ring-[var(--accent-primary)] cursor-pointer"
+                    />
+                    <span>Institution Name</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold py-1 hover:text-[var(--text-accent)] transition-colors text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={watermarkOpts.username}
+                      onChange={(e) => setWatermarkOpts(p => ({ ...p, username: e.target.checked }))}
+                      className="rounded border-[var(--border-primary)] text-[var(--accent-primary)] focus:ring-[var(--accent-primary)] cursor-pointer"
+                    />
+                    <span>Username</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer text-xs font-semibold py-1 hover:text-[var(--text-accent)] transition-colors text-slate-300">
+                    <input
+                      type="checkbox"
+                      checked={watermarkOpts.email}
+                      onChange={(e) => setWatermarkOpts(p => ({ ...p, email: e.target.checked }))}
+                      className="rounded border-[var(--border-primary)] text-[var(--accent-primary)] focus:ring-[var(--accent-primary)] cursor-pointer"
+                    />
+                    <span>Email ID</span>
+                  </label>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Error Message */}
           {error && (
             <div className="flex items-center gap-2 p-3 rounded-xl bg-red-500/10 text-red-500 text-xs font-bold">
@@ -1458,10 +1694,9 @@ export default function AdminLivePage() {
           <button
             onClick={handleStartSession}
             disabled={isStarting || !formState.title.trim()}
-            className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl text-white text-sm font-extrabold uppercase tracking-wider transition-all hover:scale-[1.02] shadow-xl disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl text-white text-sm font-bold uppercase tracking-wider transition-transform hover:-translate-y-0.5 shadow-md disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             style={{
-              background: "linear-gradient(135deg, #ef4444, #dc2626)",
-              boxShadow: "0 8px 32px rgba(239, 68, 68, 0.3)",
+              background: "var(--accent-primary)",
             }}
             id="go-live-btn"
           >
@@ -1490,11 +1725,11 @@ export default function AdminLivePage() {
         {/* Past Broadcasts List */}
         <div className="space-y-4 pt-4">
           <div className="space-y-1">
-            <h2 className="text-lg font-black" style={{ color: "var(--text-primary)" }}>
+            <h2 className="text-xl font-serif" style={{ color: "var(--text-primary)" }}>
               Past Broadcasts
             </h2>
-            <p className="text-xs font-medium" style={{ color: "var(--text-secondary)" }}>
-              Manage and delete your previously ended live sessions
+            <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+              Manage and delete your previously ended live sessions.
             </p>
           </div>
 
@@ -1516,9 +1751,9 @@ export default function AdminLivePage() {
               {pastSessions.map((past) => (
                 <div
                   key={past.id}
-                  className="flex items-center justify-between p-4 rounded-2xl border transition-all"
+                  className="flex items-center justify-between p-4 rounded-2xl border transition-colors hover:bg-[var(--bg-secondary)]"
                   style={{
-                    backgroundColor: "var(--bg-card)",
+                    backgroundColor: "var(--bg-primary)",
                     borderColor: "var(--border-primary)",
                   }}
                 >
@@ -1556,13 +1791,14 @@ export default function AdminLivePage() {
                         onClick={() => {
                           const url = past.recordingUrl.startsWith('/') ? `${API_BASE}${past.recordingUrl}` : past.recordingUrl;
                           setSelectedVideoUrl(url);
+                          setSelectedVideoSession(past);
                         }}
-                        className="px-3 py-1.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 text-[10px] font-extrabold uppercase tracking-wider transition-all border border-indigo-500/10 hover:scale-[1.02] cursor-pointer text-center shrink-0"
+                        className="px-3 py-1.5 rounded-xl bg-zinc-500/10 hover:bg-zinc-500/20 text-zinc-500 text-[10px] font-extrabold uppercase tracking-wider transition-all border border-zinc-500/10 hover:scale-[1.02] cursor-pointer text-center shrink-0"
                       >
                         Watch
                       </button>
                     ) : (past.egressSegments || (past.endedAt && (new Date() - new Date(past.endedAt)) < 180000)) ? (
-                      <span className="text-[9px] font-extrabold text-blue-500 bg-blue-500/10 px-2 py-1.5 rounded border border-blue-500/20 animate-pulse shrink-0">
+                      <span className="text-[9px] font-extrabold text-neutral-500 bg-neutral-500/10 px-2 py-1.5 rounded border border-neutral-500/20 animate-pulse shrink-0">
                         Processing...
                       </span>
                     ) : (
@@ -1586,56 +1822,7 @@ export default function AdminLivePage() {
         </div>
       </div>
 
-      {/* Recording Prompt Modal Overlay */}
-      <AnimatePresence>
-        {showRecordPrompt && (
-          <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-sm rounded-3xl border shadow-2xl p-6 text-center space-y-4"
-              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}
-            >
-              <div className="w-12 h-12 rounded-2xl bg-[var(--bg-badge)] text-[var(--text-accent)] flex items-center justify-center mx-auto">
-                <Radio size={24} className="animate-pulse" />
-              </div>
-              <div className="space-y-1">
-                <h3 className="text-sm font-black uppercase tracking-wider" style={{ color: "var(--text-primary)" }}>
-                  Record Session
-                </h3>
-                <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
-                  Do you want to record this live stream session?
-                </p>
-              </div>
-              <div className="flex items-center justify-center gap-3 pt-2">
-                <button
-                  onClick={() => {
-                    setShouldRecord(false);
-                    setShowRecordPrompt(false);
-                    startActualSession();
-                  }}
-                  className="px-5 py-2.5 rounded-2xl border text-xs font-bold transition-all hover:bg-slate-100 dark:hover:bg-slate-800/60 cursor-pointer"
-                  style={{ borderColor: "var(--border-primary)", color: "var(--text-secondary)" }}
-                >
-                  No, Skip
-                </button>
-                <button
-                  onClick={() => {
-                    setShouldRecord(true);
-                    setShowRecordPrompt(false);
-                    startActualSession();
-                  }}
-                  className="px-6 py-2.5 rounded-2xl text-white text-xs font-black uppercase transition-all shadow-lg hover:scale-[1.02] cursor-pointer"
-                  style={{ background: "var(--accent-gradient)" }}
-                >
-                  Yes, Record
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-        {/* Custom Secure Video Modal Player */}
+      {/* Custom Secure Video Modal Player */}
         {selectedVideoUrl && (
           <div 
             className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
@@ -1657,36 +1844,113 @@ export default function AdminLivePage() {
               </div>
 
               {/* Video Container */}
-              <div className="relative aspect-video bg-black flex items-center justify-center">
+              <div 
+                ref={containerRef}
+                className={isFullscreen ? "relative w-full h-full bg-black flex items-center justify-center group" : "relative aspect-video bg-black flex items-center justify-center group"}
+              >
                 <video
+                  ref={videoRef}
                   src={selectedVideoUrl}
-                  controls
                   autoPlay
                   crossOrigin="anonymous"
-                  controlsList="nodownload"
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
+                  onTimeUpdate={handleTimeUpdate}
+                  onLoadedMetadata={handleLoadedMetadata}
                   onContextMenu={(e) => e.preventDefault()}
-                  className="w-full h-full object-contain"
+                  onClick={handlePlayPause}
+                  className="w-full h-full object-contain cursor-pointer"
                 />
-
-                {/* Dynamic Watermark Overlay */}
-                {user && (
-                  <div 
-                    className="absolute z-10 pointer-events-none select-none text-slate-100 font-mono text-[9px] sm:text-xs bg-slate-950/20 backdrop-blur-[1px] px-2.5 py-1.5 rounded-lg border border-white/5 opacity-[0.16] shadow-sm"
+                
+                {/* Custom controls overlay at the bottom */}
+                <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-4 py-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-2 pointer-events-auto">
+                  <input
+                    type="range"
+                    min={0}
+                    max={duration || 100}
+                    value={currentTime}
+                    onChange={handleSeek}
+                    className="w-full h-1 bg-slate-700/60 rounded-lg appearance-none cursor-pointer accent-indigo-500 hover:h-1.5 transition-all"
                     style={{
-                      top: watermarkPos.top,
-                      left: watermarkPos.left,
-                      transition: "top 2s ease-in-out, left 2s ease-in-out"
+                      background: `linear-gradient(to right, rgb(99, 102, 241) 0%, rgb(99, 102, 241) ${(currentTime / (duration || 1)) * 100}%, rgba(51, 65, 85, 0.6) ${(currentTime / (duration || 1)) * 100}%, rgba(51, 65, 85, 0.6) 100%)`
                     }}
-                  >
-                    <div className="font-black uppercase tracking-wider">{user.username}</div>
-                    <div className="text-[7px] sm:text-[9px] font-bold opacity-80 mt-0.5">{user.email}</div>
+                  />
+                  <div className="flex items-center justify-between text-white text-xs select-none">
+                    <div className="flex items-center gap-3">
+                      <button 
+                        onClick={handlePlayPause}
+                        className="p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
+                      >
+                        {isPlaying ? <Pause size={14} /> : <Play size={14} />}
+                      </button>
+                      <span className="font-mono text-[10px] text-slate-300">
+                        {formatTime(currentTime)} / {formatTime(duration)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <button 
+                        onClick={handleToggleMute}
+                        className="p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
+                      >
+                        {isMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                      </button>
+                      <input
+                        type="range"
+                        min={0}
+                        max={1}
+                        step={0.05}
+                        value={isMuted ? 0 : volume}
+                        onChange={handleVolumeChange}
+                        className="w-16 h-1 bg-slate-700/60 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+                        style={{
+                          background: `linear-gradient(to right, rgb(99, 102, 241) 0%, rgb(99, 102, 241) ${(isMuted ? 0 : volume) * 100}%, rgba(51, 65, 85, 0.6) ${(isMuted ? 0 : volume) * 100}%, rgba(51, 65, 85, 0.6) 100%)`
+                        }}
+                      />
+                      <button 
+                        onClick={toggleFullscreen}
+                        className="p-1 rounded hover:bg-white/10 transition-colors cursor-pointer ml-1"
+                        title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+                      >
+                        {isFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
+                      </button>
+                    </div>
                   </div>
-                )}
+                </div>
+                
+                {/* Dynamic Watermark Overlay */}
+                {user && selectedVideoSession?.showWatermark && (() => {
+                  const watermarkOptsArray = selectedVideoSession?.watermarkOptions?.split(',') || ["inst", "username", "email"];
+                  const showInst = watermarkOptsArray.includes("inst");
+                  const showUsername = watermarkOptsArray.includes("username");
+                  const showEmail = watermarkOptsArray.includes("email");
+
+                  return (
+                    <div 
+                      className="absolute z-10 pointer-events-none select-none text-slate-100 font-mono text-[9px] sm:text-xs bg-slate-950/20 backdrop-blur-[1px] px-2.5 py-1.5 rounded-lg border border-white/5 opacity-[0.16] shadow-sm"
+                      style={{
+                        top: watermarkPos.top,
+                        left: watermarkPos.left,
+                        transition: "top 2s ease-in-out, left 2s ease-in-out"
+                      }}
+                    >
+                      {showInst && (user.institute?.name || user.role === "ADMIN") && (
+                        <div className="text-[7px] sm:text-[9px] font-bold opacity-70 tracking-widest uppercase mb-0.5">
+                          {user.role === "ADMIN" ? "EduVantix" : user.institute.name}
+                        </div>
+                      )}
+                      {showUsername && (
+                        <div className="font-black uppercase tracking-wider">{user.username}</div>
+                      )}
+                      {showEmail && (
+                        <div className="text-[7px] sm:text-[9px] font-bold opacity-80 mt-0.5">{user.email}</div>
+                      )}
+                    </div>
+                  );
+                })()}
               </div>
             </div>
           </div>
         )}
-      </AnimatePresence>
       </>
     );
   }

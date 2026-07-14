@@ -31,7 +31,7 @@ function statusStyle(status) {
     case "WRONG_ANSWER":         return { color: "text-rose-400",    label: "Wrong Answer" };
     case "RUNTIME_ERROR":        return { color: "text-orange-400",  label: "Runtime Error" };
     case "COMPILATION_ERROR":    return { color: "text-amber-400",   label: "Compile Error" };
-    case "TIME_LIMIT_EXCEEDED":  return { color: "text-purple-400",  label: "TLE" };
+    case "TIME_LIMIT_EXCEEDED":  return { color: "text-slate-400",  label: "TLE" };
     default:                     return { color: "text-slate-400",   label: status };
   }
 }
@@ -140,10 +140,10 @@ export default function StudentDashboard() {
     { name: "Bronze Scholar", minPoints: 100, maxPoints: 200, color: "text-amber-600" },
     { name: "Silver Scholar", minPoints: 200, maxPoints: 300, color: "text-slate-300" },
     { name: "Gold Scholar", minPoints: 300, maxPoints: 400, color: "text-yellow-400" },
-    { name: "Elite Scholar III", minPoints: 400, maxPoints: 500, color: "text-indigo-400" },
-    { name: "Elite Scholar II", minPoints: 500, maxPoints: 600, color: "text-indigo-400" },
+    { name: "Elite Scholar III", minPoints: 400, maxPoints: 500, color: "text-zinc-400" },
+    { name: "Elite Scholar II", minPoints: 500, maxPoints: 600, color: "text-zinc-400" },
     { name: "Elite Scholar I", minPoints: 600, maxPoints: 750, color: "text-rose-400" },
-    { name: "Grandmaster Scholar", minPoints: 750, maxPoints: 1000, color: "text-purple-400" },
+    { name: "Grandmaster Scholar", minPoints: 750, maxPoints: 1000, color: "text-slate-400" },
     { name: "Legendary Coder", minPoints: 1000, maxPoints: Infinity, color: "text-amber-400 animate-pulse" }
   ];
 
@@ -222,8 +222,8 @@ export default function StudentDashboard() {
       value: uniqueSolved > 0 ? `${uniqueSolved}` : "0",
       change: totalSubs > 0 ? `${totalSubs} total submissions` : "No submissions yet",
       icon: Code,
-      color: "text-indigo-400",
-      bgColor: "bg-indigo-500/10",
+      color: "text-zinc-400",
+      bgColor: "bg-zinc-500/10",
     },
     {
       title: "Contests Entered",
@@ -238,54 +238,46 @@ export default function StudentDashboard() {
       value: activeContests.length > 0 ? `${activeContests.length} Live` : upcomingContests.length > 0 ? `${upcomingContests.length} Soon` : "None",
       change: upcomingContests.length > 0 ? `${upcomingContests.length} upcoming` : "Check back later",
       icon: BookOpen,
-      color: "text-blue-400",
-      bgColor: "bg-blue-500/10",
+      color: "text-neutral-400",
+      bgColor: "bg-neutral-500/10",
     },
     {
       title: "Acceptance Rate",
       value: totalSubs > 0 ? `${Math.round((acceptedSubs.length / totalSubs) * 100)}%` : "—",
       change: totalSubs > 0 ? `${acceptedSubs.length} accepted / ${totalSubs} submitted` : "Submit your first solution",
       icon: Terminal,
-      color: "text-purple-400",
-      bgColor: "bg-purple-500/10",
+      color: "text-slate-400",
+      bgColor: "bg-slate-500/10",
     },
-  ];
-
-  return (
-    <div className="space-y-8">
-      {/* Dynamic Profile & Streak Header Banner */}
-      <div
-        className="flex flex-col lg:flex-row items-stretch justify-between gap-6 p-6 md:p-8 rounded-3xl border relative overflow-hidden"
-        style={{ 
-          backgroundColor: "var(--glass-bg)", 
-          borderColor: "var(--border-primary)",
-          backgroundImage: "linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(99, 102, 241, 0.05) 100%)" 
-        }}
-      >
-        <div className="space-y-3 relative z-10 flex-1 flex flex-col justify-center">
-          <div className="flex items-center space-x-2">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-[10px] font-extrabold uppercase tracking-wider text-emerald-400">Scholar Dashboard</span>
+  ];  return (
+    <div className="space-y-12">
+      {/* ── Editorial Header Banner ───────────────── */}
+      <div className="flex flex-col lg:flex-row items-stretch justify-between gap-8 border-b pb-12" style={{ borderColor: "var(--border-primary)" }}>
+        <div className="space-y-4 max-w-2xl relative z-10 flex-1 flex flex-col justify-center">
+          <div className="flex items-center gap-3">
+            <div className="h-px w-8" style={{ background: "var(--accent-primary)" }} />
+            <span className="text-[10px] font-bold tracking-[0.2em] uppercase" style={{ color: "var(--text-muted)" }}>Scholar Dashboard</span>
           </div>
-          <h1 className="text-2xl md:text-3xl font-black font-display tracking-tight" style={{ color: "var(--text-primary)" }}>
-            Welcome back, {user?.username || "Scholar"}!
+          <h1 className="text-[clamp(2rem,3vw,3rem)] font-black leading-[1] tracking-[-0.03em]" style={{ color: "var(--text-primary)" }}>
+            Welcome back, <br />
+            <em className="font-serif-display" style={{ fontStyle: "italic", color: "var(--text-secondary)" }}>{user?.username || "Scholar"}</em>
           </h1>
-          <p className="text-xs max-w-xl leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
             Monitor your coding stats, complete recommended algorithms tracks, and compete in scheduled speedrun contests.
           </p>
-          <div className="flex flex-wrap gap-3 pt-2">
+          <div className="flex flex-wrap gap-4 pt-4">
             <button
               onClick={() => router.push("/practice")}
-              className="px-5 py-3 rounded-2xl font-bold text-xs text-white shadow-md transition-all cursor-pointer flex items-center space-x-1.5 hover:scale-102"
-              style={{ background: "linear-gradient(135deg, #10b981 0%, #6366f1 100%)" }}
+              className="px-6 py-3 rounded-xl font-bold text-xs text-white shadow-sm transition-all cursor-pointer flex items-center gap-2 hover:-translate-y-0.5"
+              style={{ background: "var(--text-primary)", color: "var(--bg-primary)" }}
             >
               <Code size={14} />
               <span>Practice Coding</span>
             </button>
             <button
               onClick={() => router.push("/contest")}
-              className="px-5 py-3 rounded-2xl font-bold text-xs transition-all border cursor-pointer flex items-center space-x-1.5 hover:scale-102"
-              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)", color: "var(--text-primary)" }}
+              className="px-6 py-3 rounded-xl font-bold text-xs transition-all border cursor-pointer flex items-center gap-2 hover:bg-[var(--bg-hover)]"
+              style={{ backgroundColor: "var(--bg-primary)", borderColor: "var(--border-primary)", color: "var(--text-primary)" }}
             >
               <span>Contest Arena</span>
               <ArrowUpRight size={14} />
@@ -294,245 +286,143 @@ export default function StudentDashboard() {
         </div>
 
         {/* Gamified visual markers (Streak, Points & animated Progress ring) */}
-        <div className="flex flex-col sm:flex-row items-center gap-6 shrink-0 relative z-10 lg:pl-6 border-t lg:border-t-0 lg:border-l" style={{ borderColor: "var(--border-primary)" }}>
+        <div className="flex flex-col sm:flex-row items-center gap-8 shrink-0 relative z-10 lg:pl-10 lg:border-l" style={{ borderColor: "var(--border-primary)" }}>
           {/* Circular SVG progress ring */}
-          <div className="relative flex items-center justify-center h-28 w-28 shrink-0">
+          <div className="relative flex items-center justify-center h-32 w-32 shrink-0">
             <svg className="w-full h-full transform -rotate-90">
-              <circle cx="56" cy="56" r="48" stroke="var(--border-primary)" strokeWidth="6" fill="transparent" />
+              <circle cx="64" cy="64" r="54" stroke="var(--border-primary)" strokeWidth="4" fill="transparent" />
               <circle 
-                cx="56" 
-                cy="56" 
-                r="48" 
-                stroke="#10b981" 
-                strokeWidth="6" 
-                fill="transparent" 
-                strokeDasharray="301.6"
-                strokeDashoffset={301.6 - (301.6 * progressPercent) / 100}
-                strokeLinecap="round"
+                cx="64" cy="64" r="54" 
+                stroke="var(--accent-primary)" 
+                strokeWidth="4" fill="transparent" 
+                strokeDasharray="339.29"
+                strokeDashoffset={339.29 - (339.29 * progressPercent) / 100}
+                strokeLinecap="square"
                 className="transition-all duration-1000"
               />
             </svg>
             <div className="absolute flex flex-col items-center justify-center text-center">
-              <span className="text-[9px] uppercase font-bold text-slate-400">Rank Progress</span>
-              <span className="text-lg font-black" style={{ color: "var(--text-primary)" }}>{progressPercent}%</span>
-              <span className="text-[9px]" style={{ color: "var(--text-secondary)" }}>
-                {currentRank.maxPoints === Infinity ? `${currentPoints} pts` : `${currentPoints} / ${targetNextRankPoints} pts`}
+              <span className="text-[10px] font-bold tracking-widest uppercase text-[var(--text-muted)]">Rank</span>
+              <span className="text-xl font-black font-serif-display" style={{ color: "var(--text-primary)" }}>{progressPercent}%</span>
+              <span className="text-[10px]" style={{ color: "var(--text-muted)" }}>
+                {currentRank.maxPoints === Infinity ? `${currentPoints} pts` : `${currentPoints} / ${targetNextRankPoints}`}
               </span>
             </div>
           </div>
 
           <div className="space-y-4 w-full sm:w-auto">
             {/* Streak card */}
-            <div className="flex items-center space-x-3.5 p-3 rounded-2xl bg-amber-500/5 border border-amber-500/10">
-              <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-500">
-                <Flame size={18} className="animate-pulse" />
+            <div className="flex items-center gap-4 p-4 rounded-xl border" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: "var(--bg-hover)", color: "var(--text-primary)" }}>
+                <Flame size={18} className="animate-pulse text-orange-500" />
               </div>
               <div>
-                <p className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Active Streak</p>
-                <p className="text-xs font-black text-amber-500">
-                  {activeStreak > 0 ? `${activeStreak} Day${activeStreak > 1 ? "s" : ""} Running 🔥` : "0 Days Running"}
+                <p className="text-[9px] font-bold uppercase tracking-[0.1em]" style={{ color: "var(--text-muted)" }}>Active Streak</p>
+                <p className="text-sm font-black" style={{ color: "var(--text-primary)" }}>
+                  {activeStreak > 0 ? `${activeStreak} Day${activeStreak > 1 ? "s" : ""} 🔥` : "0 Days"}
                 </p>
               </div>
             </div>
 
             {/* Rank badge card */}
-            <div className={`flex items-center space-x-3.5 p-3 rounded-2xl border ${
-              currentRank.name.includes("Bronze") ? "bg-amber-600/5 border-amber-600/10" :
-              currentRank.name.includes("Silver") ? "bg-slate-300/5 border-slate-300/10" :
-              currentRank.name.includes("Gold") ? "bg-yellow-400/5 border-yellow-400/10" :
-              currentRank.name.includes("Elite") ? "bg-indigo-500/5 border-indigo-500/10" :
-              currentRank.name.includes("Legendary") ? "bg-amber-400/5 border-amber-400/10" :
-              "bg-purple-500/5 border-purple-500/10"
-            }`}>
-              <div className={`p-2.5 rounded-xl bg-slate-500/10 ${currentRank.color}`}>
-                <Award size={18} />
+            <div className="flex items-center gap-4 p-4 rounded-xl border" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg" style={{ backgroundColor: "var(--bg-hover)", color: "var(--text-primary)" }}>
+                <Award size={18} className={currentRank.color} />
               </div>
               <div>
-                <p className="text-[9px] font-extrabold uppercase tracking-wider text-[var(--text-muted)]">Current Standing</p>
-                <p className={`text-xs font-black ${currentRank.color}`}>{currentRank.name}</p>
+                <p className="text-[9px] font-bold uppercase tracking-[0.1em]" style={{ color: "var(--text-muted)" }}>Current Standing</p>
+                <p className={`text-sm font-black ${currentRank.color}`}>{currentRank.name}</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, idx) => {
-          const IconComponent = stat.icon;
-          return (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: idx * 0.05 }}
-              className="p-6 rounded-3xl border shadow-sm flex flex-col justify-between space-y-4"
-              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}
-            >
-              <div className="flex justify-between items-start">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-                  {stat.title}
+      {/* ── Dashboard Widgets: Goal & Recommended ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Daily Goal Tracker */}
+        <div className="p-6 rounded-2xl border flex flex-col justify-between" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
+          <div className="space-y-2 mb-8">
+            <h2 className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>
+              Daily Study Goal
+            </h2>
+            <p className="text-3xl font-serif-display italic" style={{ color: "var(--text-primary)" }}>
+              45 <span className="text-sm not-italic font-sans" style={{ color: "var(--text-muted)" }}>/ 60 mins</span>
+            </p>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="w-full h-1" style={{ backgroundColor: "var(--border-primary)" }}>
+              <div className="h-full transition-all duration-1000" style={{ width: "75%", backgroundColor: "var(--accent-primary)" }} />
+            </div>
+            <p className="text-xs" style={{ color: "var(--text-secondary)" }}>
+              You are <strong style={{ color: "var(--text-primary)" }}>15 mins</strong> away from your daily goal!
+            </p>
+          </div>
+        </div>
+
+        {/* Recommended Problem */}
+        <div className="lg:col-span-2 p-8 rounded-2xl border relative overflow-hidden" style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)" }}>
+          <div className="absolute inset-0 dot-grid opacity-50 pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 mb-1">
+                <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 border" style={{ color: "var(--text-secondary)", borderColor: "var(--border-primary)", backgroundColor: "var(--bg-card)" }}>
+                  Arrays
                 </span>
-                <div className={`p-2 rounded-xl ${stat.bgColor} ${stat.color}`}>
-                  <IconComponent size={16} />
-                </div>
+                <span className="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Medium</span>
               </div>
-              <div className="space-y-1">
-                <div className="text-2xl font-black" style={{ color: "var(--text-primary)" }}>
-                  {stat.value}
-                </div>
-                <div className="text-[10px] font-bold" style={{ color: "var(--text-secondary)" }}>
-                  {stat.change}
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {/* Analytics SVG Solved Breakdown & Topic Strengths */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Solve distribution SVG Ring chart */}
-        <div className="glass-panel p-6 rounded-3xl border space-y-4" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--text-primary)]">
-            Difficulty Distribution
-          </h2>
-          <div className="flex flex-col sm:flex-row items-center gap-6 py-2 justify-around">
-            {/* Pie SVG */}
-            <div className="relative h-28 w-28 flex items-center justify-center shrink-0">
-              <svg className="w-full h-full transform -rotate-90">
-                {/* Back Circle */}
-                <circle cx="56" cy="56" r="42" stroke="var(--border-primary)" strokeWidth="12" fill="transparent" />
-                {/* Easy Segment */}
-                <circle 
-                  cx="56" 
-                  cy="56" 
-                  r="42" 
-                  stroke="#10b981" 
-                  strokeWidth="12" 
-                  fill="transparent" 
-                  strokeDasharray="263.8"
-                  strokeDashoffset={263.8 - (263.8 * (easySolved || 1)) / (uniqueSolved || 1)}
-                  strokeLinecap="round"
-                  className="transition-all duration-1000"
-                />
-              </svg>
-              <div className="absolute flex flex-col items-center justify-center text-center">
-                <span className="text-lg font-black text-[var(--text-primary)]">{uniqueSolved}</span>
-                <span className="text-[8px] uppercase tracking-wider text-slate-400">Total Solved</span>
-              </div>
+              <h3 className="text-xl font-black tracking-tight" style={{ color: "var(--text-primary)" }}>
+                Longest Substring Without Repeating Characters
+              </h3>
+              <p className="text-xs max-w-md leading-relaxed" style={{ color: "var(--text-muted)" }}>
+                Given a string s, find the length of the longest substring without repeating characters. A classic sliding window problem.
+              </p>
             </div>
-
-            <div className="space-y-2 text-[10px] w-full sm:w-auto">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center space-x-1.5 font-semibold text-emerald-400">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  <span>Easy Solved</span>
-                </div>
-                <span className="font-extrabold text-[var(--text-primary)]">{easySolved}</span>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center space-x-1.5 font-semibold text-amber-400">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />
-                  <span>Medium Solved</span>
-                </div>
-                <span className="font-extrabold text-[var(--text-primary)]">{mediumSolved}</span>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center space-x-1.5 font-semibold text-rose-400">
-                  <span className="h-2 w-2 rounded-full bg-rose-500" />
-                  <span>Hard Solved</span>
-                </div>
-                <span className="font-extrabold text-[var(--text-primary)]">{hardSolved}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Topic strengths */}
-        <div className="lg:col-span-2 glass-panel p-6 rounded-3xl border space-y-4" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--text-primary)]">
-            Topic Strength Diagnostics
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-3.5 rounded-2xl border bg-slate-500/5 space-y-2" style={{ borderColor: "var(--border-primary)" }}>
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="font-bold text-slate-400 uppercase">Array Operations</span>
-                <span className="font-extrabold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Strong</span>
-              </div>
-              <div className="w-full h-1 bg-slate-500/10 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500" style={{ width: "85%" }} />
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl border bg-slate-500/5 space-y-2" style={{ borderColor: "var(--border-primary)" }}>
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="font-bold text-slate-400 uppercase">Dynamic Programming</span>
-                <span className="font-extrabold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Review Rec</span>
-              </div>
-              <div className="w-full h-1 bg-slate-500/10 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500" style={{ width: "45%" }} />
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl border bg-slate-500/5 space-y-2" style={{ borderColor: "var(--border-primary)" }}>
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="font-bold text-slate-400 uppercase">Tree Traversal</span>
-                <span className="font-extrabold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Proficient</span>
-              </div>
-              <div className="w-full h-1 bg-slate-500/10 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500" style={{ width: "70%" }} />
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl border bg-slate-500/5 space-y-2" style={{ borderColor: "var(--border-primary)" }}>
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="font-bold text-slate-400 uppercase">Graph Theory</span>
-                <span className="font-extrabold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">Critical Focus</span>
-              </div>
-              <div className="w-full h-1 bg-slate-500/10 rounded-full overflow-hidden">
-                <div className="h-full bg-rose-500" style={{ width: "20%" }} />
-              </div>
-            </div>
+            
+            <button 
+              onClick={() => router.push("/practice/longest-substring-without-repeating-characters")}
+              className="px-6 py-3 rounded-xl font-bold text-xs shadow-sm transition-all cursor-pointer hover:-translate-y-0.5 shrink-0"
+              style={{ background: "var(--text-primary)", color: "var(--bg-primary)" }}
+            >
+              Solve Now
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Live Classes Display */}
+      {/* ── Live Classes Display ─────────────────── */}
       <LiveBanner />
 
-      {/* Bottom section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {/* ── Bottom Section: Contests & Submissions ─ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-6">
 
-        {/* Left: Active / Upcoming Contests & My Participation Reports */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between border-b pb-3 mb-4" style={{ borderColor: "var(--border-primary)" }}>
-            <div className="flex space-x-4">
+        {/* Left: Active / Upcoming Contests & Reports */}
+        <div className="lg:col-span-2 space-y-6">
+          <div className="flex items-center justify-between border-b pb-4" style={{ borderColor: "var(--border-primary)" }}>
+            <div className="flex gap-6">
               <button
                 onClick={() => setActiveBottomTab("contests")}
-                className={`text-sm font-bold pb-2 relative transition-all cursor-pointer ${activeBottomTab === "contests" ? "text-[var(--text-accent)]" : "text-[var(--text-muted)]"}`}
+                className={`text-xs font-bold uppercase tracking-widest pb-3 relative transition-all cursor-pointer ${activeBottomTab === "contests" ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"}`}
               >
-                <span>Live &amp; Upcoming Contests</span>
+                <span>Arena</span>
                 {activeBottomTab === "contests" && (
-                  <motion.div layoutId="studentBottomTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--text-accent)]" />
+                  <motion.div layoutId="studentBottomTab" className="absolute bottom-0 left-0 right-0 h-px" style={{ background: "var(--text-primary)" }} />
                 )}
               </button>
               <button
                 onClick={() => setActiveBottomTab("reports")}
-                className={`text-sm font-bold pb-2 relative transition-all cursor-pointer ${activeBottomTab === "reports" ? "text-[var(--text-accent)]" : "text-[var(--text-muted)]"}`}
+                className={`text-xs font-bold uppercase tracking-widest pb-3 relative transition-all cursor-pointer ${activeBottomTab === "reports" ? "text-[var(--text-primary)]" : "text-[var(--text-muted)]"}`}
               >
-                <span>My Participation Reports</span>
+                <span>Reports</span>
                 {activeBottomTab === "reports" && (
-                  <motion.div layoutId="studentBottomTab" className="absolute bottom-0 left-0 right-0 h-0.5 bg-[var(--text-accent)]" />
+                  <motion.div layoutId="studentBottomTab" className="absolute bottom-0 left-0 right-0 h-px" style={{ background: "var(--text-primary)" }} />
                 )}
               </button>
             </div>
             {activeBottomTab === "contests" && (
-              <button
-                onClick={() => router.push("/contest")}
-                className="text-[10px] font-bold text-[var(--text-accent)] flex items-center space-x-1 hover:underline cursor-pointer"
-              >
+              <button onClick={() => router.push("/contest")} className="text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 underline-draw" style={{ color: "var(--text-secondary)" }}>
                 <span>View All</span>
                 <ChevronRight size={12} />
               </button>
@@ -540,25 +430,18 @@ export default function StudentDashboard() {
           </div>
 
           {activeBottomTab === "contests" ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {loading ? (
                 [0, 1, 2].map(i => (
-                  <div key={i} className="p-5 rounded-3xl border animate-pulse"
-                    style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}>
-                    <div className="h-3 w-40 rounded bg-slate-500/20 mb-2" />
-                    <div className="h-2 w-24 rounded bg-slate-500/10" />
+                  <div key={i} className="p-5 rounded-xl border animate-pulse" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
+                    <div className="h-3 w-40 rounded bg-[var(--border-primary)] mb-3" />
+                    <div className="h-2 w-24 rounded bg-[var(--border-primary)]" />
                   </div>
                 ))
               ) : [...activeContests, ...upcomingContests].length === 0 ? (
-                <div className="p-8 rounded-3xl border text-center space-y-2"
-                  style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}>
-                  <Trophy size={32} className="mx-auto opacity-20" style={{ color: "var(--text-muted)" }} />
-                  <p className="text-sm font-bold" style={{ color: "var(--text-secondary)" }}>
-                    No contests scheduled yet
-                  </p>
-                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                    Check back soon or ask an admin to create one.
-                  </p>
+                <div className="p-8 rounded-xl border text-center space-y-3" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
+                  <Trophy size={24} className="mx-auto opacity-20" style={{ color: "var(--text-muted)" }} />
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>No contests scheduled yet</p>
                 </div>
               ) : (
                 [...activeContests.slice(0, 2), ...upcomingContests.slice(0, 2)].map((contest) => {
@@ -572,39 +455,27 @@ export default function StudentDashboard() {
                       key={contest.id}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="p-5 rounded-3xl border shadow-sm flex items-center justify-between gap-4 cursor-pointer hover:shadow-md transition-all"
-                      style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}
+                      className="p-5 rounded-xl border flex items-center justify-between gap-4 cursor-pointer hover:bg-[var(--bg-hover)] transition-all group"
+                      style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}
                       onClick={() => handleEnterContest(contest.id)}
                     >
-                      <div className="space-y-1.5 min-w-0">
-                        <div className="flex items-center space-x-2">
-                          <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${
-                            isLive
-                              ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
-                              : "text-indigo-400 bg-indigo-500/10 border-indigo-500/20"
-                          }`}>
-                            {isLive ? "● Live" : "Upcoming"}
+                      <div className="space-y-2 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[9px] font-bold uppercase tracking-widest flex items-center gap-1 ${isLive ? "text-emerald-500" : "text-zinc-500"}`}>
+                            {isLive && <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />}
+                            {isLive ? "Live" : "Upcoming"}
                           </span>
-                          {contest.category && (
-                            <span className="text-[9px] font-bold uppercase text-[var(--text-muted)] bg-slate-500/5 px-2 py-0.5 rounded border"
-                              style={{ borderColor: "var(--border-primary)" }}>
-                              {contest.category}
-                            </span>
-                          )}
                         </div>
-                        <p className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
+                        <p className="text-base font-bold truncate group-hover:underline" style={{ color: "var(--text-primary)" }}>
                           {contest.title}
                         </p>
                         <p className="text-[10px]" style={{ color: "var(--text-secondary)" }}>
-                          {isLive
-                            ? `${minsLeft}m remaining`
-                            : `Starts ${start.toLocaleDateString(undefined, { month: "short", day: "numeric" })} at ${start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
+                          {isLive ? `${minsLeft}m remaining` : `Starts ${start.toLocaleDateString()} at ${start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`}
                         </p>
                       </div>
                       <div className="shrink-0">
                         {isLive ? (
-                          <span className="px-3 py-1.5 text-[10px] font-bold text-white rounded-xl"
-                            style={{ background: "var(--accent-gradient)" }}>
+                          <span className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest rounded-lg border transition-colors group-hover:bg-[var(--text-primary)] group-hover:text-[var(--bg-primary)]" style={{ borderColor: "var(--border-primary)", color: "var(--text-primary)" }}>
                             Enter
                           </span>
                         ) : (
@@ -617,25 +488,18 @@ export default function StudentDashboard() {
               )}
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {loading ? (
                 [0, 1].map(i => (
-                  <div key={i} className="p-5 rounded-3xl border animate-pulse"
-                    style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}>
-                    <div className="h-3 w-40 rounded bg-slate-500/20 mb-2" />
-                    <div className="h-2 w-24 rounded bg-slate-500/10" />
+                  <div key={i} className="p-5 rounded-xl border animate-pulse" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
+                    <div className="h-3 w-40 rounded bg-[var(--border-primary)] mb-3" />
+                    <div className="h-2 w-24 rounded bg-[var(--border-primary)]" />
                   </div>
                 ))
               ) : contests.filter(c => c.userParticipation).length === 0 ? (
-                <div className="p-8 rounded-3xl border text-center space-y-2"
-                  style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}>
-                  <Trophy size={32} className="mx-auto opacity-20" style={{ color: "var(--text-muted)" }} />
-                  <p className="text-sm font-bold" style={{ color: "var(--text-secondary)" }}>
-                    No contest attempts recorded
-                  </p>
-                  <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-                    Participate in an active contest to see your reports here.
-                  </p>
+                <div className="p-8 rounded-xl border text-center space-y-3" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
+                  <Trophy size={24} className="mx-auto opacity-20" style={{ color: "var(--text-muted)" }} />
+                  <p className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>No contest attempts recorded</p>
                 </div>
               ) : (
                 contests.filter(c => c.userParticipation).map((contest) => {
@@ -647,35 +511,25 @@ export default function StudentDashboard() {
                       key={contest.id}
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="p-5 rounded-3xl border shadow-sm flex items-center justify-between gap-4 cursor-pointer hover:shadow-md transition-all"
-                      style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}
+                      className="p-5 rounded-xl border flex items-center justify-between gap-4 cursor-pointer hover:bg-[var(--bg-hover)] transition-all group"
+                      style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}
                       onClick={() => handleEnterContest(contest.id)}
                     >
-                      <div className="space-y-1.5 min-w-0">
-                        <div className="flex items-center space-x-2">
-                          <span className={`text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-full border ${
-                            isCompleted
-                              ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
-                              : "text-amber-400 bg-amber-500/10 border-amber-500/20"
-                          }`}>
-                            {isCompleted ? "Completed ✓" : "In Progress"}
+                      <div className="space-y-2 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[9px] font-bold uppercase tracking-widest ${isCompleted ? "text-emerald-500" : "text-amber-500"}`}>
+                            {isCompleted ? "Completed" : "In Progress"}
                           </span>
-                          {contest.category && (
-                            <span className="text-[9px] font-bold uppercase text-[var(--text-muted)] bg-slate-500/5 px-2 py-0.5 rounded border"
-                              style={{ borderColor: "var(--border-primary)" }}>
-                              {contest.category}
-                            </span>
-                          )}
                         </div>
-                        <p className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>
+                        <p className="text-base font-bold truncate group-hover:underline" style={{ color: "var(--text-primary)" }}>
                           {contest.title}
                         </p>
                         <p className="text-[10px]" style={{ color: "var(--text-secondary)" }}>
-                          Score: <strong className="text-[var(--text-accent)]">{score} pts</strong> &bull; Time Spent: {timeSpent}
+                          Score: <strong style={{ color: "var(--text-primary)" }}>{score} pts</strong> &bull; Time Spent: {timeSpent}
                         </p>
                       </div>
-                      <div className="shrink-0 text-xs font-bold text-[var(--text-accent)]">
-                        View Arena &rarr;
+                      <div className="shrink-0 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>
+                        View &rarr;
                       </div>
                     </motion.div>
                   );
@@ -686,49 +540,39 @@ export default function StudentDashboard() {
         </div>
 
         {/* Right: Recent Submissions */}
-        <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-base font-bold font-display" style={{ color: "var(--text-primary)" }}>
-              Recent Submissions
+        <div className="space-y-6">
+          <div className="flex justify-between items-center border-b pb-4" style={{ borderColor: "var(--border-primary)" }}>
+            <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: "var(--text-primary)" }}>
+              Recent Activity
             </h2>
-            <Activity size={16} style={{ color: "var(--text-muted)" }} />
+            <Activity size={14} style={{ color: "var(--text-muted)" }} />
           </div>
 
-          <div className="border rounded-3xl overflow-hidden shadow-sm"
-            style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}>
+          <div className="border rounded-xl" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
             {loading ? (
-              <div className="p-6 flex items-center justify-center space-x-2" style={{ color: "var(--text-muted)" }}>
-                <RefreshCw size={16} className="animate-spin" />
-                <span className="text-xs">Loading...</span>
+              <div className="p-6 flex items-center justify-center gap-2" style={{ color: "var(--text-muted)" }}>
+                <RefreshCw size={14} className="animate-spin" />
+                <span className="text-[10px] font-bold uppercase tracking-widest">Loading</span>
               </div>
             ) : recentActivity.length === 0 ? (
-              <div className="p-6 text-center space-y-2">
-                <AlertCircle size={24} className="mx-auto opacity-30" style={{ color: "var(--text-muted)" }} />
-                <p className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
-                  No submissions yet
-                </p>
-                <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>
-                  Solve a practice problem to see your history here.
-                </p>
-                <button
-                  onClick={() => router.push("/practice")}
-                  className="text-[10px] font-bold text-[var(--text-accent)] hover:underline"
-                >
+              <div className="p-6 text-center space-y-3">
+                <AlertCircle size={20} className="mx-auto opacity-30" style={{ color: "var(--text-muted)" }} />
+                <p className="text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>No submissions yet</p>
+                <button onClick={() => router.push("/practice")} className="text-[10px] font-bold underline-draw" style={{ color: "var(--text-primary)" }}>
                   Go to Practice →
                 </button>
               </div>
             ) : (
-              <div className="p-4 divide-y" style={{ borderColor: "var(--border-primary)" }}>
+              <div className="p-3 divide-y" style={{ borderColor: "var(--border-primary)" }}>
                 {recentActivity.map((sub) => {
                   const { color, label } = statusStyle(sub.status);
                   return (
-                    <div key={sub.id} className="py-3 first:pt-0 last:pb-0 space-y-1">
-                      <div className="flex justify-between items-start">
-                        <span className="text-[9px] font-extrabold uppercase tracking-wider px-1.5 py-0.5 rounded border text-[var(--text-secondary)] bg-slate-500/5"
-                          style={{ borderColor: "var(--border-primary)" }}>
+                    <div key={sub.id} className="py-3 first:pt-1 last:pb-1 space-y-1.5">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[9px] font-bold uppercase tracking-widest px-2 py-0.5 border rounded-sm" style={{ borderColor: "var(--border-primary)", color: "var(--text-secondary)", backgroundColor: "var(--bg-hover)" }}>
                           {sub.language}
                         </span>
-                        <span className="text-[9px] text-slate-400 font-medium">
+                        <span className="text-[9px]" style={{ color: "var(--text-muted)" }}>
                           {timeAgo(sub.createdAt)}
                         </span>
                       </div>
@@ -736,10 +580,8 @@ export default function StudentDashboard() {
                         <p className="text-xs font-bold truncate pr-2" style={{ color: "var(--text-primary)" }}>
                           {sub.problem?.title || `Problem #${sub.problemId}`}
                         </p>
-                        <span className={`text-[10px] font-extrabold shrink-0 flex items-center space-x-1 ${color}`}>
-                          {sub.status === "ACCEPTED"
-                            ? <CheckCircle2 size={11} />
-                            : <XCircle size={11} />}
+                        <span className={`text-[9px] font-bold uppercase tracking-wider shrink-0 flex items-center gap-1 ${color}`}>
+                          {sub.status === "ACCEPTED" ? <CheckCircle2 size={10} /> : <XCircle size={10} />}
                           <span>{label}</span>
                         </span>
                       </div>

@@ -104,12 +104,16 @@ function SessionTimer({ startTime }) {
 }
 
 // ─── Viewer Count ────────────────────────────────────────────────────
-function ViewerCount() {
+function ViewerCount({ hostUsername }) {
   const participants = useParticipants();
+  const studentCount = participants.filter(
+    (p) => p.identity?.toLowerCase().trim() !== hostUsername?.toLowerCase().trim()
+  ).length;
+
   return (
     <div className="flex items-center gap-1.5 text-xs font-bold shrink-0" style={{ color: "var(--text-secondary)" }}>
       <Users size={12} />
-      <span>{participants.length} watching</span>
+      <span>{studentCount} watching</span>
     </div>
   );
 }
@@ -650,7 +654,7 @@ console.log(session)
         <div className="flex items-center gap-2.5 shrink-0">
           <div className="w-px h-6 bg-[var(--border-primary)] hidden xs:block" />
           <SessionTimer startTime={session.startedAt} />
-          <ViewerCount />
+          <ViewerCount hostUsername={normalizedHostUsername} />
         </div>
       </div>
 
@@ -659,7 +663,7 @@ console.log(session)
         {isHostCameraActive && isHostCameraHiddenLocal && (
           <button
             onClick={() => setIsHostCameraHiddenLocal(false)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white text-[10px] font-bold uppercase transition-all cursor-pointer mr-1.5 shadow-md shadow-[var(--accent-glow)] border border-transparent"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-[var(--text-on-accent)] text-[10px] font-bold uppercase transition-all cursor-pointer mr-1.5 shadow-md shadow-[var(--accent-glow)] border border-transparent"
             title="Restore Mentor Camera Feed"
           >
             <Camera size={12} />
@@ -670,7 +674,7 @@ console.log(session)
         {isStudentCameraActive && isStudentCameraHiddenLocal && (
           <button
             onClick={() => setIsStudentCameraHiddenLocal(false)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-white text-[10px] font-bold uppercase transition-all cursor-pointer mr-1.5 shadow-md shadow-[var(--accent-glow)] border border-transparent"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--accent-primary)] hover:bg-[var(--accent-secondary)] text-[var(--text-on-accent)] text-[10px] font-bold uppercase transition-all cursor-pointer mr-1.5 shadow-md shadow-[var(--accent-glow)] border border-transparent"
             title="Restore Student Camera Feed"
           >
             <Camera size={12} />
@@ -696,15 +700,15 @@ console.log(session)
             </div>
             <TrackToggle
               source={Track.Source.Microphone}
-              className="!w-8 !h-8 !rounded-full !flex !items-center !justify-center text-white transition-all cursor-pointer !p-0 border border-transparent data-[lk-on=true]:bg-[var(--accent-primary)] data-[lk-on=true]:hover:bg-[var(--accent-secondary)] data-[lk-on=false]:bg-red-600 data-[lk-on=false]:hover:bg-red-700"
+              className="!w-8 !h-8 !rounded-full !flex !items-center !justify-center text-[var(--text-on-accent)] transition-all cursor-pointer !p-0 border border-transparent data-[lk-on=true]:bg-[var(--accent-primary)] data-[lk-on=true]:hover:bg-[var(--accent-secondary)] data-[lk-on=false]:bg-red-600 data-[lk-on=false]:hover:bg-red-700"
             />
             <TrackToggle
               source={Track.Source.Camera}
-              className="!w-8 !h-8 !rounded-full !flex !items-center !justify-center text-white transition-all cursor-pointer !p-0 border border-transparent data-[lk-on=true]:bg-[var(--accent-primary)] data-[lk-on=true]:hover:bg-[var(--accent-secondary)] data-[lk-on=false]:bg-red-600 data-[lk-on=false]:hover:bg-red-700"
+              className="!w-8 !h-8 !rounded-full !flex !items-center !justify-center text-[var(--text-on-accent)] transition-all cursor-pointer !p-0 border border-transparent data-[lk-on=true]:bg-[var(--accent-primary)] data-[lk-on=true]:hover:bg-[var(--accent-secondary)] data-[lk-on=false]:bg-red-600 data-[lk-on=false]:hover:bg-red-700"
             />
             <TrackToggle
               source={Track.Source.ScreenShare}
-              className="!w-8 !h-8 !rounded-full !flex !items-center !justify-center text-white transition-all cursor-pointer !p-0 border border-transparent data-[lk-on=true]:bg-[var(--accent-primary)] data-[lk-on=true]:hover:bg-[var(--accent-secondary)] data-[lk-on=false]:bg-red-600 data-[lk-on=false]:hover:bg-red-700"
+              className="!w-8 !h-8 !rounded-full !flex !items-center !justify-center text-[var(--text-on-accent)] transition-all cursor-pointer !p-0 border border-transparent data-[lk-on=true]:bg-[var(--accent-primary)] data-[lk-on=true]:hover:bg-[var(--accent-secondary)] data-[lk-on=false]:bg-red-600 data-[lk-on=false]:hover:bg-red-700"
             />
             <button
               onClick={stopSpeaking}
@@ -858,8 +862,8 @@ console.log(session)
         ) : (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-950">
             <div className="text-center space-y-4">
-              <div className="w-20 h-20 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto shadow-inner">
-                <Radio size={40} className="text-indigo-400 animate-pulse" />
+              <div className="w-20 h-20 rounded-3xl bg-zinc-500/10 border border-zinc-500/20 flex items-center justify-center mx-auto shadow-inner">
+                <Radio size={40} className="text-zinc-400 animate-pulse" />
               </div>
               <div className="space-y-1">
                 <h3 className="text-lg font-black text-white">Live Classroom Board</h3>
@@ -872,19 +876,35 @@ console.log(session)
         )}
 
         {/* Dynamic Watermark Overlay */}
-        {user && (
-          <div 
-            className="absolute z-10 pointer-events-none select-none text-slate-100 font-mono text-[9px] sm:text-xs bg-slate-950/20 backdrop-blur-[1px] px-2.5 py-1.5 rounded-lg border border-white/5 opacity-[0.16] shadow-sm"
-            style={{
-              top: watermarkPos.top,
-              left: watermarkPos.left,
-              transition: "top 2s ease-in-out, left 2s ease-in-out"
-            }}
-          >
-            <div className="font-black uppercase tracking-wider">{user.username}</div>
-            <div className="text-[7px] sm:text-[9px] font-bold opacity-80 mt-0.5">{user.email}</div>
-          </div>
-        )}
+        {user && session?.showWatermark && (() => {
+          const watermarkOptsArray = session?.watermarkOptions?.split(',') || ["inst", "username", "email"];
+          const showInst = watermarkOptsArray.includes("inst");
+          const showUsername = watermarkOptsArray.includes("username");
+          const showEmail = watermarkOptsArray.includes("email");
+
+          return (
+            <div 
+              className="absolute z-10 pointer-events-none select-none text-slate-100 font-mono text-[9px] sm:text-xs bg-slate-950/20 backdrop-blur-[1px] px-2.5 py-1.5 rounded-lg border border-white/5 opacity-[0.16] shadow-sm"
+              style={{
+                top: watermarkPos.top,
+                left: watermarkPos.left,
+                transition: "top 2s ease-in-out, left 2s ease-in-out"
+              }}
+            >
+              {showInst && (user.institute?.name || user.role === "ADMIN") && (
+                <div className="text-[7px] sm:text-[9px] font-bold opacity-70 tracking-widest uppercase mb-0.5">
+                  {user.role === "ADMIN" ? "EduVantix" : user.institute.name}
+                </div>
+              )}
+              {showUsername && (
+                <div className="font-black uppercase tracking-wider">{user.username}</div>
+              )}
+              {showEmail && (
+                <div className="text-[7px] sm:text-[9px] font-bold opacity-80 mt-0.5">{user.email}</div>
+              )}
+            </div>
+          );
+        })()}
 
         <ReactionOverlay reactions={reactions} />
 
@@ -911,7 +931,7 @@ console.log(session)
 
         {/* Active Speaker HUD Banner */}
         {activeSpeaker && (
-          <div className="absolute top-4 right-4 z-40 px-3 py-1.5 rounded-xl bg-indigo-600/90 text-white text-xs font-bold shadow-lg flex items-center gap-2 backdrop-blur-sm border border-indigo-500/30">
+          <div className="absolute top-4 right-4 z-40 px-3 py-1.5 rounded-xl bg-zinc-600/90 text-white text-xs font-bold shadow-lg flex items-center gap-2 backdrop-blur-sm border border-zinc-500/30">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
             <span>Active Speaker: <strong className="font-extrabold">{activeSpeaker}</strong></span>
           </div>
@@ -1056,7 +1076,7 @@ console.log(session)
                   room?.localParticipant?.setMicrophoneEnabled(true);
                   setShowAcceptedModal(false);
                 }}
-                className="flex-1 py-3 px-4 rounded-xl text-white font-extrabold text-xs uppercase tracking-wider transition-all hover:scale-102 cursor-pointer shadow-md shadow-indigo-500/20"
+                className="flex-1 py-3 px-4 rounded-xl text-white font-extrabold text-xs uppercase tracking-wider transition-all hover:scale-102 cursor-pointer shadow-md shadow-zinc-500/20"
                 style={{ backgroundColor: "var(--text-accent)" }}
               >
                 Turn on Mic
