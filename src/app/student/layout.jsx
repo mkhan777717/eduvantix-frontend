@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { 
   LayoutDashboard, Trophy, LogOut, 
-  Menu, X, ChevronLeft, ChevronRight, BookOpen, ArrowLeftRight, Code, Brain, Radio, AlertTriangle, FileText, Gamepad2, FileCheck
+  Menu, X, ChevronLeft, ChevronRight, BookOpen, ArrowLeftRight, Code, Brain, Radio, AlertTriangle, FileText, Gamepad2, FileCheck, Activity, Settings, Paintbrush
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
@@ -19,6 +19,7 @@ export default function StudentLayout({ children }) {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [studentUser, setStudentUser] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [roleName, setRoleName] = useState("Scholar");
 
   useEffect(() => {
@@ -247,41 +248,7 @@ export default function StudentLayout({ children }) {
           {isSidebarCollapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
         </button>
 
-        {/* Sidebar Footer / User Info */}
-        <div className="p-4 border-t" style={{ borderColor: "var(--border-primary)" }}>
-          {!isSidebarCollapsed && studentUser ? (
-            <div className="p-3 rounded-2xl flex items-center justify-between" style={{ backgroundColor: "var(--bg-primary)" }}>
-              <div className="flex items-center space-x-3 overflow-hidden">
-                <div className="w-8 h-8 rounded-xl bg-indigo-500 text-white font-extrabold flex items-center justify-center text-xs shrink-0 shadow-sm">
-                  {studentUser.avatar}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold truncate" style={{ color: "var(--text-primary)" }}>{studentUser.name}</p>
-                  <p className="text-[10px] truncate" style={{ color: "var(--text-muted)" }}>{studentUser.role}</p>
-                </div>
-              </div>
-              <button 
-                onClick={handleLogout}
-                className="p-1.5 rounded-lg hover:bg-rose-500/10 hover:text-rose-500 transition-colors cursor-pointer"
-                style={{ color: "var(--text-secondary)" }}
-                title="Log Out"
-                id="student-logout-btn"
-              >
-                <LogOut size={14} />
-              </button>
-            </div>
-          ) : (
-            <button 
-              onClick={handleLogout}
-              className="w-full flex items-center justify-center p-3 rounded-2xl hover:bg-rose-500/10 hover:text-rose-500 transition-colors cursor-pointer"
-              style={{ color: "var(--text-secondary)" }}
-              title="Log Out"
-              id="student-logout-btn"
-            >
-              <LogOut size={16} />
-            </button>
-          )}
-        </div>
+        {/* Sidebar Footer Removed - Moved to Top Nav */}
       </aside>
 
       {/* Sidebar - Mobile Menu Drawer */}
@@ -326,28 +293,7 @@ export default function StudentLayout({ children }) {
               })}
             </nav>
 
-            <div className="pt-6 border-t" style={{ borderColor: "var(--border-primary)" }}>
-              {studentUser && (
-                <div className="flex items-center justify-between p-3 rounded-2xl" style={{ backgroundColor: "var(--bg-primary)" }}>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-xl bg-indigo-500 text-white font-extrabold flex items-center justify-center text-xs">
-                      {studentUser.avatar}
-                    </div>
-                    <div>
-                      <p className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>{studentUser.name}</p>
-                      <p className="text-[10px]" style={{ color: "var(--text-muted)" }}>{studentUser.role}</p>
-                    </div>
-                  </div>
-                  <button 
-                    onClick={handleLogout}
-                    className="p-1.5 rounded-lg hover:bg-rose-500/10 hover:text-rose-500"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    <LogOut size={14} />
-                  </button>
-                </div>
-              )}
-            </div>
+            {/* Mobile Footer Removed */}
           </div>
         </div>
       )}
@@ -396,7 +342,109 @@ export default function StudentLayout({ children }) {
               <ArrowLeftRight size={12} />
               <span>Go To Public Site</span>
             </Link>
-            <ThemeToggle />
+            {studentUser && (
+              <div className="relative">
+                <button 
+                  onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                  className="w-9 h-9 rounded-full bg-indigo-500 text-white font-extrabold flex items-center justify-center text-sm shadow-sm cursor-pointer hover:ring-2 hover:ring-indigo-400 transition-all ml-2"
+                >
+                  {studentUser.avatar}
+                </button>
+
+                {isProfileMenuOpen && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40"
+                      onClick={() => setIsProfileMenuOpen(false)}
+                    />
+                    <div 
+                      className="absolute right-0 mt-3 w-72 rounded-2xl border shadow-xl z-50 animate-in slide-in-from-top-2 fade-in duration-200"
+                      style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}
+                    >
+                      {/* Dropdown Header */}
+                      <div className="p-5 flex items-center space-x-3 border-b relative" style={{ borderColor: "var(--border-primary)" }}>
+                        <div className="w-12 h-12 rounded-full bg-indigo-500 text-white font-extrabold flex items-center justify-center text-lg shrink-0">
+                          {studentUser.avatar}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-bold truncate" style={{ color: "var(--text-primary)" }}>{studentUser.name}</p>
+                          <p className="text-[10px] text-amber-500 font-semibold truncate mt-0.5">Access all features with Premium!</p>
+                        </div>
+                      </div>
+                      
+                      {/* Grid Icons */}
+                      <div className="grid grid-cols-3 gap-2 p-4 border-b" style={{ borderColor: "var(--border-primary)" }}>
+                        <Link href="/student/lists" onClick={() => setIsProfileMenuOpen(false)} className="flex flex-col items-center justify-center p-2 rounded-xl hover:bg-[var(--bg-primary)] transition-colors cursor-pointer group">
+                          <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                            <BookOpen size={18} className="text-indigo-400" />
+                          </div>
+                          <span className="text-[10px] font-semibold text-[var(--text-secondary)]">My Lists</span>
+                        </Link>
+                        
+                        <Link href="/student/notebook" onClick={() => setIsProfileMenuOpen(false)} className="flex flex-col items-center justify-center p-2 rounded-xl hover:bg-[var(--bg-primary)] transition-colors cursor-pointer group">
+                          <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform">
+                            <FileText size={18} className="text-blue-400" />
+                          </div>
+                          <span className="text-[10px] font-semibold text-[var(--text-secondary)]">Notebook</span>
+                        </Link>
+                        
+                        <Link href="/student/profile" onClick={() => setIsProfileMenuOpen(false)} className="flex flex-col items-center justify-center p-2 rounded-xl hover:bg-[var(--bg-primary)] transition-colors cursor-pointer group">
+                          <div className="w-10 h-10 rounded-xl bg-slate-500/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform relative">
+                            {/* Progress SVG */}
+                            <svg className="w-6 h-6 transform -rotate-90">
+                              <circle cx="12" cy="12" r="10" stroke="rgba(16, 185, 129, 0.2)" strokeWidth="3" fill="transparent" />
+                              <circle cx="12" cy="12" r="10" stroke="#10b981" strokeWidth="3" fill="transparent" strokeDasharray="62.8" strokeDashoffset="20" strokeLinecap="round" />
+                            </svg>
+                          </div>
+                          <span className="text-[10px] font-semibold text-[var(--text-secondary)]">Progress</span>
+                        </Link>
+                      </div>
+                      
+                      {/* Dropdown Links */}
+                      <div className="p-2 space-y-1">
+                        <Link 
+                          href="/student/settings"
+                          onClick={() => setIsProfileMenuOpen(false)}
+                          className="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors hover:bg-[var(--bg-primary)] cursor-pointer"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          <Settings size={14} />
+                          <span>Settings</span>
+                        </Link>
+                        
+                        <div 
+                          className="flex items-center justify-between px-3 py-1.5 rounded-xl text-xs font-semibold"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          <div className="flex items-center space-x-3">
+                            <Paintbrush size={14} />
+                            <span>Appearance</span>
+                          </div>
+                          {/* Inline Theme Toggle */}
+                          <div className="scale-90 origin-right">
+                            <ThemeToggle />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-2 border-t" style={{ borderColor: "var(--border-primary)" }}>
+                        <button 
+                          onClick={() => {
+                            setIsProfileMenuOpen(false);
+                            handleLogout();
+                          }}
+                          className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors hover:bg-rose-500/10 hover:text-rose-500 cursor-pointer"
+                          style={{ color: "var(--text-secondary)" }}
+                        >
+                          <LogOut size={14} />
+                          <span>Sign Out</span>
+                        </button>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </header>
 

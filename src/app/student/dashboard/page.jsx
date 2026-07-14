@@ -356,145 +356,62 @@ export default function StudentDashboard() {
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, idx) => {
-          const IconComponent = stat.icon;
-          return (
-            <motion.div
-              key={stat.title}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: idx * 0.05 }}
-              className="p-6 rounded-3xl border shadow-sm flex flex-col justify-between space-y-4"
-              style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}
-            >
-              <div className="flex justify-between items-start">
-                <span className="text-[10px] font-extrabold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>
-                  {stat.title}
-                </span>
-                <div className={`p-2 rounded-xl ${stat.bgColor} ${stat.color}`}>
-                  <IconComponent size={16} />
-                </div>
-              </div>
-              <div className="space-y-1">
-                <div className="text-2xl font-black" style={{ color: "var(--text-primary)" }}>
-                  {stat.value}
-                </div>
-                <div className="text-[10px] font-bold" style={{ color: "var(--text-secondary)" }}>
-                  {stat.change}
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {/* Analytics SVG Solved Breakdown & Topic Strengths */}
+      {/* New Dashboard Widgets: Daily Goal & Recommended Problem */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         
-        {/* Solve distribution SVG Ring chart */}
-        <div className="glass-panel p-6 rounded-3xl border space-y-4" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--text-primary)]">
-            Difficulty Distribution
-          </h2>
-          <div className="flex flex-col sm:flex-row items-center gap-6 py-2 justify-around">
-            {/* Pie SVG */}
-            <div className="relative h-28 w-28 flex items-center justify-center shrink-0">
-              <svg className="w-full h-full transform -rotate-90">
-                {/* Back Circle */}
-                <circle cx="56" cy="56" r="42" stroke="var(--border-primary)" strokeWidth="12" fill="transparent" />
-                {/* Easy Segment */}
-                <circle 
-                  cx="56" 
-                  cy="56" 
-                  r="42" 
-                  stroke="#10b981" 
-                  strokeWidth="12" 
-                  fill="transparent" 
-                  strokeDasharray="263.8"
-                  strokeDashoffset={263.8 - (263.8 * (easySolved || 1)) / (uniqueSolved || 1)}
-                  strokeLinecap="round"
-                  className="transition-all duration-1000"
-                />
-              </svg>
-              <div className="absolute flex flex-col items-center justify-center text-center">
-                <span className="text-lg font-black text-[var(--text-primary)]">{uniqueSolved}</span>
-                <span className="text-[8px] uppercase tracking-wider text-slate-400">Total Solved</span>
-              </div>
+        {/* Daily Goal Tracker */}
+        <div className="p-6 rounded-3xl border shadow-sm flex flex-col justify-between" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}>
+          <div className="space-y-2 mb-6">
+            <h2 className="text-sm font-bold uppercase tracking-wider" style={{ color: "var(--text-secondary)" }}>
+              Daily Study Goal
+            </h2>
+            <p className="text-2xl font-black text-[var(--text-primary)]">
+              45 <span className="text-sm text-[var(--text-muted)] font-semibold">/ 60 mins</span>
+            </p>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="w-full h-3 bg-slate-500/10 rounded-full overflow-hidden">
+              <div className="h-full bg-emerald-500 rounded-full transition-all duration-1000" style={{ width: "75%" }} />
             </div>
-
-            <div className="space-y-2 text-[10px] w-full sm:w-auto">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center space-x-1.5 font-semibold text-emerald-400">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  <span>Easy Solved</span>
-                </div>
-                <span className="font-extrabold text-[var(--text-primary)]">{easySolved}</span>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center space-x-1.5 font-semibold text-amber-400">
-                  <span className="h-2 w-2 rounded-full bg-amber-500" />
-                  <span>Medium Solved</span>
-                </div>
-                <span className="font-extrabold text-[var(--text-primary)]">{mediumSolved}</span>
-              </div>
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center space-x-1.5 font-semibold text-rose-400">
-                  <span className="h-2 w-2 rounded-full bg-rose-500" />
-                  <span>Hard Solved</span>
-                </div>
-                <span className="font-extrabold text-[var(--text-primary)]">{hardSolved}</span>
-              </div>
-            </div>
+            <p className="text-xs text-[var(--text-muted)]">
+              You are <strong className="text-emerald-500">15 mins</strong> away from your daily goal! Keep going!
+            </p>
           </div>
         </div>
 
-        {/* Topic strengths */}
-        <div className="lg:col-span-2 glass-panel p-6 rounded-3xl border space-y-4" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
-          <h2 className="text-sm font-bold uppercase tracking-wider text-[var(--text-primary)]">
-            Topic Strength Diagnostics
+        {/* Recommended Problem */}
+        <div className="lg:col-span-2 p-6 rounded-3xl border shadow-sm relative overflow-hidden" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}>
+          {/* Background decoration */}
+          <div className="absolute right-0 top-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl" />
+          
+          <h2 className="text-sm font-bold uppercase tracking-wider mb-6 relative z-10" style={{ color: "var(--text-secondary)" }}>
+            Recommended For You
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-3.5 rounded-2xl border bg-slate-500/5 space-y-2" style={{ borderColor: "var(--border-primary)" }}>
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="font-bold text-slate-400 uppercase">Array Operations</span>
-                <span className="font-extrabold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Strong</span>
+          
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 relative z-10">
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <span className="px-2 py-1 text-[10px] font-black uppercase rounded bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+                  Arrays
+                </span>
+                <span className="text-xs font-bold text-amber-500">Medium</span>
               </div>
-              <div className="w-full h-1 bg-slate-500/10 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500" style={{ width: "85%" }} />
-              </div>
+              <h3 className="text-lg font-black text-[var(--text-primary)]">
+                Longest Substring Without Repeating Characters
+              </h3>
+              <p className="text-xs text-[var(--text-muted)] max-w-md line-clamp-2">
+                Given a string s, find the length of the longest substring without repeating characters. A classic sliding window problem.
+              </p>
             </div>
-
-            <div className="p-3.5 rounded-2xl border bg-slate-500/5 space-y-2" style={{ borderColor: "var(--border-primary)" }}>
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="font-bold text-slate-400 uppercase">Dynamic Programming</span>
-                <span className="font-extrabold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">Review Rec</span>
-              </div>
-              <div className="w-full h-1 bg-slate-500/10 rounded-full overflow-hidden">
-                <div className="h-full bg-amber-500" style={{ width: "45%" }} />
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl border bg-slate-500/5 space-y-2" style={{ borderColor: "var(--border-primary)" }}>
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="font-bold text-slate-400 uppercase">Tree Traversal</span>
-                <span className="font-extrabold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">Proficient</span>
-              </div>
-              <div className="w-full h-1 bg-slate-500/10 rounded-full overflow-hidden">
-                <div className="h-full bg-emerald-500" style={{ width: "70%" }} />
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl border bg-slate-500/5 space-y-2" style={{ borderColor: "var(--border-primary)" }}>
-              <div className="flex justify-between items-center text-[10px]">
-                <span className="font-bold text-slate-400 uppercase">Graph Theory</span>
-                <span className="font-extrabold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20">Critical Focus</span>
-              </div>
-              <div className="w-full h-1 bg-slate-500/10 rounded-full overflow-hidden">
-                <div className="h-full bg-rose-500" style={{ width: "20%" }} />
-              </div>
-            </div>
+            
+            <button 
+              onClick={() => router.push("/practice/longest-substring-without-repeating-characters")}
+              className="px-5 py-2.5 rounded-xl font-bold text-xs text-white shadow-md transition-all cursor-pointer hover:scale-105 shrink-0"
+              style={{ background: "linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)" }}
+            >
+              Solve Now
+            </button>
           </div>
         </div>
       </div>
