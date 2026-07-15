@@ -76,9 +76,9 @@ export default function CinematicCursor() {
 
   return (
     <>
-      {/* Dot — precise, fast */}
+      {/* Soft Apple-style WWDC cursor glow */}
       <motion.div
-        className="pointer-events-none fixed z-[9999] rounded-full"
+        className="pointer-events-none fixed z-[99999] rounded-full"
         style={{
           x: dotX,
           y: dotY,
@@ -86,31 +86,13 @@ export default function CinematicCursor() {
           translateY: "-50%",
           top: 0,
           left: 0,
-          width: clicking ? 6 : hovered ? 8 : 6,
-          height: clicking ? 6 : hovered ? 8 : 6,
-          background: "var(--accent-primary)",
-          opacity: visible ? 1 : 0,
-          transition: "width 0.15s, height 0.15s, opacity 0.3s",
-        }}
-      />
-
-      {/* Ring — lagging, spring follower */}
-      <motion.div
-        className="pointer-events-none fixed z-[9998] rounded-full border"
-        style={{
-          x: ringX,
-          y: ringY,
-          translateX: "-50%",
-          translateY: "-50%",
-          top: 0,
-          left: 0,
-          width: hovered ? 44 : clicking ? 28 : 36,
-          height: hovered ? 44 : clicking ? 28 : 36,
-          borderColor: "var(--accent-primary)",
-          borderWidth: hovered ? 1 : 1,
-          opacity: visible ? (hovered ? 0.6 : 0.3) : 0,
-          transition: "width 0.25s cubic-bezier(0.34,1.56,0.64,1), height 0.25s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s",
-          background: hovered ? "var(--accent-glow)" : "transparent",
+          width: 600,
+          height: 600,
+          background: "radial-gradient(circle, var(--accent-primary) 0%, transparent 60%)",
+          opacity: visible ? 0.08 : 0,
+          filter: "blur(40px)",
+          transition: "opacity 0.6s ease",
+          mixBlendMode: "screen",
         }}
       />
     </>

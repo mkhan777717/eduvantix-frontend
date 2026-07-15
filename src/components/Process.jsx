@@ -6,12 +6,12 @@ import { motion, useInView, AnimatePresence } from "framer-motion";
 /* ─── Interactive Illustrations ─────────────────── */
 const PathIllustration = () => {
   const [active, setActive] = useState(null);
-  
+
   return (
     <div className="w-full h-full flex items-center justify-center relative p-4 md:p-8 font-mono text-xs overflow-hidden">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(79,70,229,0.1)_0,transparent_100%)] pointer-events-none" />
       <div className="flex items-center justify-between w-full h-full relative z-10 max-w-[240px]">
-        
+
         {/* SVG Paths connecting nodes */}
         <svg viewBox="0 0 240 200" preserveAspectRatio="none" className="absolute inset-0 w-full h-full pointer-events-none" style={{ zIndex: -1 }}>
           {[0, 1, 2].map((i) => (
@@ -37,7 +37,7 @@ const PathIllustration = () => {
         {/* End Nodes */}
         <div className="flex flex-col gap-4 h-full justify-center w-24">
           {["AI Track", "Frontend", "DevOps"].map((label, i) => (
-            <div 
+            <div
               key={i}
               onMouseEnter={() => setActive(i)}
               onMouseLeave={() => setActive(null)}
@@ -77,21 +77,21 @@ const SandboxIllustration = () => {
         <div className="w-2 h-2 rounded-full bg-green-500/80" />
         <div className="ml-2 text-cyan-700/50 text-[9px]">App.jsx - Sandbox</div>
       </div>
-      
+
       <div className="flex-1 flex gap-4 h-full">
         {/* Editor */}
         <div className="flex-1 text-cyan-400/80 whitespace-pre overflow-hidden">
           {code}
           <span className="animate-pulse w-1.5 h-3 bg-cyan-400 inline-block ml-0.5 align-middle" />
         </div>
-        
+
         {/* Divider */}
         <div className="w-[1px] h-full bg-cyan-500/20" />
-        
+
         {/* Preview Container */}
         <div className="flex-1 flex items-center justify-center relative overflow-hidden bg-black/10 rounded-br-lg">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(6,182,212,0.1)_0,transparent_100%)]" />
-          <motion.div 
+          <motion.div
             animate={{ rotateX: [0, 360], rotateY: [0, 360] }}
             transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
             className="w-12 h-12 border border-cyan-400 bg-cyan-500/20 shadow-[0_0_20px_rgba(6,182,212,0.6)]"
@@ -108,14 +108,14 @@ const AIIllustration = () => {
   return (
     <div className="w-full h-full p-4 md:p-6 flex flex-col justify-center items-center font-mono text-[10px] relative overflow-hidden group bg-[var(--bg-secondary)]">
       <div className="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
-      
+
       {/* Code Background */}
       <div className="w-full max-w-[220px] bg-black/40 border border-emerald-500/30 rounded-lg p-3 text-emerald-400 space-y-1.5 relative z-0 font-medium shadow-[0_0_15px_rgba(16,185,129,0.1)]">
         <div>const data = await fetch('/api');</div>
         <div className="text-red-400 line-through bg-red-500/10 px-1 -mx-1">let result = data.json();</div>
-        <motion.div 
-          initial={{ opacity: 0, x: -10 }} 
-          animate={{ opacity: 1, x: 0 }} 
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, repeat: Infinity, repeatDelay: 3 }}
           className="text-emerald-300 font-bold bg-emerald-500/20 border-l-2 border-emerald-400 pl-2 -mx-1 py-0.5 shadow-[0_0_10px_rgba(16,185,129,0.2)]"
         >
@@ -125,7 +125,7 @@ const AIIllustration = () => {
       </div>
 
       {/* AI Floating Widget */}
-      <motion.div 
+      <motion.div
         animate={{ y: [0, -10, 0] }}
         transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
         className="absolute right-4 md:right-8 top-8 md:top-12 w-40 bg-[var(--bg-card)] border border-emerald-500 shadow-[0_8px_30px_rgba(16,185,129,0.3)] rounded-lg p-2.5 z-10"
@@ -167,7 +167,7 @@ const CertIllustration = () => {
   return (
     <div className="w-full h-full flex items-center justify-center p-6 [perspective:1000px] overflow-hidden bg-[var(--bg-secondary)] relative group">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(162,28,175,0.1)_0,transparent_100%)] pointer-events-none transition-opacity duration-500 group-hover:opacity-100 opacity-50" />
-      
+
       <motion.div
         ref={cardRef}
         onMouseMove={handleMouseMove}
@@ -178,7 +178,7 @@ const CertIllustration = () => {
         style={{ transformStyle: 'preserve-3d' }}
       >
         <div className="absolute -top-10 -right-10 w-24 h-24 bg-fuchsia-500/20 blur-2xl rounded-full pointer-events-none" />
-        
+
         <div className="flex justify-between items-start mb-auto z-10" style={{ transform: "translateZ(20px)" }}>
           <div className="w-8 h-8 rounded-md bg-fuchsia-500/10 flex items-center justify-center border border-fuchsia-500/30 shadow-[0_0_10px_rgba(162,28,175,0.2)]">
             <span className="text-[var(--text-primary)] text-[14px]">✦</span>
@@ -193,7 +193,7 @@ const CertIllustration = () => {
           <div className="w-full h-1 bg-fuchsia-500/60 rounded-full mb-1.5 opacity-80" />
           <div className="w-2/3 h-1 bg-fuchsia-500/60 rounded-full opacity-80" />
         </div>
-        
+
         <div className="mt-3 text-[7px] font-mono text-[var(--text-secondary)] z-10 font-bold" style={{ transform: "translateZ(5px)" }}>
           TX: 0x4f3a9910...a8c2f1
         </div>
@@ -285,7 +285,7 @@ function StepRow({ step, index }) {
               style={{ color: "var(--text-muted)" }}
             >
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={step.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-                <polyline points="20 6 9 17 4 12"/>
+                <polyline points="20 6 9 17 4 12" />
               </svg>
               {d}
             </motion.div>
@@ -327,7 +327,6 @@ function StepRow({ step, index }) {
 export default function Process() {
   return (
     <section id="process" className="relative py-12 overflow-hidden" style={{ backgroundColor: "var(--bg-secondary)" }}>
-      <div className="editorial-line" />
 
       {/* Section header */}
       <div className="mx-auto max-w-[1400px] px-6 md:px-12 mb-20">
@@ -366,7 +365,6 @@ export default function Process() {
         ))}
       </div>
 
-      <div className="editorial-line mt-28" />
     </section>
   );
 }

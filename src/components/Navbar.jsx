@@ -47,11 +47,11 @@ export default function Navbar() {
         transition={{ duration: largeDuration, ease: premiumEase }}
         className="fixed top-4 left-0 right-0 z-50 mx-auto w-[95%] md:w-[90%] max-w-[1310px] rounded-full px-6 py-0 md:px-8 h-16 flex items-center shadow-lg"
         style={{
-          backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.65)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          border: "1px solid rgba(255,255,255,0.15)",
-          boxShadow: isDark ? "0 8px 32px rgba(0,0,0,0.2)" : "0 8px 32px rgba(0,0,0,0.08)"
+          backgroundColor: isDark ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.55)",
+          backdropFilter: "blur(25px)",
+          WebkitBackdropFilter: "blur(25px)",
+          border: isDark ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(255,255,255,0.45)",
+          boxShadow: isDark ? "0 20px 60px rgba(0,0,0,0.4)" : "0 20px 60px rgba(0,0,0,0.08)"
         }}
       >
         <div className="w-full">
@@ -225,7 +225,7 @@ export default function Navbar() {
                   <ThemeToggle />
                   <Link
                     href="/login"
-                    className="inline-flex items-center space-x-2 rounded-full px-5 py-2.5 text-sm font-semibold text-[var(--text-on-accent)] shadow-md transition-all shrink-0 hover:scale-105"
+                    className="inline-flex items-center space-x-2 rounded-full px-5 py-2.5 text-sm font-semibold text-[var(--text-on-accent)] shadow-md transition-all shrink-0 hover:scale-[1.02] hover:-translate-y-[3px] hover:shadow-xl"
                     style={{
                       background: "var(--accent-gradient)",
                       boxShadow: "0px 6px 20px var(--accent-glow)"

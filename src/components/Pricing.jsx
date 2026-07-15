@@ -196,7 +196,7 @@ function PlanCard({ plan, isAnnual, index, isSelected, onClick }) {
               stroke="var(--accent-primary)"
               strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
             >
-              <polyline points="20 6 9 17 4 12"/>
+              <polyline points="20 6 9 17 4 12" />
             </svg>
             <span style={{ color: "var(--text-secondary)" }}>
               {f}
@@ -211,7 +211,7 @@ function PlanCard({ plan, isAnnual, index, isSelected, onClick }) {
               stroke="var(--text-muted)"
               strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
             >
-              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+              <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
             <span style={{ color: plan.featured ? "rgba(255,255,255,0.5)" : "var(--text-muted)", textDecoration: "line-through" }}>
               {f}
@@ -230,7 +230,6 @@ export default function Pricing() {
 
   return (
     <section id="pricing" className="relative py-12 overflow-hidden" style={{ backgroundColor: "var(--bg-secondary)" }}>
-      <div className="editorial-line" />
 
       {/* Section header */}
       <div className="mx-auto max-w-[1400px] px-6 md:px-12 mb-16">
@@ -321,11 +320,11 @@ export default function Pricing() {
       <div className="mx-auto max-w-[1200px] px-6 md:px-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center justify-center">
           {plans.map((plan, i) => (
-            <PlanCard 
-              key={plan.id} 
-              plan={plan} 
-              isAnnual={isAnnual} 
-              index={i} 
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              isAnnual={isAnnual}
+              index={i}
               isSelected={selectedPlan === plan.id}
               onClick={() => setSelectedPlan(plan.id)}
             />

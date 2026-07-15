@@ -12,94 +12,94 @@
   /* ---- LIGHT THEME (default) ---- */
   :root,
   html.theme-light {
-    --bg-primary:       #f8fafc;
-    --bg-secondary:     #ffffff;
-    --bg-card:          #ffffff;
-    --bg-sidebar:       #ffffff;
-    --bg-input:         #f1f5f9;
-    --bg-hover:         #f1f5f9;
-    --bg-badge:         #f1f5f9;
-    --bg-code:          #f8fafc;
-    --bg-surface:       #ffffff;
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
+    --bg-sidebar: #ffffff;
+    --bg-input: #f1f5f9;
+    --bg-hover: #f1f5f9;
+    --bg-badge: #f1f5f9;
+    --bg-code: #f8fafc;
+    --bg-surface: #ffffff;
 
-    --text-primary:     #020617;
-    --text-secondary:   #334155;
-    --text-muted:       #475569;
-    --text-accent:      #059669;
-    --text-accent2:     #047857;
+    --text-primary: #020617;
+    --text-secondary: #334155;
+    --text-muted: #475569;
+    --text-accent: #059669;
+    --text-accent2: #047857;
 
-    --border-primary:   #e2e8f0;
-    --border-accent:    #059669;
-    --border-card:      #e2e8f0;
-    --border-subtle:    #f1f5f9;
+    --border-primary: #e2e8f0;
+    --border-accent: #059669;
+    --border-card: #e2e8f0;
+    --border-subtle: #f1f5f9;
 
-    --accent-primary:   #059669;
+    --accent-primary: #059669;
     --accent-secondary: #047857;
-    --accent-gradient:  linear-gradient(135deg, #059669 0%, #047857 100%);
-    --accent-glow:      rgba(5, 150, 105, 0.15);
-    --text-on-accent:   #ffffff;
+    --accent-gradient: linear-gradient(135deg, #059669 0%, #047857 100%);
+    --accent-glow: rgba(5, 150, 105, 0.15);
+    --text-on-accent: #ffffff;
 
-    --glass-bg:         rgba(255, 255, 255, 0.75);
-    --glass-border:     rgba(0, 0, 0, 0.05);
+    --glass-bg: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(0, 0, 0, 0.05);
 
-    --scrollbar-track:  #f8f7f4;
-    --scrollbar-thumb:  #d4d3cf;
-    --scrollbar-hover:  #b8b7b3;
+    --scrollbar-track: #f8f7f4;
+    --scrollbar-thumb: #d4d3cf;
+    --scrollbar-hover: #b8b7b3;
 
-    --selection-bg:     rgba(17, 17, 16, 0.12);
-    --selection-text:   #111110;
+    --selection-bg: rgba(17, 17, 16, 0.12);
+    --selection-text: #111110;
 
-    --noise-opacity:    0.03;
-    --dot-color:        rgba(17, 17, 16, 0.08);
+    --noise-opacity: 0.03;
+    --dot-color: rgba(17, 17, 16, 0.08);
 
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-serif: 'Instrument Serif', Georgia, serif;
+    --font-serif: serif;
   }
 
   /* ---- DARK THEME ---- */
   html.theme-dark {
-    --bg-primary:       #000000;
-    --bg-secondary:     #0a0a0a;
-    --bg-card:          #0a0a0a;
-    --bg-sidebar:       #000000;
-    --bg-input:         #111111;
-    --bg-hover:         #1a1a1a;
-    --bg-badge:         #111111;
-    --bg-code:          #000000;
-    --bg-surface:       #0a0a0a;
+    --bg-primary: #000000;
+    --bg-secondary: #0a0a0a;
+    --bg-card: #0a0a0a;
+    --bg-sidebar: #000000;
+    --bg-input: #111111;
+    --bg-hover: #1a1a1a;
+    --bg-badge: #111111;
+    --bg-code: #000000;
+    --bg-surface: #0a0a0a;
 
-    --text-primary:     #f8fafc;
-    --text-secondary:   #94a3b8;
-    --text-muted:       #64748b;
-    --text-accent:      #10b981;
-    --text-accent2:     #34d399;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --text-accent: #10b981;
+    --text-accent2: #34d399;
 
-    --border-primary:   #222222;
-    --border-accent:    #10b981;
-    --border-card:      #222222;
-    --border-subtle:    #111111;
+    --border-primary: #222222;
+    --border-accent: #10b981;
+    --border-card: #222222;
+    --border-subtle: #111111;
 
-    --accent-primary:   #10b981;
+    --accent-primary: #10b981;
     --accent-secondary: #34d399;
-    --accent-gradient:  #10b981;
-    --accent-glow:      rgba(16, 185, 129, 0.15);
-    --text-on-accent:   #022c22;
+    --accent-gradient: #10b981;
+    --accent-glow: rgba(16, 185, 129, 0.15);
+    --text-on-accent: #022c22;
 
-    --glass-bg:         rgba(0, 0, 0, 0.7);
-    --glass-border:     rgba(255, 255, 255, 0.08);
+    --glass-bg: rgba(0, 0, 0, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.08);
 
-    --scrollbar-track:  #0c0c0b;
-    --scrollbar-thumb:  #1f1f1e;
-    --scrollbar-hover:  #2c2c2a;
+    --scrollbar-track: #0c0c0b;
+    --scrollbar-thumb: #1f1f1e;
+    --scrollbar-hover: #2c2c2a;
 
-    --selection-bg:     rgba(255, 255, 255, 0.15);
-    --selection-text:   #ffffff;
+    --selection-bg: rgba(255, 255, 255, 0.15);
+    --selection-text: #ffffff;
 
-    --noise-opacity:    0.04;
-    --dot-color:        rgba(237, 237, 236, 0.05);
+    --noise-opacity: 0.04;
+    --dot-color: rgba(237, 237, 236, 0.05);
 
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    --font-serif: 'Instrument Serif', Georgia, serif;
+    --font-serif: serif;
   }
 
   body {
@@ -114,7 +114,12 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-sans);
     font-weight: 700;
     letter-spacing: -0.02em;
@@ -132,10 +137,22 @@
 /* =============================================
    CUSTOM SCROLLBAR
    ============================================= */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track  { background: var(--scrollbar-track); }
-::-webkit-scrollbar-thumb  { background: var(--scrollbar-thumb); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-hover); }
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover);
+}
 
 /* =============================================
    TEXT SELECTION
@@ -179,14 +196,6 @@ html {
 }
 
 /* =============================================
-   EDITORIAL LINE
-   ============================================= */
-.editorial-line {
-  height: 1px;
-  background: linear-gradient(to right, transparent, var(--border-primary), transparent);
-}
-
-/* =============================================
    TEXT GRADIENT UTILITY
    ============================================= */
 .text-gradient {
@@ -200,6 +209,7 @@ html {
    CUSTOM CURSOR — hides native on desktop
    ============================================= */
 @media (pointer: fine) {
+
   .cursor-none-zone,
   .cursor-none-zone * {
     cursor: none !important;
@@ -249,22 +259,43 @@ html.theme-dark .live-chat-sidebar-fullscreen {
    CONTEST WORKSPACE ANIMATIONS
    ============================================= */
 @keyframes shimmer-sweep {
-  0%   { transform: translateX(-100%); }
-  100% { transform: translateX(200%); }
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(200%);
+  }
 }
 
 @keyframes verdict-pop {
-  0%   { transform: scale(0.6); opacity: 0; }
-  70%  { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+
+  70% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 /* =============================================
    TICKER ANIMATION
    ============================================= */
 @keyframes ticker {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
 }
 
 .ticker-track {
@@ -281,15 +312,20 @@ html.theme-dark .live-chat-sidebar-fullscreen {
    PRINT STYLES FOR RESUME BUILDER
    ============================================= */
 @media print {
-  aside, header {
+
+  aside,
+  header {
     display: none !important;
   }
-  body, main {
+
+  body,
+  main {
     margin: 0 !important;
     padding: 0 !important;
     background: white !important;
     overflow: visible !important;
   }
+
   .h-screen {
     height: auto !important;
     overflow: visible !important;
@@ -307,10 +343,12 @@ html.theme-dark .live-chat-sidebar-fullscreen {
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
+
 .horizontal-scroll-rail::-webkit-scrollbar {
   display: none;
 }
-.horizontal-scroll-rail > * {
+
+.horizontal-scroll-rail>* {
   scroll-snap-align: start;
   flex-shrink: 0;
 }
@@ -321,6 +359,7 @@ html.theme-dark .live-chat-sidebar-fullscreen {
 .underline-draw {
   position: relative;
 }
+
 .underline-draw::after {
   content: '';
   position: absolute;
@@ -331,6 +370,7 @@ html.theme-dark .live-chat-sidebar-fullscreen {
   background: var(--accent-primary);
   transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
+
 .underline-draw:hover::after {
   width: 100%;
 }
@@ -355,10 +395,12 @@ html.theme-dark .live-chat-sidebar-fullscreen {
   .footer-reveal {
     transition: opacity 0.4s ease, transform 0.4s ease;
   }
+
   .footer-reveal.is-visible .wordmark {
     animation: none;
     text-shadow: 0 0 3px rgba(220, 38, 38, 0.3), 0 0 8px rgba(220, 38, 38, 0.2);
   }
+
   html.theme-dark .footer-reveal.is-visible .wordmark {
     text-shadow: 0 0 3px rgba(16, 185, 129, 0.35), 0 0 8px rgba(16, 185, 129, 0.25);
   }

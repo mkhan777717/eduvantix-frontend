@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { motion, useMotionValue, useSpring } from "framer-motion";
+import { motion, useMotionValue, useSpring, animate, useMotionTemplate, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import FloatingObjects from "./FloatingObjects";
+import CodeWindow from "./CodeWindow";
 
 /* ─── Premium easing tokens ───────────────────────────── */
 const ease = {
@@ -138,13 +140,32 @@ export default function Hero() {
   const [mxVal, setMxVal] = useState(0.5);
   const [myVal, setMyVal] = useState(0.5);
   const [mounted, setMounted] = useState(false);
+  const [headlineIndex, setHeadlineIndex] = useState(0);
+
+  // Aurora Colors
+  const color1 = useMotionValue("#62ffdc");
+  const color2 = useMotionValue("#96fff0");
+  const color3 = useMotionValue("#4ade80");
 
   useEffect(() => {
     setMounted(true);
     const u1 = mouseX.on("change", setMxVal);
     const u2 = mouseY.on("change", setMyVal);
+
+    // Animate Aurora Colors Slowly
+    animate(color1, ["#62ffdc", "#4ade80", "#62ffdc"], { ease: "linear", duration: 30, repeat: Infinity });
+    animate(color2, ["#96fff0", "#3b82f6", "#96fff0"], { ease: "linear", duration: 40, repeat: Infinity });
+    animate(color3, ["#4ade80", "#a855f7", "#4ade80"], { ease: "linear", duration: 35, repeat: Infinity });
+
     return () => { u1(); u2(); };
-  }, [mouseX, mouseY]);
+  }, [mouseX, mouseY, color1, color2, color3]);
+
+  const auroraBackground = useMotionTemplate`
+    radial-gradient(circle at 20% 10%, ${color1} 0%, transparent 35%),
+    radial-gradient(circle at 80% 20%, ${color2} 0%, transparent 40%),
+    radial-gradient(circle at 50% 100%, ${color3} 0%, transparent 45%),
+    linear-gradient(180deg, ${dark ? '#000000' : '#ffffff'}, ${dark ? '#050505' : '#f7f8fa'})
+  `;
 
   const handleMouseMove = useCallback((e) => {
     const rect = containerRef.current?.getBoundingClientRect();
@@ -153,16 +174,19 @@ export default function Hero() {
     rawY.set((e.clientY - rect.top) / rect.height);
   }, [rawX, rawY]);
 
-  const stats = [
-    { label: "Learners Enrolled", value: 25, suffix: "+", isDecimal: false },
-    { label: "Projects Shipped", value: 30, suffix: "+", isDecimal: false },
-    { label: "Avg Rating", value: 4, suffix: "", isDecimal: true },
-    { label: "Live Mentors", value: 8, suffix: "+", isDecimal: false },
-  ];
-
-  const headline = [
-    { words: ["Master", "Code."], accents: [false, true] },
-    { words: ["Build", "Tomorrow."], accents: [false, true] },
+  const headlines = [
+    [
+      { words: ["Code", "Better."], accents: [false, true] },
+      { words: ["Think", "Bigger."], accents: [false, true] },
+    ],
+    [
+      { words: ["Learn", "Code."], accents: [false, true] },
+      { words: ["Build", "AI."], accents: [false, true] },
+    ],
+    [
+      { words: ["From", "Ideas."], accents: [false, true] },
+      { words: ["To", "Reality."], accents: [false, true] },
+    ],
   ];
 
   return (
@@ -172,20 +196,49 @@ export default function Hero() {
       className="relative w-full overflow-hidden cursor-none-zone"
       style={{
         minHeight: "85svh",
-        background: tok.bg,
+        background: dark ? "#000000" : "#ffffff",
         transition: "background 0.4s ease",
       }}
     >
+
+      {/* Animated Aurora Background */}
+      <motion.div
+        className="absolute inset-0 z-0 pointer-events-none"
+        style={{
+          background: auroraBackground,
+          opacity: dark ? 0.15 : 0.25,
+          mixBlendMode: dark ? "screen" : "multiply",
+        }}
+      />
 
       {/* Noise texture overlay */}
       <div
         className="absolute inset-0 z-0 pointer-events-none"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E")`,
-          opacity: dark ? 0.028 : 0.018,
+          opacity: 0.03,
           mixBlendMode: "overlay",
         }}
       />
+
+      {/* Huge blurred background logo */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden">
+        <span
+          style={{
+            fontSize: "800px",
+            fontWeight: 900,
+            color: dark ? "#ffffff" : "#000000",
+            opacity: 0.02,
+            filter: "blur(120px)",
+            userSelect: "none"
+          }}
+        >
+          E
+        </span>
+      </div>
+
+      {/* 3D Floating Objects */}
+      {mounted && <FloatingObjects />}
 
       {/* Main content */}
       <div className="relative z-10 mx-auto max-w-[1400px] px-6 md:px-12 min-h-[100vh] flex flex-col justify-center pointer-events-none">
@@ -193,82 +246,110 @@ export default function Hero() {
 
           {/* Top label */}
           <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, ease: ease.out }}
+            initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ duration: 0.8, ease: ease.out }}
             className="flex items-center gap-3 mb-10"
           >
             <div style={{ width: 28, height: 1, background: tok.accentFaint }} />
-            <span className="text-[10px] font-bold tracking-[0.22em] uppercase" style={{ color: tok.accent }}>
+            <span className="text-[10px] font-bold tracking-[0.25em] uppercase" style={{ color: tok.accent }}>
               BUILDING THE NEXT GENERATION OF DEVELOPERS
             </span>
           </motion.div>
 
           {/* Headline + description grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,340px)] gap-10 lg:gap-0 items-end">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_0.8fr] gap-12 lg:gap-10 items-center min-h-[400px]">
 
             {/* LEFT: editorial headline */}
-            <div>
-              {headline.map((line, li) => (
-                <div key={li} style={{ overflow: "hidden" }}>
-                  <motion.div
-                    className="flex items-baseline gap-6"
-                    initial="hidden"
-                    animate="visible"
-                    variants={{
-                      hidden: {},
-                      visible: { transition: { staggerChildren: 0.1, delayChildren: 0.12 + li * 0.2 } },
-                    }}
-                  >
-                    {line.words.map((word, wi) => (
-                      <motion.span
-                        key={wi}
-                        style={{
-                          display: "block",
-                          fontFamily: line.accents[wi] ? "'Instrument Serif', Georgia, serif" : "var(--font-sans)",
-                          fontSize: "clamp(3.6rem, 8.5vw, 8rem)",
-                          fontWeight: line.accents[wi] ? 400 : 700,
-                          letterSpacing: line.accents[wi] ? "-0.015em" : "-0.04em",
-                          lineHeight: 0.93,
-                          fontStyle: line.accents[wi] ? "italic" : "normal",
-                          color: line.accents[wi] ? "transparent" : tok.textPrimary,
-                          WebkitTextStroke: line.accents[wi]
-                            ? `1px ${dark ? "rgba(16,185,129,0.65)" : "rgba(5,150,105,0.6)"}`
-                            : "none",
-                        }}
-                        variants={{
-                          hidden: { y: 90, opacity: 0, skewY: 2.5 },
-                          visible: { y: 0, opacity: 1, skewY: 0, transition: { duration: 0.75, ease: ease.out } },
-                        }}
-                      >
-                        {word}
-                      </motion.span>
-                    ))}
-                  </motion.div>
-                </div>
-              ))}
+            <div className="relative h-[250px] lg:h-[300px]">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={headlineIndex}
+                  initial="hidden"
+                  animate="visible"
+                  exit="exit"
+                  className="absolute inset-0"
+                  variants={{
+                    hidden: {},
+                    visible: { transition: { staggerChildren: 0.1 } },
+                    exit: { transition: { staggerChildren: 0.05, staggerDirection: -1 } }
+                  }}
+                >
+                  {headlines[headlineIndex].map((line, li) => (
+                    <div key={li} style={{ overflow: "hidden" }}>
+                      <motion.div className="flex items-baseline gap-4 md:gap-6">
+                        {line.words.map((word, wi) => (
+                          <motion.span
+                            key={wi}
+                            style={{
+                              display: "block",
+                              fontFamily: "var(--font-sans)",
+                              fontSize: "clamp(3.8rem, 8.5vw, 8rem)",
+                              fontWeight: line.accents[wi] ? 400 : 700,
+                              letterSpacing: line.accents[wi] ? "-0.02em" : "-0.05em",
+                              lineHeight: 1.2,
+                              fontStyle: line.accents[wi] ? "italic" : "normal",
+                              color: line.accents[wi] ? "transparent" : tok.textPrimary,
+                              WebkitTextStroke: line.accents[wi]
+                                ? `1px ${dark ? "rgba(16,185,129,0.8)" : "rgba(5,150,105,0.8)"}`
+                                : "none",
+                            }}
+                            variants={{
+                              hidden: { y: 90, opacity: 0, filter: "blur(8px)", skewY: 2.5 },
+                              visible: { y: 0, opacity: 1, filter: "blur(0px)", skewY: 0, transition: { duration: 0.4, ease: ease.out } },
+                              exit: { y: -50, opacity: 0, filter: "blur(8px)", transition: { duration: 0.4, ease: "easeIn" } }
+                            }}
+                          >
+                            {word}
+                          </motion.span>
+                        ))}
+                      </motion.div>
+                    </div>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
             </div>
 
+            {/* RIGHT: Code window */}
+            <div className="w-full relative">
+              <CodeWindow dark={dark} onStateChange={setHeadlineIndex} />
+
+              {/* Optional ambient glow behind code window */}
+              <div
+                className="absolute inset-0 bg-emerald-500/20 blur-[100px] rounded-full pointer-events-none"
+                style={{ transform: "translateZ(-10px)" }}
+              />
+            </div>
           </div>
 
           {/* Divider */}
           <motion.div
-            initial={{ scaleX: 0, originX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ delay: 0.62, duration: 0.7, ease: ease.out }}
-            style={{ height: 1, background: tok.divider, marginTop: 44, marginBottom: 44 }}
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: 1, opacity: 1 }}
+            transition={{ delay: 0.62, duration: 0.8, ease: ease.out }}
+            style={{
+              height: 1,
+              background: `linear-gradient(90deg, transparent, ${tok.divider}, transparent)`,
+              marginTop: 44,
+              marginBottom: 44,
+              transformOrigin: "center"
+            }}
           />
 
           {/* Bottom row */}
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.72, duration: 0.5, ease: ease.out }}
+            initial={{ opacity: 0, y: 30, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ delay: 0.72, duration: 0.8, ease: ease.out }}
             className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8"
           >
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-5">
-              <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2, ease: ease.soft }}>
+              <motion.div
+                whileHover={{ y: -3, scale: 1.02 }}
+                transition={{ duration: 0.3, ease: ease.soft }}
+                className="hover:shadow-xl hover:shadow-emerald-500/20 rounded-full"
+              >
                 <Link
                   href="/courses/generative-ai"
                   className="group inline-flex items-center gap-2.5 rounded-full px-7 py-3.5 text-sm font-semibold"
@@ -295,7 +376,11 @@ export default function Hero() {
                 </Link>
               </motion.div>
 
-              <motion.div whileHover={{ y: -2 }} transition={{ duration: 0.2, ease: ease.soft }}>
+              <motion.div
+                whileHover={{ y: -3, scale: 1.02 }}
+                transition={{ duration: 0.3, ease: ease.soft }}
+                className="hover:shadow-xl hover:shadow-black/5 rounded-full"
+              >
                 <Link
                   href="/courses"
                   className="inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold"
@@ -324,7 +409,7 @@ export default function Hero() {
               </motion.div>
             </div>
 
-            {/* RIGHT: description */}
+            {/* RIGHT: description removed as it's now under the headline */}
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}

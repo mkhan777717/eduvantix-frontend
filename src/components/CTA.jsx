@@ -14,24 +14,24 @@ function FlowLines() {
     >
       <defs>
         <linearGradient id="lineGrad1" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="var(--accent-primary)" stopOpacity="0"/>
-          <stop offset="50%" stopColor="var(--accent-primary)" stopOpacity="0.3"/>
-          <stop offset="100%" stopColor="var(--accent-secondary)" stopOpacity="0"/>
+          <stop offset="0%" stopColor="var(--accent-primary)" stopOpacity="0" />
+          <stop offset="50%" stopColor="var(--accent-primary)" stopOpacity="0.3" />
+          <stop offset="100%" stopColor="var(--accent-secondary)" stopOpacity="0" />
         </linearGradient>
         <linearGradient id="lineGrad2" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="var(--accent-secondary)" stopOpacity="0"/>
-          <stop offset="40%" stopColor="var(--accent-secondary)" stopOpacity="0.2"/>
-          <stop offset="100%" stopColor="var(--accent-primary)" stopOpacity="0"/>
+          <stop offset="0%" stopColor="var(--accent-secondary)" stopOpacity="0" />
+          <stop offset="40%" stopColor="var(--accent-secondary)" stopOpacity="0.2" />
+          <stop offset="100%" stopColor="var(--accent-primary)" stopOpacity="0" />
         </linearGradient>
       </defs>
-      <path d="M0 180 Q300 120 600 200 Q900 280 1200 160" stroke="url(#lineGrad1)" strokeWidth="1"/>
-      <path d="M0 220 Q250 280 600 200 Q950 120 1200 240" stroke="url(#lineGrad2)" strokeWidth="0.7"/>
-      <path d="M0 200 Q400 150 700 220 Q900 240 1200 200" stroke="url(#lineGrad1)" strokeWidth="0.4" strokeDasharray="4 8"/>
+      <path d="M0 180 Q300 120 600 200 Q900 280 1200 160" stroke="url(#lineGrad1)" strokeWidth="1" />
+      <path d="M0 220 Q250 280 600 200 Q950 120 1200 240" stroke="url(#lineGrad2)" strokeWidth="0.7" />
+      <path d="M0 200 Q400 150 700 220 Q900 240 1200 200" stroke="url(#lineGrad1)" strokeWidth="0.4" strokeDasharray="4 8" />
       {/* Dot grid overlay */}
-      <rect width="1200" height="400" fill="url(#dotGridCTA)" fillOpacity="1"/>
+      <rect width="1200" height="400" fill="url(#dotGridCTA)" fillOpacity="1" />
       <defs>
         <pattern id="dotGridCTA" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-          <circle cx="1" cy="1" r="0.8" fill="var(--accent-primary)" fillOpacity="0.12"/>
+          <circle cx="1" cy="1" r="0.8" fill="var(--accent-primary)" fillOpacity="0.12" />
         </pattern>
       </defs>
     </svg>
@@ -51,7 +51,6 @@ export default function CTA() {
       className="relative py-32 overflow-hidden"
       style={{ backgroundColor: "var(--bg-primary)" }}
     >
-      <div className="editorial-line" />
 
       {/* Background flow lines */}
       <div className="absolute inset-0">
@@ -130,7 +129,7 @@ export default function CTA() {
               >
                 Start Free Course
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                  <path d="M5 12h14M12 5l7 7-7 7" />
                 </svg>
               </a>
               <a
@@ -207,7 +206,7 @@ export default function CTA() {
               ].map((t, i) => (
                 <div key={i} className="flex items-center gap-2.5 text-xs" style={{ color: "var(--text-muted)" }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="20 6 9 17 4 12"/>
+                    <polyline points="20 6 9 17 4 12" />
                   </svg>
                   {t}
                 </div>
