@@ -366,26 +366,30 @@ html.theme-dark .footer-reveal.is-visible .wordmark {
 @keyframes wordmark-glow-light {
   0%, 100% {
     text-shadow:
-      0 0 30px rgba(220, 38, 38, 0.15),
-      0 0 60px rgba(220, 38, 38, 0.08);
+      0 0 1px rgba(220, 38, 38, 0.3),
+      0 0 4px rgba(220, 38, 38, 0.25),
+      0 0 10px rgba(220, 38, 38, 0.15);
   }
   50% {
     text-shadow:
-      0 0 45px rgba(220, 38, 38, 0.35),
-      0 0 90px rgba(220, 38, 38, 0.18);
+      0 0 2px rgba(220, 38, 38, 0.5),
+      0 0 6px rgba(220, 38, 38, 0.4),
+      0 0 16px rgba(220, 38, 38, 0.25);
   }
 }
 
 @keyframes wordmark-glow-dark {
   0%, 100% {
     text-shadow:
-      0 0 30px rgba(16, 185, 129, 0.2),
-      0 0 60px rgba(16, 185, 129, 0.1);
+      0 0 1px rgba(16, 185, 129, 0.4),
+      0 0 4px rgba(16, 185, 129, 0.3),
+      0 0 10px rgba(16, 185, 129, 0.2);
   }
   50% {
     text-shadow:
-      0 0 45px rgba(16, 185, 129, 0.45),
-      0 0 90px rgba(16, 185, 129, 0.22);
+      0 0 2px rgba(16, 185, 129, 0.6),
+      0 0 6px rgba(16, 185, 129, 0.5),
+      0 0 16px rgba(16, 185, 129, 0.3);
   }
 }
 
@@ -395,9 +399,9 @@ html.theme-dark .footer-reveal.is-visible .wordmark {
   }
   .footer-reveal.is-visible .wordmark {
     animation: none;
-    text-shadow: 0 0 30px rgba(220, 38, 38, 0.2);
+    text-shadow: 0 0 3px rgba(220, 38, 38, 0.3), 0 0 8px rgba(220, 38, 38, 0.2);
   }
   html.theme-dark .footer-reveal.is-visible .wordmark {
-    text-shadow: 0 0 30px rgba(16, 185, 129, 0.25);
+    text-shadow: 0 0 3px rgba(16, 185, 129, 0.35), 0 0 8px rgba(16, 185, 129, 0.25);
   }
 }
