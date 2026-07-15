@@ -1255,7 +1255,7 @@ export default function AdminLivePage() {
   // Auto-poll recently ended sessions to fetch compilation status in real-time
   useEffect(() => {
     const hasProcessing = pastSessions.some(
-      (s) => !s.recordingUrl && (s.egressSegments || (s.endedAt && (new Date() - new Date(s.endedAt)) < 180000))
+      (s) => s.isRecording && !s.recordingUrl && (s.egressSegments || (s.endedAt && (new Date() - new Date(s.endedAt)) < 180000))
     );
 
     if (!hasProcessing) return;
@@ -1822,7 +1822,7 @@ export default function AdminLivePage() {
                       >
                         Watch
                       </button>
-                    ) : (past.egressSegments || (past.endedAt && (new Date() - new Date(past.endedAt)) < 180000)) ? (
+                    ) : (past.isRecording && (past.egressSegments || (past.endedAt && (new Date() - new Date(past.endedAt)) < 180000))) ? (
                       <span className="text-[9px] font-extrabold text-neutral-500 bg-neutral-500/10 px-2 py-1.5 rounded border border-[var(--border-primary)] border-neutral-500/20 animate-pulse shrink-0">
                         Processing...
                       </span>
