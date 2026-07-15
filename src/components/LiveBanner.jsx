@@ -103,15 +103,17 @@ function LiveNowBanner({ session }) {
 function PastSessionCard({ session, onWatchRecording }) {
   return (
     <div
-      className="group flex flex-col rounded-lg border border-[var(--border-primary)] overflow-hidden transition-all hover:shadow-md"
+      className="group flex flex-col rounded-xl border border-[var(--border-primary)] overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
       style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}
     >
       {/* Thumbnail area */}
-      <div className="relative aspect-video w-full overflow-hidden bg-[var(--bg-card)]/30 flex items-center justify-center border-b" style={{ borderColor: "var(--border-primary)" }}>
+      <div className="relative aspect-video w-full overflow-hidden flex items-center justify-center border-b" style={{ borderColor: "var(--border-primary)", background: "linear-gradient(135deg, var(--bg-primary), var(--bg-secondary))" }}>
         {session.thumbnailUrl ? (
-          <img src={session.thumbnailUrl} alt={session.title} className="w-full h-full object-cover opacity-80" />
+          <img src={session.thumbnailUrl} alt={session.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90" />
         ) : (
-          <CheckCircle2 size={24} style={{ color: "var(--text-accent)" }} />
+          <div className="absolute inset-0 flex items-center justify-center group-hover:scale-105 transition-transform duration-500" style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.1), rgba(6,182,212,0.05))" }}>
+            <Play size={32} style={{ color: "var(--accent-primary)", opacity: 0.6 }} className="group-hover:opacity-100 transition-opacity ml-1" />
+          </div>
         )}
         {session.host && (
           <div className="absolute bottom-2.5 left-2.5 text-[8px] font-bold px-1.5 py-0.5 rounded border border-[var(--border-primary)] bg-slate-950/60 backdrop-blur-sm text-slate-300"

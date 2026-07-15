@@ -215,7 +215,7 @@ function StepRow({ step, index }) {
 /* ─── Process Section ──────────────────────── */
 export default function Process() {
   return (
-    <section id="process" className="relative py-28 overflow-hidden" style={{ backgroundColor: "var(--bg-secondary)" }}>
+    <section id="process" className="relative py-12 overflow-hidden" style={{ backgroundColor: "var(--bg-secondary)" }}>
       <div className="editorial-line" />
 
       {/* Section header */}

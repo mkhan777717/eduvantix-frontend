@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 
 const testimonials = [
@@ -53,9 +53,9 @@ const testimonials = [
 /* ─── Star Rating ─────────────────────────── */
 function Stars({ count }) {
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-0.5 justify-center">
       {Array.from({ length: count }).map((_, i) => (
-        <svg key={i} width="12" height="12" viewBox="0 0 24 24" fill="#f59e0b">
+        <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill="#f59e0b">
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
       ))}
@@ -65,10 +65,10 @@ function Stars({ count }) {
 
 /* ─── Avatar ──────────────────────────────── */
 function Avatar({ initials, color, size = "md" }) {
-  const sz = size === "lg" ? "h-12 w-12 text-sm" : "h-9 w-9 text-xs";
+  const sz = size === "lg" ? "h-14 w-14 text-lg" : "h-9 w-9 text-xs";
   return (
     <div
-      className={`${sz} rounded-full flex items-center justify-center font-bold text-white flex-shrink-0`}
+      className={`${sz} rounded-full flex items-center justify-center font-bold text-white flex-shrink-0 mx-auto`}
       style={{ background: `linear-gradient(135deg, ${color}90, ${color}50)`, border: `1px solid ${color}40` }}
     >
       {initials}
@@ -76,21 +76,15 @@ function Avatar({ initials, color, size = "md" }) {
   );
 }
 
-/* ─── Large Feature Testimonial ─────────── */
-function FeaturedTestimonial({ t, inView }) {
+/* ─── Testimonial Slide ─────────────────── */
+function TestimonialSlide({ t }) {
   const parts = t.quote.split(t.highlight);
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="col-span-full space-y-8 pb-12"
-      style={{ borderBottom: "1px solid var(--border-primary)" }}
-    >
+    <div className="flex flex-col items-center text-center space-y-6 md:space-y-8 px-2 md:px-10">
       <Stars count={t.rating} />
 
       <blockquote
-        className="text-[clamp(1.4rem,3vw,2.2rem)] font-bold leading-[1.3] tracking-[-0.015em]"
+        className="text-[clamp(1.1rem,2vw,1.8rem)] font-bold leading-[1.4] tracking-[-0.015em] max-w-4xl"
         style={{ color: "var(--text-primary)" }}
       >
         {parts[0]}
@@ -100,48 +94,20 @@ function FeaturedTestimonial({ t, inView }) {
         >
           {t.highlight}
         </em>
-        {parts[1]}
+        {parts.length > 1 && parts[1]}
       </blockquote>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col items-center gap-2 md:gap-3 pt-2 md:pt-4">
         <Avatar initials={t.initials} color={t.companyColor} size="lg" />
         <div>
-          <div className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>{t.name}</div>
-          <div className="text-xs" style={{ color: "var(--text-muted)" }}>
+          <div className="text-sm md:text-base font-bold" style={{ color: "var(--text-primary)" }}>{t.name}</div>
+          <div className="text-[10px] md:text-xs mt-0.5 md:mt-1" style={{ color: "var(--text-muted)" }}>
             {t.role} <span style={{ color: "var(--border-primary)" }}>·</span>{" "}
             <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>{t.company}</span>
           </div>
         </div>
       </div>
-    </motion.div>
-  );
-}
-
-/* ─── Small Testimonial ─────────────────── */
-function SmallTestimonial({ t, inView, delay }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className="space-y-5"
-    >
-      <Stars count={t.rating} />
-
-      <blockquote className="text-base leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-        "{t.quote}"
-      </blockquote>
-
-      <div className="flex items-center gap-3 pt-2">
-        <Avatar initials={t.initials} color={t.companyColor} />
-        <div>
-          <div className="text-sm font-semibold" style={{ color: "var(--text-primary)" }}>{t.name}</div>
-          <div className="text-[11px]" style={{ color: "var(--text-muted)" }}>
-            {t.role} · <span style={{ fontWeight: 600 }}>{t.company}</span>
-          </div>
-        </div>
-      </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -149,12 +115,16 @@ function SmallTestimonial({ t, inView, delay }) {
 export default function Testimonials() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-60px" });
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const next = () => setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+  const prev = () => setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
 
   return (
-    <section id="testimonials" className="relative py-28 overflow-hidden" style={{ backgroundColor: "var(--bg-primary)" }}>
+    <section id="testimonials" className="relative py-12 overflow-hidden" style={{ backgroundColor: "var(--bg-primary)" }}>
 
       {/* Section header */}
-      <div className="mx-auto max-w-[1400px] px-6 md:px-12 mb-16">
+      <div className="mx-auto max-w-[1400px] px-6 md:px-12 mb-8 md:mb-16">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6">
           <div className="space-y-4">
             <motion.div
@@ -201,32 +171,58 @@ export default function Testimonials() {
         </div>
       </div>
 
-      {/* Testimonials grid */}
-      <div ref={ref} className="mx-auto max-w-[1400px] px-6 md:px-12">
-        <div className="grid grid-cols-1 gap-12">
+      {/* Carousel */}
+      <div ref={ref} className="w-full relative pb-8 mt-16 md:mt-24">
+        
+        <div className="relative h-[480px] md:h-[400px] w-full flex items-center justify-center overflow-x-hidden md:overflow-visible px-4 max-w-[100vw]">
+          {testimonials.map((t, i) => {
+            const diff = (i - currentIndex + testimonials.length) % testimonials.length;
+            
+            let position = 0; 
+            if (diff === 0) position = 0;
+            else if (diff === 1) position = 1;
+            else if (diff === testimonials.length - 1) position = -1;
+            else position = 2;
 
-          {/* Featured — full width */}
-          <FeaturedTestimonial t={testimonials[0]} inView={inView} />
-
-          {/* Small — 3 column asymmetric */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            {/* Wide card */}
-            <div className="md:col-span-1" style={{ paddingRight: "0" }}>
-              <SmallTestimonial t={testimonials[1]} inView={inView} delay={0.1} />
-            </div>
-
-            {/* Divider */}
-            <div className="hidden md:block">
-              <div className="h-full w-px mx-auto" style={{ background: "var(--border-primary)" }} />
-            </div>
-
-            {/* Two stacked */}
-            <div className="space-y-10 -mt-0">
-              <SmallTestimonial t={testimonials[2]} inView={inView} delay={0.2} />
-              <div className="h-px" style={{ background: "var(--border-primary)" }} />
-              <SmallTestimonial t={testimonials[3]} inView={inView} delay={0.3} />
-            </div>
-          </div>
+            return (
+              <motion.div
+                key={t.id}
+                onClick={() => {
+                  if (position === 1) next();
+                  else if (position === -1) prev();
+                }}
+                initial={false}
+                animate={{
+                  x: position === 0 ? "0%" : position === 1 ? "65%" : position === -1 ? "-65%" : position === 2 && diff > 1 ? "120%" : "-120%",
+                  scale: position === 0 ? 1 : 0.85,
+                  opacity: position === 0 ? 1 : position === 2 ? 0 : 0.4,
+                  zIndex: position === 0 ? 10 : 5,
+                  y: position === 0 ? 0 : 25, 
+                }}
+                transition={{ duration: 0.5, ease: [0.25, 0.46, 0.45, 0.94] }}
+                className={`absolute w-full max-w-xl rounded-[2rem] border shadow-2xl p-6 md:p-10 ${position !== 0 && position !== 2 ? 'cursor-pointer hover:opacity-70' : ''}`}
+                style={{
+                  backgroundColor: "var(--bg-card)",
+                  borderColor: position === 0 ? "var(--border-accent)" : "var(--border-primary)",
+                  pointerEvents: position === 2 ? "none" : "auto",
+                }}
+              >
+                <TestimonialSlide t={t} />
+              </motion.div>
+            );
+          })}
+        </div>
+        
+        {/* Carousel Dots */}
+        <div className="flex justify-center gap-2 mt-4 md:mt-8">
+          {testimonials.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentIndex(i)}
+              className={`h-2 rounded-full transition-all ${i === currentIndex ? "w-8" : "w-2 hover:opacity-70"}`}
+              style={{ backgroundColor: i === currentIndex ? "var(--accent-primary)" : "var(--border-primary)" }}
+            />
+          ))}
         </div>
       </div>
     </section>

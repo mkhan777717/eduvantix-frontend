@@ -100,18 +100,20 @@ function Price({ monthly, annually, isAnnual }) {
 }
 
 /* ─── Plan Card ──────────────────────────── */
-function PlanCard({ plan, isAnnual, index }) {
+function PlanCard({ plan, isAnnual, index, isSelected, onClick }) {
   return (
     <motion.div
+      onClick={onClick}
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
+      whileHover={{ scale: plan.featured ? 1.05 : 1.02 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.7, delay: index * 0.12, ease: [0.25, 0.46, 0.45, 0.94] }}
-      className={`relative flex flex-col rounded-2xl p-8 ${plan.featured ? "mt-0 lg:-mt-6" : "mt-0 lg:mt-6"}`}
+      className={`relative flex flex-col rounded-3xl p-8 transition-all cursor-pointer ${plan.featured ? "z-10 scale-105 shadow-2xl" : "z-0 mt-0 lg:mt-6"}`}
       style={{
-        backgroundColor: "var(--bg-card)",
-        border: plan.featured ? "2px solid var(--accent-primary)" : "1px solid var(--border-card)",
-        boxShadow: plan.featured ? "0 20px 40px -15px var(--accent-glow)" : "none",
+        backgroundColor: plan.featured ? "var(--bg-card)" : "var(--bg-primary)",
+        border: isSelected ? "2px solid #10b981" : "1px solid var(--border-card)",
+        boxShadow: isSelected ? "0 0 40px rgba(16, 185, 129, 0.2)" : (plan.featured ? "0 0 40px var(--accent-glow)" : "none"),
         color: "var(--text-primary)",
       }}
     >
@@ -224,9 +226,10 @@ function PlanCard({ plan, isAnnual, index }) {
 /* ─── Pricing Section ───────────────────── */
 export default function Pricing() {
   const [isAnnual, setIsAnnual] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
 
   return (
-    <section id="pricing" className="relative py-28 overflow-hidden" style={{ backgroundColor: "var(--bg-secondary)" }}>
+    <section id="pricing" className="relative py-12 overflow-hidden" style={{ backgroundColor: "var(--bg-secondary)" }}>
       <div className="editorial-line" />
 
       {/* Section header */}
@@ -315,10 +318,17 @@ export default function Pricing() {
       </div>
 
       {/* Plans — offset grid */}
-      <div className="mx-auto max-w-[1400px] px-6 md:px-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-start">
+      <div className="mx-auto max-w-[1200px] px-6 md:px-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-center justify-center">
           {plans.map((plan, i) => (
-            <PlanCard key={plan.id} plan={plan} isAnnual={isAnnual} index={i} />
+            <PlanCard 
+              key={plan.id} 
+              plan={plan} 
+              isAnnual={isAnnual} 
+              index={i} 
+              isSelected={selectedPlan === plan.id}
+              onClick={() => setSelectedPlan(plan.id)}
+            />
           ))}
         </div>
 

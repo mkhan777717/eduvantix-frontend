@@ -144,12 +144,12 @@ export default function PracticeCatalogPage() {
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden animate-fade-in" style={{ backgroundColor: "var(--bg-primary)" }}>
       {/* Background ambient lighting */}
-      <div className="absolute top-0 left-0 right-0 h-[450px] bg-gradient-to-b from-zinc-100/30 via-transparent to-transparent pointer-events-none z-0" />
+      <div className="absolute top-0 left-0 right-0 h-[450px] pointer-events-none z-0" style={{ background: "linear-gradient(180deg, rgba(16,185,129,0.04) 0%, transparent 100%)" }} />
       
-      <Navbar />
+      {!user && <Navbar />}
 
-      <main className="flex-grow pt-32 pb-24 relative z-10">
-        <div className="mx-auto max-w-7xl px-4 md:px-8 space-y-12">
+      <main className={`flex-grow relative z-10 ${!user ? 'pt-32 pb-24' : ''}`}>
+        <div className="mx-auto max-w-7xl px-4 md:px-8 space-y-8">
           
           {/* Header Description */}
           <motion.div 
@@ -393,7 +393,7 @@ export default function PracticeCatalogPage() {
         </div>
       </main>
 
-      <Footer />
+      {!user && <Footer />}
     </div>
   );
 }

@@ -8,12 +8,7 @@ import { Sparkles, Menu, X, ArrowRight, ChevronDown, User, GraduationCap, Shield
 import ThemeToggle from "./ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
 
-const navItems = [
-  { name: "Tracks", href: "/#tracks" },
-  { name: "Curriculum", href: "/#process" },
-  { name: "Contests", href: "/contest" },
-  { name: "Pricing", href: "/#pricing" },
-];
+const navItems = [];
 
 const courseCategories = [
   { name: "Web & Mobile Development", href: "/courses?category=Web%20%26%20Mobile%20Development", desc: "React, Next.js, Node.js, Flutter" },
@@ -35,11 +30,18 @@ export default function Navbar() {
   const isUserAdmin = user?.role === "ADMIN" || user?.role === "INSTITUTE_ADMIN" || user?.role === "BATCH_MANAGER" || userEmailLower.includes("admin");
   const isUserMentor = user?.role === "MENTOR" || user?.role === "BATCH_MANAGER" || userEmailLower.includes("mentor");
 
+  // Premium motion constants
+  const premiumEase = [0.16, 1, 0.3, 1];
+  const fastDuration = 0.15;
+  const stdDuration = 0.25;
+  const largeDuration = 0.45;
+
   return (
+    <>
     <motion.header
-      initial={{ y: -100, opacity: 0 }}
+      initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.7, ease: "easeOut" }}
+      transition={{ duration: largeDuration, ease: premiumEase }}
       className="fixed top-0 left-0 right-0 z-50 px-6 py-0 md:px-12"
       style={{ backgroundColor: "var(--glass-bg)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", borderBottom: "1px solid var(--border-subtle)" }}
     >
@@ -64,7 +66,6 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Desktop Nav Items */}
           <ul className="hidden md:flex items-center gap-1">
             {navItems.map((item, index) => (
               <li key={item.name} className="relative">
@@ -79,93 +80,6 @@ export default function Navbar() {
                 </a>
               </li>
             ))}
-
-            {/* Premium Hover Dropdown for Courses */}
-            <li
-              className="relative"
-              onMouseEnter={() => setIsDropdownOpen(true)}
-              onMouseLeave={() => setIsDropdownOpen(false)}
-            >
-              <button
-                className="relative flex items-center gap-1 px-4 py-2 text-sm font-medium transition-colors outline-none cursor-pointer"
-                style={{ color: isDropdownOpen ? "var(--text-accent)" : "var(--text-secondary)" }}
-              >
-                <span>Courses</span>
-                <motion.span
-                  animate={{ rotate: isDropdownOpen ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="shrink-0"
-                >
-                  <ChevronDown size={14} />
-                </motion.span>
-              </button>
-
-              <AnimatePresence>
-                {isDropdownOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute left-1/2 -translate-x-1/2 mt-2 w-64 rounded-2xl border border-[var(--border-primary)] p-2 shadow-2xl backdrop-blur-xl z-50"
-                    style={{
-                      backgroundColor: "var(--bg-card)",
-                      borderColor: "var(--border-primary)",
-                      boxShadow: "0 10px 30px rgba(0,0,0,0.08)"
-                    }}
-                  >
-                    {courseCategories.map((cat) => (
-                      <a
-                        key={cat.name}
-                        href={cat.href}
-                        className="block rounded-xl px-3 py-2 hover:bg-slate-500/5 transition-all text-left"
-                        onClick={() => setIsDropdownOpen(false)}
-                      >
-                        <div className="text-xs font-bold" style={{ color: "var(--text-primary)" }}>
-                          {cat.name}
-                        </div>
-                        <div className="text-[10px] font-medium mt-0.5" style={{ color: "var(--text-secondary)" }}>
-                          {cat.desc}
-                        </div>
-                      </a>
-                    ))}
-                    <div className="border-t my-1" style={{ borderColor: "var(--border-primary)" }} />
-                    <Link
-                      href="/courses"
-                      className="block rounded-xl px-4 py-2 text-xs font-bold text-center transition-all hover:bg-slate-500/10"
-                      style={{ color: "var(--text-accent)" }}
-                      onClick={() => setIsDropdownOpen(false)}
-                    >
-                      View All Courses &rarr;
-                    </Link>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </li>
-
-            {/* Live Classes Nav Link */}
-            <li className="relative">
-              <Link
-                href="/live-classes"
-                onMouseEnter={() => setHoveredIndex("live-classes")}
-                onMouseLeave={() => setHoveredIndex(null)}
-                className="relative block px-4 py-2 text-sm font-medium transition-colors"
-                style={{ color: hoveredIndex === "live-classes" ? "var(--text-accent)" : "var(--text-secondary)" }}
-              >
-                {hoveredIndex === "live-classes" && (
-                  <motion.span
-                    layoutId="navHover"
-                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
-                    className="absolute inset-0 z-0 rounded-full"
-                    style={{ backgroundColor: "var(--bg-badge)", border: "1px solid var(--border-accent)" }}
-                  />
-                )}
-                <span className="relative z-10 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
-                  Live Classes
-                </span>
-              </Link>
-            </li>
           </ul>
 
           {/* Right: CTA */}
@@ -190,7 +104,7 @@ export default function Navbar() {
                   <span>{user.username}</span>
                   <motion.span
                     animate={{ rotate: isSignInDropdownOpen ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: fastDuration, ease: premiumEase }}
                     className="shrink-0"
                   >
                     <ChevronDown size={14} />
@@ -200,10 +114,10 @@ export default function Navbar() {
                 <AnimatePresence>
                   {isSignInDropdownOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: fastDuration, ease: premiumEase }}
                       className="absolute right-0 mt-2 w-56 rounded-2xl border border-[var(--border-primary)] p-2 shadow-2xl backdrop-blur-xl z-50 text-left"
                       style={{
                         backgroundColor: "var(--bg-card)",
@@ -316,7 +230,7 @@ export default function Navbar() {
                   <span>Sign In</span>
                   <motion.span
                     animate={{ rotate: isSignInDropdownOpen ? 180 : 0 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ duration: fastDuration, ease: premiumEase }}
                     className="shrink-0"
                   >
                     <ChevronDown size={14} />
@@ -326,10 +240,10 @@ export default function Navbar() {
                 <AnimatePresence>
                   {isSignInDropdownOpen && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                      transition={{ duration: 0.2 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      transition={{ duration: fastDuration, ease: premiumEase }}
                       className="absolute right-0 mt-2 w-56 rounded-2xl border border-[var(--border-primary)] p-2 shadow-2xl backdrop-blur-xl z-50 text-left"
                       style={{
                         backgroundColor: "var(--bg-card)",
@@ -437,7 +351,7 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.25, ease: premiumEase }}
             className="absolute left-0 right-0 top-16 z-40 overflow-hidden border-b p-6 shadow-xl md:hidden"
             style={{
               backgroundColor: "var(--bg-secondary)",
@@ -458,49 +372,6 @@ export default function Navbar() {
                   </a>
                 </li>
               ))}
-
-              <li>
-                <Link
-                  href="/live-classes"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-2 text-base font-semibold transition-colors"
-                  style={{ color: "var(--text-secondary)" }}
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shrink-0" />
-                  <span>Live Classes</span>
-                </Link>
-              </li>
-
-              <li className="border-t my-1" style={{ borderColor: "var(--border-primary)" }} />
-
-              <li className="text-[10px] font-bold uppercase tracking-wider pl-1" style={{ color: "var(--text-muted)" }}>
-                Curriculums
-              </li>
-
-              {courseCategories.map((cat) => (
-                <li key={cat.name}>
-                  <a
-                    href={cat.href}
-                    onClick={() => setIsOpen(false)}
-                    className="block text-sm font-bold pl-2 transition-colors hover:text-[var(--text-accent)]"
-                    style={{ color: "var(--text-secondary)" }}
-                  >
-                    {cat.name}
-                  </a>
-                </li>
-              ))}
-              <li>
-                <Link
-                  href="/courses"
-                  onClick={() => setIsOpen(false)}
-                  className="block text-sm font-bold pl-2 transition-colors hover:text-[var(--text-accent)]"
-                  style={{ color: "var(--text-accent)" }}
-                >
-                  View Course Catalog &rarr;
-                </Link>
-              </li>
-
-              <li className="border-t my-1" style={{ borderColor: "var(--border-primary)" }} />
 
               {user ? (
                 <>
@@ -621,11 +492,23 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+    </motion.header>
+
       {/* Logout Confirmation Modal */}
       <AnimatePresence>
         {showLogoutConfirm && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
-            <div
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: stdDuration, ease: premiumEase }}
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.98, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.98, opacity: 0 }}
+              transition={{ duration: stdDuration, ease: premiumEase }}
               className="w-full max-w-sm rounded-3xl p-6 border border-[var(--border-primary)] shadow-2xl text-center space-y-5"
               style={{
                 backgroundColor: "var(--bg-card)",
@@ -666,10 +549,10 @@ export default function Navbar() {
                   Logout
                 </button>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
-    </motion.header>
+    </>
   );
 }

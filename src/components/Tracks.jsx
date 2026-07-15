@@ -226,7 +226,7 @@ export default function Tracks() {
   const railRef = useRef(null);
 
   return (
-    <section id="tracks" className="relative py-28 overflow-hidden" style={{ backgroundColor: "var(--bg-primary)" }}>
+    <section id="tracks" className="relative py-12 overflow-hidden" style={{ backgroundColor: "var(--bg-primary)" }}>
 
       {/* Section intro — left-aligned editorial */}
       <div className="mx-auto max-w-[1400px] px-6 md:px-12 mb-14">
@@ -274,7 +274,7 @@ export default function Tracks() {
       {/* Horizontal scroll rail */}
       <div
         ref={railRef}
-        className="horizontal-scroll-rail px-6 md:px-12 gap-4 pb-6"
+        className="flex flex-row flex-nowrap md:justify-center overflow-x-auto px-6 md:px-12 gap-4 pb-6 hide-scrollbar"
         style={{ maxWidth: "100vw" }}
       >
         {tracks.map((track, i) => (

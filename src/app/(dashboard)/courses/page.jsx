@@ -31,6 +31,7 @@ const categories = [
 ];
 
 export default function CoursesCatalogPage() {
+  const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Courses");
   const [hoveredCourseId, setHoveredCourseId] = useState(null);
@@ -93,13 +94,13 @@ export default function CoursesCatalogPage() {
     <div className="relative flex min-h-screen flex-col overflow-hidden" style={{ backgroundColor: "var(--bg-primary)" }}>
       
       {/* Background ambient lighting */}
-      <div className="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-zinc-100/30 via-transparent to-transparent pointer-events-none z-0" />
+      <div className="absolute top-0 left-0 right-0 h-[500px] pointer-events-none z-0" style={{ background: "linear-gradient(180deg, rgba(16,185,129,0.04) 0%, transparent 100%)" }} />
       
       {/* Main navigation */}
-      <Navbar />
+      {!user && <Navbar />}
 
-      <main className="flex-grow pt-32 pb-24 relative z-10">
-        <div className="mx-auto max-w-7xl px-4 md:px-8 space-y-16">
+      <main className={`flex-grow relative z-10 ${!user ? 'pt-32 pb-24' : ''}`}>
+        <div className="mx-auto max-w-7xl px-4 md:px-8 space-y-10">
           
           {/* Hero Section */}
           <motion.div 
@@ -354,7 +355,7 @@ export default function CoursesCatalogPage() {
       </main>
 
       {/* Page footer */}
-      <Footer />
+      {!user && <Footer />}
     </div>
   );
 }

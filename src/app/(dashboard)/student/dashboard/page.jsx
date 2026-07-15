@@ -10,7 +10,6 @@ import {
   Flame, Award, TrendingUp, HelpCircle
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import LiveBanner from "@/components/LiveBanner";
 
 // Helper: time-ago formatter
 function timeAgo(dateStr) {
@@ -392,8 +391,6 @@ export default function StudentDashboard() {
         </div>
       </div>
 
-      {/* ── Live Classes Display ─────────────────── */}
-      <LiveBanner />
 
       {/* ── Bottom Section: Contests & Submissions ─ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-6">
