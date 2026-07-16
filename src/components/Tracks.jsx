@@ -1006,7 +1006,7 @@ export default function Tracks() {
           ))}
         </div>
       </div>
-      </div>
+
 
       <div className="editorial-line  mb-40" />
 
