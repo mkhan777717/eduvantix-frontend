@@ -30,7 +30,7 @@ export default function DashboardLayout({ children }) {
   const [showEndConfirmModal, setShowEndConfirmModal] = useState(false);
   const [pendingNavAction, setPendingNavAction] = useState(null);
 
-  const effectiveRole = user?.role || (typeof window !== "undefined" ? JSON.parse(localStorage.getItem("dmx_auth_user") || "{}")?.role : null);
+  const effectiveRole = user?.role || (typeof window !== "undefined" ? JSON.parse(localStorage.getItem("eduvantix_auth_user") || "{}")?.role : null);
   const isSuperAdmin = effectiveRole === "ADMIN";
   const isInstAdmin = effectiveRole === "INSTITUTE_ADMIN";
   const isBatchMgr = effectiveRole === "BATCH_MANAGER";

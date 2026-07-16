@@ -199,7 +199,7 @@ export default function Tracks() {
         <div className="absolute right-6 bottom-6 md:right-10 md:bottom-10 w-[220px] md:w-[250px] h-[100px] md:h-[120px] rounded-xl border border-cyan-500/20 bg-neutral-950/60 p-3 flex flex-col justify-between translate-y-4 group-hover:translate-y-1 transition-transform duration-500 overflow-hidden relative">
           <motion.div animate={{ x: ["-100%", "200%"] }} transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }} className="absolute inset-y-0 w-8 bg-gradient-to-r from-transparent via-cyan-500/10 to-transparent skew-x-12" />
           <div className="flex justify-between items-start">
-            <span className="text-[8px] font-mono text-cyan-400">DMX_VERIFIED</span>
+            <span className="text-[8px] font-mono text-cyan-400">EDUVANTIX_VERIFIED</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-cyan-500"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
           </div>
           <div className="text-left leading-none">
@@ -361,7 +361,7 @@ export default function Tracks() {
               </motion.div>
               <div className="min-w-0">
                 <div className="text-xs font-bold text-white truncate">Cyber Hits 2026</div>
-                <div className="text-[10px] text-white/50 truncate">DMX Records</div>
+                <div className="text-[10px] text-white/50 truncate">Eduvantix Records</div>
               </div>
             </div>
             {/* Animated Audio Equalizer Bars */}
@@ -479,7 +479,7 @@ export default function Tracks() {
       centerContent: (
         <div className="w-[245px] h-[155px] rounded-xl border border-red-500/20 bg-black/60 backdrop-blur-md p-2 flex flex-col justify-between shadow-2xl relative overflow-hidden group-hover:scale-105 transition-transform duration-500">
           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
-          <div className="absolute top-2 left-2 z-20 bg-red-600 text-white font-black text-[9px] px-1 py-0.5 rounded shadow-md">DMX ORIGINALS</div>
+          <div className="absolute top-2 left-2 z-20 bg-red-600 text-white font-black text-[9px] px-1 py-0.5 rounded shadow-md">EDUVANTIX ORIGINALS</div>
           <div className="w-full h-[95px] rounded-lg overflow-hidden bg-gradient-to-br from-red-950 to-neutral-900 flex items-center justify-center relative">
             <motion.div
               animate={{ opacity: [0.3, 0.6, 0.3] }}

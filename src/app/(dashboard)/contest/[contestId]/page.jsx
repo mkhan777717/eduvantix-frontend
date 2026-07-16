@@ -145,7 +145,7 @@ function highlightCode(code, lang) {
 // Helper: returns auth bypass headers based on current session
 function getAuthHeaders() {
   if (typeof window === "undefined") return {};
-  const token = localStorage.getItem("dmx_auth_token");
+  const token = localStorage.getItem("eduvantix_auth_token");
   const hasRealToken = token && !token.startsWith("demo-") && !token.startsWith("local-");
   if (hasRealToken) {
     return { "Authorization": `Bearer ${token}` };
@@ -157,7 +157,7 @@ function getAuthHeaders() {
   if (localStorage.getItem("synapse_student_session") === "true") bypassRole = "USER";
 
   let bypassUserId = null;
-  const storedUser = localStorage.getItem("dmx_auth_user");
+  const storedUser = localStorage.getItem("eduvantix_auth_user");
   if (storedUser) {
     try {
       const u = JSON.parse(storedUser);
