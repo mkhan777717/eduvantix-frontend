@@ -16,14 +16,14 @@ export default function DashboardLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const { logout, user, token, API_BASE, activeSession, setActiveSession } = useAuth();
-  
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
   const [dashboardUser, setDashboardUser] = useState(null);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  
+
   // Role & Session States
   const [roleName, setRoleName] = useState("Scholar");
   const [showEndConfirmModal, setShowEndConfirmModal] = useState(false);
@@ -35,7 +35,7 @@ export default function DashboardLayout({ children }) {
   const isBatchMgr = effectiveRole === "BATCH_MANAGER";
   const isMentor = effectiveRole === "MENTOR";
   const isStudent = effectiveRole === "USER";
-  
+
   const isStudentSession = typeof window !== "undefined" && localStorage.getItem("synapse_student_session") === "true";
   const isAdminSession = typeof window !== "undefined" && localStorage.getItem("synapse_admin_session") === "true";
   const isMentorSession = typeof window !== "undefined" && localStorage.getItem("synapse_mentor_session") === "true";
@@ -92,16 +92,16 @@ export default function DashboardLayout({ children }) {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const isLoginRoute = pathname === "/student" || pathname === "/admin" || pathname === "/mentor";
-      
+
       const hasSession = isStudentSession || isAdminSession || isMentorSession;
 
       if (!hasSession && !pathname.startsWith('/practice') && !pathname.startsWith('/contest') && !pathname.startsWith('/courses') && !pathname.startsWith('/live-classes')) {
         if (pathname.startsWith('/admin') || pathname.startsWith('/mentor') || pathname.startsWith('/student')) {
-            router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
-            return;
+          router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+          return;
         }
-      } 
-      
+      }
+
       if (hasSession && isLoginRoute) {
         if (isAdminSession) router.push("/admin/dashboard");
         else if (isMentorSession) router.push("/mentor/dashboard");
@@ -110,14 +110,14 @@ export default function DashboardLayout({ children }) {
         const name = user?.username || "Eduvantix User";
         const email = user?.email || "user@synapse.com";
         const avatar = name.slice(0, 2).toUpperCase();
-        
+
         let displayRole = "User";
         if (isStudentSession) displayRole = roleName;
         else if (isMentorSession) displayRole = "Mentor";
         else if (isSuperAdmin) displayRole = "Super Admin";
         else if (isInstAdmin) displayRole = "Institute Admin";
         else if (isBatchMgr) displayRole = "Batch Manager";
-        
+
         setDashboardUser({ name, email, role: displayRole, avatar });
       }
       setCheckingAuth(false);
@@ -175,10 +175,13 @@ export default function DashboardLayout({ children }) {
 
   if (isLoginRoute) return <>{children}</>;
 
+  const isPracticeWorkspace = pathname.startsWith("/practice/");
+  if (isPracticeWorkspace) return <>{children}</>;
+
   const isPublicRoute = !dashboardUser && (pathname.startsWith('/practice') || pathname.startsWith('/contest') || pathname.startsWith('/courses') || pathname.startsWith('/live-classes'));
-  
+
   if (isPublicRoute) {
-     return <>{children}</>;
+    return <>{children}</>;
   }
 
   let sidebarLinks = [];
@@ -209,12 +212,10 @@ export default function DashboardLayout({ children }) {
       (isBatchMgr || isInstAdmin || isMentor) && { label: "AI Viva", href: "/mentor/viva/questions", icon: Brain },
       (isBatchMgr || isInstAdmin || isMentor) && { label: "Study Materials", href: "/mentor/viva/materials", icon: FileText },
       isSuperAdmin && { label: "AI Settings", href: "/admin/viva/ai-settings", icon: Settings },
-      (isSuperAdmin || isInstAdmin || isBatchMgr || isMentor) && { label: "All Contests", href: "/admin/contests", icon: Trophy },
-      (isSuperAdmin || isInstAdmin || isBatchMgr || isMentor) && { label: "Create Contest", href: "/admin/contests/new", icon: PlusCircle },
-      (isSuperAdmin || isInstAdmin || isBatchMgr || isMentor) && { label: "All Problems", href: "/admin/problems", icon: Code },
+      (isSuperAdmin || isInstAdmin || isBatchMgr || isMentor) && { label: "Contests", href: "/admin/contests", icon: Trophy },
+      (isSuperAdmin || isInstAdmin || isBatchMgr || isMentor) && { label: "Problems", href: "/admin/problems", icon: Code },
       (isSuperAdmin || isInstAdmin || isBatchMgr || isMentor) && { label: "Go Live", href: "/admin/live", icon: Radio },
       (isSuperAdmin || isInstAdmin || isBatchMgr || isMentor) && { label: "Arcade Questions", href: "/admin/arcade", icon: Gamepad2 },
-      { label: "Public Lobby", href: "/contest", icon: List },
       { label: "Course Catalog", href: "/courses", icon: BookOpen }
     ].filter(Boolean);
   }
@@ -233,7 +234,7 @@ export default function DashboardLayout({ children }) {
               <>
                 <div className="h-6 w-6 rounded-md flex items-center justify-center text-[var(--text-on-accent)] flex-shrink-0" style={{ background: "var(--accent-gradient)" }}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                   </svg>
                 </div>
                 <span className="text-[13px] font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>Eduvantix</span>
@@ -242,7 +243,7 @@ export default function DashboardLayout({ children }) {
             {isSidebarCollapsed && (
               <div className="h-6 w-6 rounded-md flex items-center justify-center text-[var(--text-on-accent)] mx-auto" style={{ background: "var(--accent-gradient)" }}>
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                 </svg>
               </div>
             )}
@@ -320,7 +321,7 @@ export default function DashboardLayout({ children }) {
               <Link href="/" className="flex items-center gap-2.5" onClick={() => setIsMobileMenuOpen(false)}>
                 <div className="h-6 w-6 rounded-md flex items-center justify-center text-[var(--text-on-accent)]" style={{ background: "var(--accent-gradient)" }}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                   </svg>
                 </div>
                 <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>Eduvantix</span>
