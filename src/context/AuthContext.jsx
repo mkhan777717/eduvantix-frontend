@@ -22,12 +22,12 @@ function formatBackendError(data) {
 
 // ---------------------------------------------------------------------------
 // Local account store — used when the DB is unreachable
-// Accounts are stored in localStorage under "dmx_local_accounts"
+// Accounts are stored in localStorage under "eduvantix_local_accounts"
 // ---------------------------------------------------------------------------
 function getLocalAccounts() {
   if (typeof window === "undefined") return [];
   try {
-    return JSON.parse(localStorage.getItem("dmx_local_accounts") || "[]");
+    return JSON.parse(localStorage.getItem("eduvantix_local_accounts") || "[]");
   } catch {
     return [];
   }
@@ -38,7 +38,7 @@ function saveLocalAccount(email, password, user) {
   // Remove any existing account with same email
   const filtered = accounts.filter(a => a.email !== email);
   filtered.push({ email, password, user });
-  localStorage.setItem("dmx_local_accounts", JSON.stringify(filtered));
+  localStorage.setItem("eduvantix_local_accounts", JSON.stringify(filtered));
 }
 
 function findLocalAccount(email, password) {
@@ -91,9 +91,9 @@ export function AuthProvider({ children }) {
     setUser(null);
     setToken(null);
     clearLegacySessions();
-    localStorage.removeItem("dmx_auth_token");
-    localStorage.removeItem("dmx_auth_user");
-    // Note: dmx_local_accounts is intentionally kept so users can log back in
+    localStorage.removeItem("eduvantix_auth_token");
+    localStorage.removeItem("eduvantix_auth_user");
+    // Note: eduvantix_local_accounts is intentionally kept so users can log back in
   };
 
   // Sync WebSocket for single-session tracking
@@ -103,7 +103,7 @@ export function AuthProvider({ children }) {
     }
     const socket = getSocket();
     if (socket) {
-      const storedUser = localStorage.getItem("dmx_auth_user");
+      const storedUser = localStorage.getItem("eduvantix_auth_user");
       let mySessionId = "";
       try {
         mySessionId = JSON.parse(storedUser)?.sessionId;
@@ -172,8 +172,8 @@ export function AuthProvider({ children }) {
     async function loadStoredAuth() {
       if (typeof window === "undefined") { setLoading(false); return; }
 
-      const storedToken = localStorage.getItem("dmx_auth_token");
-      const storedUser = localStorage.getItem("dmx_auth_user");
+      const storedToken = localStorage.getItem("eduvantix_auth_token");
+      const storedUser = localStorage.getItem("eduvantix_auth_user");
 
       if (storedToken && storedUser) {
         // Only verify with the real backend if this is a real JWT (not demo/local)
@@ -187,7 +187,7 @@ export function AuthProvider({ children }) {
               const data = await res.json();
               if (data.success) {
                 setUser(data.user);
-                localStorage.setItem("dmx_auth_user", JSON.stringify(data.user));
+                localStorage.setItem("eduvantix_auth_user", JSON.stringify(data.user));
                 setToken(storedToken);
                 setLegacySession(data.user);
                 setLoading(false);
@@ -213,8 +213,8 @@ export function AuthProvider({ children }) {
           setToken(storedToken);
           setLegacySession(parsedUser);
         } catch {
-          localStorage.removeItem("dmx_auth_token");
-          localStorage.removeItem("dmx_auth_user");
+          localStorage.removeItem("eduvantix_auth_token");
+          localStorage.removeItem("eduvantix_auth_user");
         }
       }
 
@@ -241,8 +241,8 @@ export function AuthProvider({ children }) {
         setUser(data.user);
         setLegacySession(data.user);
         setIsInstituteBlocked(false);
-        localStorage.setItem("dmx_auth_token", data.token);
-        localStorage.setItem("dmx_auth_user", JSON.stringify(data.user));
+        localStorage.setItem("eduvantix_auth_token", data.token);
+        localStorage.setItem("eduvantix_auth_user", JSON.stringify(data.user));
         return { success: true, user: data.user };
       }
 
@@ -266,8 +266,8 @@ export function AuthProvider({ children }) {
       setToken(localToken);
       setUser(localAccount.user);
       setLegacySession(localAccount.user);
-      localStorage.setItem("dmx_auth_token", localToken);
-      localStorage.setItem("dmx_auth_user", JSON.stringify(localAccount.user));
+      localStorage.setItem("eduvantix_auth_token", localToken);
+      localStorage.setItem("eduvantix_auth_user", JSON.stringify(localAccount.user));
       return { success: true, user: localAccount.user };
     }
 
@@ -294,8 +294,8 @@ export function AuthProvider({ children }) {
         setToken(data.token);
         setUser(data.user);
         setLegacySession(data.user);
-        localStorage.setItem("dmx_auth_token", data.token);
-        localStorage.setItem("dmx_auth_user", JSON.stringify(data.user));
+        localStorage.setItem("eduvantix_auth_token", data.token);
+        localStorage.setItem("eduvantix_auth_user", JSON.stringify(data.user));
         return { success: true, user: data.user };
       }
 
@@ -323,8 +323,8 @@ export function AuthProvider({ children }) {
     setToken(localToken);
     setUser(newUser);
     setLegacySession(newUser);
-    localStorage.setItem("dmx_auth_token", localToken);
-    localStorage.setItem("dmx_auth_user", JSON.stringify(newUser));
+    localStorage.setItem("eduvantix_auth_token", localToken);
+    localStorage.setItem("eduvantix_auth_user", JSON.stringify(newUser));
     return { success: true, offlineMode: true, user: newUser };
   };
 
@@ -377,8 +377,8 @@ export function AuthProvider({ children }) {
         setUser(data.user);
         setLegacySession(data.user);
         setIsInstituteBlocked(false);
-        localStorage.setItem("dmx_auth_token", data.token);
-        localStorage.setItem("dmx_auth_user", JSON.stringify(data.user));
+        localStorage.setItem("eduvantix_auth_token", data.token);
+        localStorage.setItem("eduvantix_auth_user", JSON.stringify(data.user));
         return { success: true, user: data.user };
       }
 

@@ -951,7 +951,7 @@ function BroadcastPanel({ session, onEndSession, authToken, shouldRecord }) {
         </div>
 
         {/* Right — Live Chat */}
-        <div className={`xl:w-[320px] xl:min-w-[300px] xl:max-w-[360px] flex flex-col min-h-0 overflow-hidden shrink-0 order-2 ${!isChatOpen ? "hidden" : ""}`}>
+        <div className={`w-full lg:w-[320px] lg:min-w-[300px] lg:max-w-[360px] flex flex-col min-h-0 overflow-hidden shrink-0 order-2 ${!isChatOpen ? "hidden" : ""}`}>
           <LiveChat
             persistent
             sessionId={session?.id}
@@ -1019,6 +1019,8 @@ export default function AdminLivePage() {
   });
   const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState(null);
+  const [showEndConfirm, setShowEndConfirm] = useState(false);
+  const [pendingEndAction, setPendingEndAction] = useState(null);
 
   // Batches targeting state
   const [batches, setBatches] = useState([]);
@@ -1429,23 +1431,13 @@ export default function AdminLivePage() {
 
   const handleEndSession = async () => {
     if (!session) return;
-
-    const confirmed = window.confirm("Are you sure you want to end this live session?");
-    if (!confirmed) return;
-
-    await endActiveSession();
+    setPendingEndAction("end");
+    setShowEndConfirm(true);
   };
 
   const handleBackToPortal = async () => {
-    const confirmed = window.confirm(
-      "Leaving will end the active live session for all students. Continue?"
-    );
-    if (!confirmed) return;
-
-    const ended = await endActiveSession();
-    if (ended) {
-      router.push("/admin/dashboard");
-    }
+    setPendingEndAction("portal");
+    setShowEndConfirm(true);
   };
 
   // ─── Checking for active session (loading state) ───────────────────
@@ -2075,6 +2067,43 @@ export default function AdminLivePage() {
         </div>
       )}
       </div>
+
+      {showEndConfirm && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-sm rounded-2xl p-6 border border-[var(--border-primary)] shadow-2xl text-center space-y-5"
+            style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
+            <div className="w-11 h-11 rounded-xl bg-orange-500/10 text-orange-500 flex items-center justify-center mx-auto border border-[var(--border-primary)] border-orange-500/20">
+              <AlertTriangle size={20} />
+            </div>
+            <div className="space-y-1.5">
+              <h3 className="text-base font-black" style={{ color: "var(--text-primary)" }}>End Live Session?</h3>
+              <p className="text-xs" style={{ color: "var(--text-muted)" }}>
+                {pendingEndAction === "portal" 
+                  ? "Leaving will end the active live session for all students. Continue?" 
+                  : "Are you sure you want to end this live session?"}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button type="button" onClick={() => setShowEndConfirm(false)}
+                className="flex-1 py-2.5 rounded-xl border border-[var(--border-primary)] text-xs font-semibold transition-all cursor-pointer"
+                style={{ borderColor: "var(--border-primary)", color: "var(--text-secondary)" }}>
+                Cancel
+              </button>
+              <button type="button" 
+                onClick={async () => { 
+                  setShowEndConfirm(false); 
+                  const ended = await endActiveSession(); 
+                  if (ended && pendingEndAction === "portal") {
+                    router.push("/admin/dashboard");
+                  }
+                }}
+                className="flex-1 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition-all cursor-pointer">
+                End Session
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

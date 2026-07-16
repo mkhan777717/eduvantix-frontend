@@ -461,9 +461,7 @@ export default function LiveChat({
     return a.identity.localeCompare(b.identity);
   });
 
-  const studentParticipantsCount = sortedParticipants.filter(
-    (p) => p.identity?.toLowerCase().trim() !== hostUsername?.toLowerCase().trim()
-  ).length;
+  const studentParticipantsCount = Math.max(0, sortedParticipants.length - 1);
 
   // ─── Collapsed Toggle Button ───────────────────────────────────────
   if (canCollapse && !isOpen && !isPoppedOut && !isPopoutInstance) {
@@ -606,10 +604,10 @@ export default function LiveChat({
           className="flex items-center justify-between px-4 py-2.5 border-b select-none"
           style={{ borderColor: "rgba(148, 163, 184, 0.16)" }}
         >
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 overflow-x-auto no-scrollbar flex-1 min-w-0 pr-2">
             <button
               onClick={() => setActiveTab("chat")}
-              className={`flex items-center gap-1.5 pb-0.5 border-b-2 text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer ${activeTab === "chat"
+              className={`flex items-center gap-1.5 pb-0.5 border-b-2 text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer shrink-0 whitespace-nowrap ${activeTab === "chat"
                   ? "border-zinc-500 text-[var(--text-primary)]"
                   : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 }`}
@@ -630,14 +628,14 @@ export default function LiveChat({
 
             <button
               onClick={() => setActiveTab("participants")}
-              className={`flex items-center gap-1.5 pb-0.5 border-b-2 text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer ${activeTab === "participants"
+              className={`flex items-center gap-1.5 pb-0.5 border-b-2 text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer shrink-0 whitespace-nowrap ${activeTab === "participants"
                   ? "border-zinc-500 text-[var(--text-primary)]"
                   : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 }`}
               id="tab-participants-btn"
             >
               <Users size={13} />
-              <span>{isHost ? "Stud" : "Students"}</span>
+              <span>Students</span>
               <span
                 className="text-[9px] font-bold px-1.5 py-0.2 rounded-full"
                 style={{ backgroundColor: "var(--bg-badge)", color: "var(--text-accent)" }}
@@ -648,7 +646,7 @@ export default function LiveChat({
 
             <button
               onClick={() => setActiveTab("polls")}
-              className={`flex items-center gap-1.5 pb-0.5 border-b-2 text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer ${activeTab === "polls"
+              className={`flex items-center gap-1.5 pb-0.5 border-b-2 text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer shrink-0 whitespace-nowrap ${activeTab === "polls"
                   ? "border-zinc-500 text-[var(--text-primary)]"
                   : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 }`}
@@ -661,7 +659,7 @@ export default function LiveChat({
             {isHost && (
               <button
                 onClick={() => setActiveTab("settings")}
-                className={`flex items-center gap-1.5 pb-0.5 border-b-2 text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer ${activeTab === "settings"
+                className={`flex items-center gap-1.5 pb-0.5 border-b-2 text-xs font-extrabold uppercase tracking-wider transition-colors cursor-pointer shrink-0 whitespace-nowrap ${activeTab === "settings"
                     ? "border-zinc-500 text-[var(--text-primary)]"
                     : "border-transparent text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                   }`}

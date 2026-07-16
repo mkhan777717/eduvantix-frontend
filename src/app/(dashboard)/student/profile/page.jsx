@@ -22,24 +22,67 @@ const Heatmap = ({ data, totalActiveDays, maxStreak }) => {
   const days = 7;
   const today = new Date();
   
-  // Generate last 365 days
-  const grid = [];
-  let currentDate = new Date(today);
-  currentDate.setDate(currentDate.getDate() - (weeks * days) + 1);
+  // Calculate start date (52 weeks ago)
+  let startDate = new Date(today);
+  startDate.setDate(startDate.getDate() - (weeks * days) + 1);
+
+  // Group by month
+  const monthsData = [];
+  let currentMonth = -1;
+  let currentMonthObj = null;
+  let currentWeek = null;
+
+  let currentDate = new Date(startDate);
   
-  for (let w = 0; w < weeks; w++) {
-    const week = [];
-    for (let d = 0; d < days; d++) {
-      const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
-      const count = data[dateStr] || 0;
-      week.push({ date: dateStr, count });
-      currentDate.setDate(currentDate.getDate() + 1);
+  for (let i = 0; i < weeks * days; i++) {
+    const month = currentDate.getMonth();
+    const dayOfWeek = currentDate.getDay(); // 0 (Sun) to 6 (Sat)
+    
+    // If we've hit a new month, push the old month and start a new one
+    if (month !== currentMonth) {
+      if (currentMonthObj) {
+        if (currentWeek && currentWeek.length > 0) {
+          // pad the rest of the week with nulls and push
+          while (currentWeek.length < 7) currentWeek.push(null);
+          currentMonthObj.weeks.push(currentWeek);
+        }
+        monthsData.push(currentMonthObj);
+      }
+      currentMonth = month;
+      const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      currentMonthObj = {
+        name: monthNames[month],
+        weeks: []
+      };
+      
+      // Start a new week with null padding up to the dayOfWeek
+      currentWeek = Array(dayOfWeek).fill(null);
     }
-    grid.push(week);
+    
+    const dateStr = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`;
+    const count = data?.[dateStr] || 0;
+    
+    currentWeek.push({ date: dateStr, count });
+    
+    if (currentWeek.length === 7) {
+      currentMonthObj.weeks.push(currentWeek);
+      currentWeek = [];
+    }
+    
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+  
+  // Push the last month
+  if (currentMonthObj) {
+    if (currentWeek && currentWeek.length > 0) {
+      while (currentWeek.length < 7) currentWeek.push(null);
+      currentMonthObj.weeks.push(currentWeek);
+    }
+    monthsData.push(currentMonthObj);
   }
 
   const getColor = (count) => {
-    if (count === 0) return "var(--bg-primary)";
+    if (count === 0) return "rgba(128, 128, 128, 0.15)";
     if (count < 2) return "rgba(16, 185, 129, 0.3)";
     if (count < 4) return "rgba(16, 185, 129, 0.6)";
     if (count < 6) return "rgba(16, 185, 129, 0.8)";
@@ -69,26 +112,53 @@ const Heatmap = ({ data, totalActiveDays, maxStreak }) => {
       </div>
       
       <div className="relative z-10 overflow-x-auto pb-4 custom-scrollbar">
-        <div className="flex gap-[3px] min-w-max">
-          {grid.map((week, wIdx) => (
-            <div key={wIdx} className="flex flex-col gap-[3px]">
-              {week.map((day, dIdx) => (
-                <div 
-                  key={dIdx} 
-                  className="w-3.5 h-3.5 rounded-[2px] transition-all hover:ring-2 hover:ring-white/50 cursor-crosshair"
-                  style={{ backgroundColor: getColor(day.count) }}
-                  title={`${day.count} submissions on ${day.date}`}
-                />
-              ))}
-            </div>
-          ))}
+        <div className="flex gap-4 min-w-max pt-1 relative">
+          {/* Left edge Weekday Labels */}
+          <div className="sticky left-0 z-20 flex flex-col gap-[3px] text-[9px] font-bold uppercase tracking-widest text-[var(--text-muted)] pr-2" style={{ backgroundColor: "var(--bg-secondary)" }}>
+            <div className="h-3.5" />
+            <div className="h-3.5 flex items-center">Mon</div>
+            <div className="h-3.5" />
+            <div className="h-3.5 flex items-center">Wed</div>
+            <div className="h-3.5" />
+            <div className="h-3.5 flex items-center">Fri</div>
+            <div className="h-3.5" />
+          </div>
+
+          {/* Month Blocks */}
+          <div className="flex gap-4">
+            {monthsData.map((month, mIdx) => (
+              <div key={mIdx} className="flex flex-col gap-2">
+                <div className="flex gap-[3px]">
+                  {month.weeks.map((week, wIdx) => (
+                    <div key={wIdx} className="flex flex-col gap-[3px]">
+                      {week.map((day, dIdx) => (
+                        day ? (
+                          <div 
+                            key={dIdx} 
+                            className="w-3.5 h-3.5 rounded-[2px] transition-all hover:ring-2 hover:ring-white/50 cursor-crosshair"
+                            style={{ backgroundColor: getColor(day.count) }}
+                            title={`${day.count} submissions on ${day.date}`}
+                          />
+                        ) : (
+                          <div key={dIdx} className="w-3.5 h-3.5" />
+                        )
+                      ))}
+                    </div>
+                  ))}
+                </div>
+                <div className="text-[10px] font-bold uppercase text-[var(--text-muted)] text-center">
+                  {month.name}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
         <div className="flex items-center justify-between mt-6 text-[9px] font-bold uppercase tracking-widest" style={{ color: "var(--text-muted)" }}>
           <span>Learn</span>
           <div className="flex items-center gap-2">
             <span>Less</span>
             <div className="flex gap-1">
-              <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: "var(--bg-primary)" }} />
+              <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: "rgba(128, 128, 128, 0.15)" }} />
               <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: "rgba(16, 185, 129, 0.3)" }} />
               <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: "rgba(16, 185, 129, 0.6)" }} />
               <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: "rgba(16, 185, 129, 0.8)" }} />

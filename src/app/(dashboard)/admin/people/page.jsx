@@ -149,10 +149,10 @@ export default function ManagePeoplePage() {
     // Use the backend's expected role mapping
     const payloadRole = memberRole === 'STUDENT' ? 'USER' : memberRole;
 
-    // Get id from localStorage dmx_auth_user
+    // Get id from localStorage eduvantix_auth_user
     let instituteId = undefined;
     try {
-      const userStr = typeof window !== "undefined" ? localStorage.getItem("dmx_auth_user") : null;
+      const userStr = typeof window !== "undefined" ? localStorage.getItem("eduvantix_auth_user") : null;
 
       if (userStr) {
         const userObj = JSON.parse(userStr);
@@ -160,7 +160,7 @@ export default function ManagePeoplePage() {
         if (userObj && userObj.id) instituteId = userObj.id;
       }
     } catch(e) {
-      console.warn("Could not parse dmx_auth_user id from localStorage", e);
+      console.warn("Could not parse eduvantix_auth_user id from localStorage", e);
     }
 
     // PROACTIVE GUARD: Make sure we have an instituteId
@@ -686,7 +686,7 @@ export default function ManagePeoplePage() {
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="e.g. rahul@dmx.com"
+                        placeholder="e.g. rahul@eduvantix.com"
                         className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-[var(--border-accent)] transition-all placeholder:text-[var(--text-muted)]"
                         style={{ borderColor: "var(--border-primary)" }}
                       />
@@ -941,7 +941,7 @@ export default function ManagePeoplePage() {
                         required
                         value={editEmail}
                         onChange={(e) => setEditEmail(e.target.value)}
-                        placeholder="e.g. rahul@dmx.com"
+                        placeholder="e.g. rahul@eduvantix.com"
                         className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-[var(--border-accent)] transition-all placeholder:text-[var(--text-muted)]"
                         style={{ borderColor: "var(--border-primary)" }}
                       />

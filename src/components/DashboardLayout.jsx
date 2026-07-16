@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
+import useThemeStore from "@/store/useThemeStore";
 
 export default function DashboardLayout({ children }) {
   const router = useRouter();
@@ -29,13 +30,17 @@ export default function DashboardLayout({ children }) {
   const [showEndConfirmModal, setShowEndConfirmModal] = useState(false);
   const [pendingNavAction, setPendingNavAction] = useState(null);
 
-  const effectiveRole = user?.role || (typeof window !== "undefined" ? JSON.parse(localStorage.getItem("dmx_auth_user") || "{}")?.role : null);
+  const effectiveRole = user?.role || (typeof window !== "undefined" ? JSON.parse(localStorage.getItem("eduvantix_auth_user") || "{}")?.role : null);
   const isSuperAdmin = effectiveRole === "ADMIN";
   const isInstAdmin = effectiveRole === "INSTITUTE_ADMIN";
   const isBatchMgr = effectiveRole === "BATCH_MANAGER";
   const isMentor = effectiveRole === "MENTOR";
   const isStudent = effectiveRole === "USER";
+  const { isDark, initTheme } = useThemeStore();
 
+  useEffect(() => {
+    initTheme();
+  }, [initTheme]);
   const isStudentSession = typeof window !== "undefined" && localStorage.getItem("synapse_student_session") === "true";
   const isAdminSession = typeof window !== "undefined" && localStorage.getItem("synapse_admin_session") === "true";
   const isMentorSession = typeof window !== "undefined" && localStorage.getItem("synapse_mentor_session") === "true";
@@ -222,39 +227,27 @@ export default function DashboardLayout({ children }) {
 
   const pageTitle = pathname.split("/").filter(Boolean).slice(1).map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(" / ") || "Dashboard";
 
+  const isLiveStudioMode = (activeSession && pathname === "/admin/live") || pathname === "/live";
+
   return (
     <div className="flex h-screen overflow-hidden" style={{ backgroundColor: "var(--bg-primary)" }}>
-      <aside
+      {!isLiveStudioMode && (
+        <aside
         className="hidden md:flex flex-col h-full border-r transition-all duration-300 relative z-30"
         style={{ width: isSidebarCollapsed ? "60px" : "195px", backgroundColor: "var(--bg-sidebar)", borderColor: "var(--border-primary)" }}
       >
         <div className="flex items-center justify-between px-4 h-14 border-b" style={{ borderColor: "var(--border-primary)" }}>
-          <Link href="/" className="flex items-center gap-2.5">
-            {!isSidebarCollapsed && (
-              <>
-                <div className="h-6 w-6 rounded-md flex items-center justify-center text-[var(--text-on-accent)] flex-shrink-0" style={{ background: "var(--accent-gradient)" }}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                </div>
-                <span className="text-[13px] font-bold tracking-tight" style={{ color: "var(--text-primary)" }}>Eduvantix</span>
-              </>
-            )}
-            {isSidebarCollapsed && (
-              <div className="h-6 w-6 rounded-md flex items-center justify-center text-[var(--text-on-accent)] mx-auto" style={{ background: "var(--accent-gradient)" }}>
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                </svg>
-              </div>
-            )}
+          <Link href="/" className="flex items-center gap-3 px-2 py-4 mb-2">
+            <div className={`flex items-center overflow-hidden transition-all ${isSidebarCollapsed ? "w-8" : "w-32"}`}>
+              <img
+                src={isDark ? "/logo-white-text.webp" : "/logo-black-text.webp"}
+                alt="Eduvantix Logo"
+                className="h-6 object-contain object-left shrink-0 max-w-none"
+                style={{ display: "block" }}
+              />
+            </div>
           </Link>
         </div>
-
-        {!isSidebarCollapsed && (
-          <div className="px-4 pt-5 pb-2">
-            <span className="text-[9px] font-bold tracking-[0.18em] uppercase" style={{ color: "var(--text-muted)" }}>Navigation</span>
-          </div>
-        )}
 
         <nav className={`flex-1 px-2 py-2 space-y-0.5 ${isSidebarCollapsed ? 'overflow-hidden' : 'overflow-y-auto overflow-x-hidden'}`}>
           {sidebarLinks.map((link) => {
@@ -309,8 +302,9 @@ export default function DashboardLayout({ children }) {
           </button>
         </div>
       </aside>
+      )}
 
-      {isMobileMenuOpen && (
+      {isMobileMenuOpen && !isLiveStudioMode && (
         <div className="fixed inset-0 z-50 flex md:hidden" onClick={() => setIsMobileMenuOpen(false)}>
           <div
             className="w-72 h-full flex flex-col p-5 shadow-2xl"
@@ -319,12 +313,12 @@ export default function DashboardLayout({ children }) {
           >
             <div className="flex items-center justify-between mb-6">
               <Link href="/" className="flex items-center gap-2.5" onClick={() => setIsMobileMenuOpen(false)}>
-                <div className="h-6 w-6 rounded-md flex items-center justify-center text-[var(--text-on-accent)]" style={{ background: "var(--accent-gradient)" }}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                  </svg>
-                </div>
-                <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>Eduvantix</span>
+                <img
+                  src={isDark ? "/logo-white-text.webp" : "/logo-black-text.webp"}
+                  alt="Eduvantix Logo"
+                  className="h-6 object-contain object-left"
+                  style={{ display: "block" }}
+                />
               </Link>
               <button onClick={() => setIsMobileMenuOpen(false)} className="p-1.5 rounded-lg" style={{ color: "var(--text-secondary)" }}>
                 <X size={16} />
@@ -351,8 +345,9 @@ export default function DashboardLayout({ children }) {
       )}
 
       <div className="flex-1 flex flex-col h-full overflow-hidden">
-        <header
-          className="flex items-center justify-between px-6 h-14 border-b flex-shrink-0"
+        {!isLiveStudioMode && (
+          <header
+            className="flex items-center justify-between px-6 h-14 border-b flex-shrink-0"
           style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)" }}
         >
           <div className="flex items-center gap-4">
@@ -450,9 +445,10 @@ export default function DashboardLayout({ children }) {
             )}
           </div>
         </header>
+        )}
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto p-6 md:p-8">
+        <main className={`flex-1 overflow-y-auto ${isLiveStudioMode ? 'bg-[var(--bg-primary)]' : ''}`}>
+          <div className={isLiveStudioMode ? "h-full p-2 md:p-4" : "max-w-7xl mx-auto p-6 md:p-8"}>
             {children}
           </div>
         </main>

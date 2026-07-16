@@ -73,7 +73,7 @@ export default function AIAllInOneVivaPage() {
   const [customSubjects, setCustomSubjects] = useState(() => {
     if (typeof window !== "undefined") {
       try {
-        const saved = localStorage.getItem("dmx_custom_subjects");
+        const saved = localStorage.getItem("eduvantix_custom_subjects");
         return saved ? JSON.parse(saved) : [];
       } catch { return []; }
     }
@@ -81,7 +81,7 @@ export default function AIAllInOneVivaPage() {
   });
 
   useEffect(() => {
-    localStorage.setItem("dmx_custom_subjects", JSON.stringify(customSubjects));
+    localStorage.setItem("eduvantix_custom_subjects", JSON.stringify(customSubjects));
   }, [customSubjects]);
 
   useEffect(() => {

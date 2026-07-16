@@ -15,7 +15,7 @@ export default function ManageBatchesPage() {
 
   // Mock list of registered members in the institute (aligned with people list)
   const [managers, setManagers] = useState([
-    { id: 4, name: "Sakshi", email: "sakshi@dmx.com" }
+    { id: 4, name: "Sakshi", email: "sakshi@eduvantix.com" }
   ]);
 
   const [mentors, setMentors] = useState([]);
