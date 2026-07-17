@@ -188,6 +188,11 @@ export default function DashboardLayout({ children }) {
   const isContestWorkspace = /^\/contest\/[^/]+/.test(pathname);
   if (isContestWorkspace) return <>{children}</>;
 
+  // Hide sidebar + header for course catalog & course detail pages — they are
+  // full-page immersive layouts that manage their own navigation.
+  const isCoursePage = pathname.startsWith("/courses");
+  if (isCoursePage) return <>{children}</>;
+
   const isPublicRoute = !dashboardUser && (pathname.startsWith('/practice') || pathname.startsWith('/contest') || pathname.startsWith('/courses') || pathname.startsWith('/live-classes'));
 
   if (isPublicRoute) {

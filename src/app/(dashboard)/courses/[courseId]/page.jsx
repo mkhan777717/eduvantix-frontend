@@ -630,7 +630,7 @@ export default function DynamicCoursePage() {
       >
         {/* Sidebar Header */}
         <div className="flex h-16 items-center justify-between px-5" style={{ borderBottom: "1px solid var(--border-primary)" }}>
-          <a href="/" className="flex items-center space-x-2 text-lg font-bold font-display" style={{ color: "var(--text-primary)" }}>
+          <a href="/courses" className="flex items-center space-x-2 text-lg font-bold font-display" style={{ color: "var(--text-primary)" }}>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg text-[var(--text-on-accent)] shadow-md" style={{ background: "var(--accent-gradient)" }}>
               <Sparkles size={16} />
             </div>
@@ -643,6 +643,20 @@ export default function DynamicCoursePage() {
           >
             <X size={20} />
           </button>
+        </div>
+
+        {/* Back to Catalog */}
+        <div className="px-3 pt-2 pb-1" style={{ borderBottom: "1px solid var(--border-primary)" }}>
+          <a
+            href="/courses"
+            className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-all w-full"
+            style={{ color: "var(--text-secondary)" }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = "var(--bg-hover)"; e.currentTarget.style.color = "var(--text-primary)"; }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.color = "var(--text-secondary)"; }}
+          >
+            <ArrowLeft size={13} />
+            <span>Back to Catalog</span>
+          </a>
         </div>
 
         {/* Global Progress Indicators */}
