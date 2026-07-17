@@ -425,7 +425,7 @@ export default function ContestLobby() {
           <div className="relative min-h-[400px]">
             {isGlobalStudent && (
               <div className="absolute inset-0 z-30 flex items-center justify-center bg-slate-950/40 backdrop-blur-md border border-slate-500/10 rounded-3xl select-none min-h-[450px]">
-                <div 
+                <div
                   className="w-full max-w-[360px] rounded-[32px] p-8 flex flex-col items-center text-center relative border backdrop-blur-2xl shadow-2xl transition-all duration-300"
                   style={{
                     background: "linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%)",
@@ -465,13 +465,10 @@ export default function ContestLobby() {
                     </svg>
                   </div>
 
-                  <h3 className="text-xl font-extrabold text-white tracking-tight mb-2">Page Locked</h3>
-                  <p className="text-xs text-slate-300 leading-relaxed max-w-[240px] mb-8">
-                    You don't have access to view this page. Enroll in an institute to unlock.
-                  </p>
+                  <h3 className="text-xl font-extrabold text-white tracking-tight mb-6">Page Locked</h3>
 
                   {/* Locked Pill with timer */}
-                  <div 
+                  <div
                     className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-bold text-xs shadow-md border"
                     style={{
                       background: "#ffffff",
@@ -480,7 +477,7 @@ export default function ContestLobby() {
                     }}
                   >
                     <Lock size={12} className="text-slate-800" />
-                    <span>Locked: {timeLeftStr}</span>
+                    <span>Unlocks In: {timeLeftStr}</span>
                   </div>
                 </div>
               </div>
@@ -489,339 +486,339 @@ export default function ContestLobby() {
             <div className={isGlobalStudent ? "opacity-30 pointer-events-none blur-[1.5px]" : ""}>
               {/* Lobby controls bar */}
               <div className="flex flex-col lg:flex-row gap-4 justify-between items-center p-4 rounded-3xl border border-[var(--border-primary)] backdrop-blur-md"
-            style={{
-              backgroundColor: "var(--glass-bg)",
-              borderColor: "var(--border-primary)"
-            }}
-          >
-            {/* Tab links */}
-            <div className="flex flex-wrap gap-1 items-center p-1 rounded-full border" style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)" }}>
-              {[
-                { id: "all", label: "Contests" },
-                { id: "active", label: "Active" },
-                { id: "upcoming", label: "Upcoming" },
-                { id: "past", label: "Past Events" },
-                { id: "leaderboard", label: "Leaderboard" }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className="relative px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer"
-                  style={{
-                    color: activeTab === tab.id ? "#ffffff" : "var(--text-secondary)"
-                  }}
-                >
-                  {activeTab === tab.id && (
-                    <motion.div
-                      layoutId="activeContestTab"
-                      className="absolute inset-0 rounded-full shadow-sm"
-                      style={{ background: "var(--accent-gradient)" }}
-                      transition={{ type: "spring", stiffness: 350, damping: 28 }}
-                    />
-                  )}
-                  <span className="relative z-10">{tab.label}</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Search filter input */}
-            {activeTab !== "leaderboard" && (
-              <div className="relative w-full lg:w-80">
-                <Search size={16} className="absolute left-4 top-3" style={{ color: "var(--text-muted)" }} />
-                <input
-                  type="text"
-                  placeholder="Search contests..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-full py-2.5 pl-11 pr-4 text-xs outline-none border border-[var(--border-primary)] transition-all"
-                  style={{
-                    backgroundColor: "var(--bg-input)",
-                    borderColor: "var(--border-primary)",
-                    color: "var(--text-primary)"
-                  }}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* Tab contents */}
-          <div className="relative">
-            {activeTab === "leaderboard" ? (
-              /* Global Leaderboard Table */
-              <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="border border-[var(--border-primary)] rounded-3xl overflow-hidden shadow-sm max-w-4xl mx-auto"
-                style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}
+                style={{
+                  backgroundColor: "var(--glass-bg)",
+                  borderColor: "var(--border-primary)"
+                }}
               >
-                <div className="px-6 py-5 border-b flex items-center justify-between" style={{ borderColor: "var(--border-primary)" }}>
-                  <div>
-                    <h3 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>Eduvantix Grand Rankings</h3>
-                    <p className="text-xs" style={{ color: "var(--text-secondary)" }}>Updated after every official weekly speedrun contest.</p>
-                  </div>
-                  <Trophy size={20} className="text-amber-500" />
+                {/* Tab links */}
+                <div className="flex flex-wrap gap-1 items-center p-1 rounded-full border" style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)" }}>
+                  {[
+                    { id: "all", label: "Contests" },
+                    { id: "active", label: "Active" },
+                    { id: "upcoming", label: "Upcoming" },
+                    { id: "past", label: "Past Events" },
+                    { id: "leaderboard", label: "Leaderboard" }
+                  ].map(tab => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveTab(tab.id)}
+                      className="relative px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer"
+                      style={{
+                        color: activeTab === tab.id ? "#ffffff" : "var(--text-secondary)"
+                      }}
+                    >
+                      {activeTab === tab.id && (
+                        <motion.div
+                          layoutId="activeContestTab"
+                          className="absolute inset-0 rounded-full shadow-sm"
+                          style={{ background: "var(--accent-gradient)" }}
+                          transition={{ type: "spring", stiffness: 350, damping: 28 }}
+                        />
+                      )}
+                      <span className="relative z-10">{tab.label}</span>
+                    </button>
+                  ))}
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="font-bold text-[var(--text-muted)] border-b" style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)" }}>
-                        <th className="px-6 py-4">Rank</th>
-                        <th className="px-6 py-4">Developer</th>
-                        <th className="px-6 py-4 text-center">Score Points</th>
-                        <th className="px-6 py-4 text-center">Contests Participated</th>
-                        <th className="px-6 py-4 text-right">League Tier</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y" style={{ divideColor: "var(--border-primary)", color: "var(--text-secondary)" }}>
-                      {leaderboardLoading ? (
-                        <tr>
-                          <td colSpan="5" className="px-6 py-8 text-center" style={{ color: "var(--text-muted)" }}>
-                            <RefreshCw size={16} className="animate-spin inline-block mr-2" />
-                            Loading grand rankings...
-                          </td>
-                        </tr>
-                      ) : leaderboard.length === 0 ? (
-                        <tr>
-                          <td colSpan="5" className="px-6 py-8 text-center" style={{ color: "var(--text-muted)" }}>
-                            No rankings calculated yet. Solve problems to show up here!
-                          </td>
-                        </tr>
-                      ) : (
-                        leaderboard.map((player) => (
-                          <tr key={player.rank} className="hover:bg-[var(--bg-secondary)] transition-colors">
-                            <td className="px-6 py-4 font-bold">
-                              {player.rank === 1 ? "🥇" : player.rank === 2 ? "🥈" : player.rank === 3 ? "🥉" : `#${player.rank}`}
-                            </td>
-                            <td className="px-6 py-4 font-semibold text-[var(--text-primary)]">
-                              {player.name}
-                            </td>
-                            <td className="px-6 py-4 text-center font-extrabold text-[var(--text-accent)]">
-                              {player.points}
-                            </td>
-                            <td className="px-6 py-4 text-center">
-                              {player.contests}
-                            </td>
-                            <td className="px-6 py-4 text-right font-bold uppercase tracking-wider text-[10px]">
-                              <span className={player.color}>{player.rankClass}</span>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </motion.div>
-            ) : loading ? (
-              /* Loading state */
-              <div className="flex flex-col items-center justify-center py-24 space-y-4">
-                <RefreshCw size={28} className="animate-spin" style={{ color: "var(--text-accent)" }} />
-                <p className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>Loading contests from the server...</p>
-              </div>
-            ) : filteredContests.length === 0 ? (
-              /* Empty state */
-              <div className="flex flex-col items-center justify-center py-24 space-y-4">
-                <Trophy size={48} className="opacity-20" style={{ color: "var(--text-secondary)" }} />
-                <p className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>No contests found</p>
-                <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
-                  {searchQuery ? "Try a different search term." : "No contests are scheduled yet. Check back soon."}
-                </p>
-                {!searchQuery && (
-                  <button
-                    onClick={fetchContests}
-                    className="flex items-center space-x-2 px-4 py-2 rounded-xl border border-[var(--border-primary)] text-xs font-bold cursor-pointer transition-all"
-                    style={{ borderColor: "var(--border-accent)", color: "var(--text-accent)" }}
-                  >
-                    <RefreshCw size={12} />
-                    <span>Retry</span>
-                  </button>
+                {/* Search filter input */}
+                {activeTab !== "leaderboard" && (
+                  <div className="relative w-full lg:w-80">
+                    <Search size={16} className="absolute left-4 top-3" style={{ color: "var(--text-muted)" }} />
+                    <input
+                      type="text"
+                      placeholder="Search contests..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full rounded-full py-2.5 pl-11 pr-4 text-xs outline-none border border-[var(--border-primary)] transition-all"
+                      style={{
+                        backgroundColor: "var(--bg-input)",
+                        borderColor: "var(--border-primary)",
+                        color: "var(--text-primary)"
+                      }}
+                    />
+                  </div>
                 )}
               </div>
-            ) : (
-              /* Contests Card Grid */
-              <motion.div
-                layout
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-              >
-                <AnimatePresence mode="popLayout">
-                  {filteredContests.map((contest, idx) => {
-                    const isActive = contest.status === "active";
-                    const isUpcoming = contest.status === "upcoming";
-                    const isPast = contest.status === "past";
-                    const isRegistered = registeredContests.includes(contest.id);
 
-                    return (
-                      <motion.div
-                        key={contest.id}
-                        layout
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.4, delay: idx * 0.03 }}
-                        className="group relative flex flex-col justify-between rounded-3xl p-6 shadow-sm border border-[var(--border-primary)] overflow-hidden hover:shadow-xl transition-all duration-300"
-                        style={{
-                          backgroundColor: "var(--bg-card)",
-                          borderColor: "var(--border-card)"
-                        }}
-                      >
-                        {/* Status Line */}
-                        <div
-                          className={`absolute top-0 left-0 right-0 h-[3px] ${isActive ? "bg-emerald-500" : isUpcoming ? "bg-zinc-500" : "bg-slate-400"
-                            }`}
-                        />
+              {/* Tab contents */}
+              <div className="relative">
+                {activeTab === "leaderboard" ? (
+                  /* Global Leaderboard Table */
+                  <motion.div
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="border border-[var(--border-primary)] rounded-3xl overflow-hidden shadow-sm max-w-4xl mx-auto"
+                    style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}
+                  >
+                    <div className="px-6 py-5 border-b flex items-center justify-between" style={{ borderColor: "var(--border-primary)" }}>
+                      <div>
+                        <h3 className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>Eduvantix Grand Rankings</h3>
+                        <p className="text-xs" style={{ color: "var(--text-secondary)" }}>Updated after every official weekly speedrun contest.</p>
+                      </div>
+                      <Trophy size={20} className="text-amber-500" />
+                    </div>
 
-                        {/* Card Top */}
-                        <div className="space-y-4 relative z-10">
-                          <div className="flex justify-between items-center">
-                            <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded border border-[var(--border-primary)] bg-slate-500/5"
-                              style={{ borderColor: "var(--border-primary)", color: "var(--text-secondary)" }}
-                            >
-                              {contest.category}
-                            </span>
-
-                            {/* Dynamic Tag Pill */}
-                            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border border-[var(--border-primary)] ${isActive ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" :
-                              isUpcoming ? "text-zinc-500 bg-zinc-500/10 border-zinc-500/20" :
-                                "text-[var(--text-muted)] bg-slate-500/5 border-transparent"
-                              }`}>
-                              {contest.status.toUpperCase()}
-                            </span>
-                          </div>
-
-                          <div className="space-y-2">
-                            <h3 className="text-lg font-bold font-display leading-snug group-hover:text-[var(--text-accent)] transition-colors"
-                              style={{ color: "var(--text-primary)" }}
-                            >
-                              {contest.title}
-                            </h3>
-                            <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
-                              {contest.desc}
-                            </p>
-                          </div>
-
-                          {/* Stats Grid */}
-                          <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl border border-[var(--border-primary)] bg-slate-500/5" style={{ borderColor: "var(--border-primary)" }}>
-                            <div className="space-y-0.5">
-                              <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase">Points</span>
-                              <div className="text-sm font-black text-[var(--text-primary)]">{contest.totalPoints} pts</div>
-                            </div>
-                            <div className="space-y-0.5">
-                              <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase">Duration</span>
-                              <div className="text-sm font-black text-[var(--text-primary)]">{contest.durationMins} mins</div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Card Bottom CTA Actions */}
-                        <div className="pt-4 mt-6 border-t flex items-center justify-between" style={{ borderColor: "var(--border-primary)" }}>
-                          <div className="flex items-center space-x-1 text-xs" style={{ color: "var(--text-secondary)" }}>
-                            <Clock size={12} className="text-[var(--text-muted)]" />
-                            <span>{contest.timeLeftStr}</span>
-                          </div>
-
-                          {/* --- Student-only action buttons --- */}
-                          {!isStudentLoggedIn ? (
-                            // Non-students / guests: show login nudge
-                            <Link
-                              href="/login?redirect=/contest"
-                              className="px-4 py-2 text-xs font-bold rounded-xl border border-[var(--border-primary)] transition-all cursor-pointer flex items-center space-x-1"
-                              style={{
-                                backgroundColor: "var(--bg-primary)",
-                                borderColor: "var(--border-primary)",
-                                color: "var(--text-muted)"
-                              }}
-                            >
-                              <Lock size={11} />
-                              <span>Login to Participate</span>
-                            </Link>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse text-xs">
+                        <thead>
+                          <tr className="font-bold text-[var(--text-muted)] border-b" style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)" }}>
+                            <th className="px-6 py-4">Rank</th>
+                            <th className="px-6 py-4">Developer</th>
+                            <th className="px-6 py-4 text-center">Score Points</th>
+                            <th className="px-6 py-4 text-center">Contests Participated</th>
+                            <th className="px-6 py-4 text-right">League Tier</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y" style={{ divideColor: "var(--border-primary)", color: "var(--text-secondary)" }}>
+                          {leaderboardLoading ? (
+                            <tr>
+                              <td colSpan="5" className="px-6 py-8 text-center" style={{ color: "var(--text-muted)" }}>
+                                <RefreshCw size={16} className="animate-spin inline-block mr-2" />
+                                Loading grand rankings...
+                              </td>
+                            </tr>
+                          ) : leaderboard.length === 0 ? (
+                            <tr>
+                              <td colSpan="5" className="px-6 py-8 text-center" style={{ color: "var(--text-muted)" }}>
+                                No rankings calculated yet. Solve problems to show up here!
+                              </td>
+                            </tr>
                           ) : (
-                            <>
-                              {isActive && (
-                                contest.attempted ? (
-                                  <button
-                                    disabled
-                                    className="px-4 py-2 text-xs font-bold rounded-xl border border-[var(--border-primary)] flex items-center space-x-1 opacity-60 cursor-not-allowed"
-                                    style={{
-                                      backgroundColor: "var(--bg-badge)",
-                                      borderColor: "var(--border-primary)",
-                                      color: "var(--text-secondary)"
-                                    }}
-                                  >
-                                    <span>Attempted</span>
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={() => handleEnterArena(contest.id)}
-                                    className="px-4 py-2 text-xs font-bold text-[var(--text-on-accent)] rounded-xl shadow-md transition-all cursor-pointer flex items-center space-x-1"
-                                    style={{ background: "var(--accent-gradient)" }}
-                                  >
-                                    <span>Enter Arena</span>
-                                    <ChevronRight size={13} />
-                                  </button>
-                                )
-                              )}
+                            leaderboard.map((player) => (
+                              <tr key={player.rank} className="hover:bg-[var(--bg-secondary)] transition-colors">
+                                <td className="px-6 py-4 font-bold">
+                                  {player.rank === 1 ? "🥇" : player.rank === 2 ? "🥈" : player.rank === 3 ? "🥉" : `#${player.rank}`}
+                                </td>
+                                <td className="px-6 py-4 font-semibold text-[var(--text-primary)]">
+                                  {player.name}
+                                </td>
+                                <td className="px-6 py-4 text-center font-extrabold text-[var(--text-accent)]">
+                                  {player.points}
+                                </td>
+                                <td className="px-6 py-4 text-center">
+                                  {player.contests}
+                                </td>
+                                <td className="px-6 py-4 text-right font-bold uppercase tracking-wider text-[10px]">
+                                  <span className={player.color}>{player.rankClass}</span>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </motion.div>
+                ) : loading ? (
+                  /* Loading state */
+                  <div className="flex flex-col items-center justify-center py-24 space-y-4">
+                    <RefreshCw size={28} className="animate-spin" style={{ color: "var(--text-accent)" }} />
+                    <p className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>Loading contests from the server...</p>
+                  </div>
+                ) : filteredContests.length === 0 ? (
+                  /* Empty state */
+                  <div className="flex flex-col items-center justify-center py-24 space-y-4">
+                    <Trophy size={48} className="opacity-20" style={{ color: "var(--text-secondary)" }} />
+                    <p className="text-lg font-bold" style={{ color: "var(--text-primary)" }}>No contests found</p>
+                    <p className="text-sm" style={{ color: "var(--text-secondary)" }}>
+                      {searchQuery ? "Try a different search term." : "No contests are scheduled yet. Check back soon."}
+                    </p>
+                    {!searchQuery && (
+                      <button
+                        onClick={fetchContests}
+                        className="flex items-center space-x-2 px-4 py-2 rounded-xl border border-[var(--border-primary)] text-xs font-bold cursor-pointer transition-all"
+                        style={{ borderColor: "var(--border-accent)", color: "var(--text-accent)" }}
+                      >
+                        <RefreshCw size={12} />
+                        <span>Retry</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  /* Contests Card Grid */
+                  <motion.div
+                    layout
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                  >
+                    <AnimatePresence mode="popLayout">
+                      {filteredContests.map((contest, idx) => {
+                        const isActive = contest.status === "active";
+                        const isUpcoming = contest.status === "upcoming";
+                        const isPast = contest.status === "past";
+                        const isRegistered = registeredContests.includes(contest.id);
 
-                              {isUpcoming && (
-                                isRegistered ? (
-                                  <button
-                                    disabled
-                                    className="px-4 py-2 text-xs font-bold rounded-xl border border-[var(--border-primary)] flex items-center space-x-1"
-                                    style={{
-                                      backgroundColor: "var(--bg-badge)",
-                                      borderColor: "var(--border-accent)",
-                                      color: "var(--text-accent)"
-                                    }}
-                                  >
-                                    <UserCheck size={13} />
-                                    <span>Registered</span>
-                                  </button>
-                                ) : (
-                                  <button
-                                    onClick={() => handleRegister(contest.id)}
-                                    className="px-4 py-2 text-xs font-bold rounded-xl border border-[var(--border-primary)] transition-all cursor-pointer"
-                                    style={{
-                                      backgroundColor: "var(--bg-primary)",
-                                      borderColor: "var(--border-primary)",
-                                      color: "var(--text-primary)"
-                                    }}
-                                  >
-                                    Register
-                                  </button>
-                                )
-                              )}
+                        return (
+                          <motion.div
+                            key={contest.id}
+                            layout
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            transition={{ duration: 0.4, delay: idx * 0.03 }}
+                            className="group relative flex flex-col justify-between rounded-3xl p-6 shadow-sm border border-[var(--border-primary)] overflow-hidden hover:shadow-xl transition-all duration-300"
+                            style={{
+                              backgroundColor: "var(--bg-card)",
+                              borderColor: "var(--border-card)"
+                            }}
+                          >
+                            {/* Status Line */}
+                            <div
+                              className={`absolute top-0 left-0 right-0 h-[3px] ${isActive ? "bg-emerald-500" : isUpcoming ? "bg-zinc-500" : "bg-slate-400"
+                                }`}
+                            />
 
-                              {isPast && (
-                                <button
-                                  onClick={() => handleViewScoreboard(contest)}
-                                  className="px-4 py-2 text-xs font-bold rounded-xl border border-[var(--border-primary)] transition-all cursor-pointer"
+                            {/* Card Top */}
+                            <div className="space-y-4 relative z-10">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded border border-[var(--border-primary)] bg-slate-500/5"
+                                  style={{ borderColor: "var(--border-primary)", color: "var(--text-secondary)" }}
+                                >
+                                  {contest.category}
+                                </span>
+
+                                {/* Dynamic Tag Pill */}
+                                <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border border-[var(--border-primary)] ${isActive ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" :
+                                  isUpcoming ? "text-zinc-500 bg-zinc-500/10 border-zinc-500/20" :
+                                    "text-[var(--text-muted)] bg-slate-500/5 border-transparent"
+                                  }`}>
+                                  {contest.status.toUpperCase()}
+                                </span>
+                              </div>
+
+                              <div className="space-y-2">
+                                <h3 className="text-lg font-bold font-display leading-snug group-hover:text-[var(--text-accent)] transition-colors"
+                                  style={{ color: "var(--text-primary)" }}
+                                >
+                                  {contest.title}
+                                </h3>
+                                <p className="text-xs leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                                  {contest.desc}
+                                </p>
+                              </div>
+
+                              {/* Stats Grid */}
+                              <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl border border-[var(--border-primary)] bg-slate-500/5" style={{ borderColor: "var(--border-primary)" }}>
+                                <div className="space-y-0.5">
+                                  <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase">Points</span>
+                                  <div className="text-sm font-black text-[var(--text-primary)]">{contest.totalPoints} pts</div>
+                                </div>
+                                <div className="space-y-0.5">
+                                  <span className="text-[10px] text-[var(--text-muted)] font-bold uppercase">Duration</span>
+                                  <div className="text-sm font-black text-[var(--text-primary)]">{contest.durationMins} mins</div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Card Bottom CTA Actions */}
+                            <div className="pt-4 mt-6 border-t flex items-center justify-between" style={{ borderColor: "var(--border-primary)" }}>
+                              <div className="flex items-center space-x-1 text-xs" style={{ color: "var(--text-secondary)" }}>
+                                <Clock size={12} className="text-[var(--text-muted)]" />
+                                <span>{contest.timeLeftStr}</span>
+                              </div>
+
+                              {/* --- Student-only action buttons --- */}
+                              {!isStudentLoggedIn ? (
+                                // Non-students / guests: show login nudge
+                                <Link
+                                  href="/login?redirect=/contest"
+                                  className="px-4 py-2 text-xs font-bold rounded-xl border border-[var(--border-primary)] transition-all cursor-pointer flex items-center space-x-1"
                                   style={{
                                     backgroundColor: "var(--bg-primary)",
                                     borderColor: "var(--border-primary)",
-                                    color: "var(--text-primary)"
+                                    color: "var(--text-muted)"
                                   }}
                                 >
-                                  View Scoreboard
-                                </button>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-                </AnimatePresence>
+                                  <Lock size={11} />
+                                  <span>Login to Participate</span>
+                                </Link>
+                              ) : (
+                                <>
+                                  {isActive && (
+                                    contest.attempted ? (
+                                      <button
+                                        disabled
+                                        className="px-4 py-2 text-xs font-bold rounded-xl border border-[var(--border-primary)] flex items-center space-x-1 opacity-60 cursor-not-allowed"
+                                        style={{
+                                          backgroundColor: "var(--bg-badge)",
+                                          borderColor: "var(--border-primary)",
+                                          color: "var(--text-secondary)"
+                                        }}
+                                      >
+                                        <span>Attempted</span>
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() => handleEnterArena(contest.id)}
+                                        className="px-4 py-2 text-xs font-bold text-[var(--text-on-accent)] rounded-xl shadow-md transition-all cursor-pointer flex items-center space-x-1"
+                                        style={{ background: "var(--accent-gradient)" }}
+                                      >
+                                        <span>Enter Arena</span>
+                                        <ChevronRight size={13} />
+                                      </button>
+                                    )
+                                  )}
 
-                {/* Empty fallbacks */}
-                {filteredContests.length === 0 && (
-                  <div className="col-span-full py-16 text-center space-y-4">
-                    <Terminal size={48} className="mx-auto text-[var(--text-muted)]" />
-                    <p className="text-base font-bold" style={{ color: "var(--text-primary)" }}>No contests match filters.</p>
-                    <p className="text-xs" style={{ color: "var(--text-secondary)" }}>Try modifying filters or search query terms.</p>
-                  </div>
+                                  {isUpcoming && (
+                                    isRegistered ? (
+                                      <button
+                                        disabled
+                                        className="px-4 py-2 text-xs font-bold rounded-xl border border-[var(--border-primary)] flex items-center space-x-1"
+                                        style={{
+                                          backgroundColor: "var(--bg-badge)",
+                                          borderColor: "var(--border-accent)",
+                                          color: "var(--text-accent)"
+                                        }}
+                                      >
+                                        <UserCheck size={13} />
+                                        <span>Registered</span>
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() => handleRegister(contest.id)}
+                                        className="px-4 py-2 text-xs font-bold rounded-xl border border-[var(--border-primary)] transition-all cursor-pointer"
+                                        style={{
+                                          backgroundColor: "var(--bg-primary)",
+                                          borderColor: "var(--border-primary)",
+                                          color: "var(--text-primary)"
+                                        }}
+                                      >
+                                        Register
+                                      </button>
+                                    )
+                                  )}
+
+                                  {isPast && (
+                                    <button
+                                      onClick={() => handleViewScoreboard(contest)}
+                                      className="px-4 py-2 text-xs font-bold rounded-xl border border-[var(--border-primary)] transition-all cursor-pointer"
+                                      style={{
+                                        backgroundColor: "var(--bg-primary)",
+                                        borderColor: "var(--border-primary)",
+                                        color: "var(--text-primary)"
+                                      }}
+                                    >
+                                      View Scoreboard
+                                    </button>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </AnimatePresence>
+
+                    {/* Empty fallbacks */}
+                    {filteredContests.length === 0 && (
+                      <div className="col-span-full py-16 text-center space-y-4">
+                        <Terminal size={48} className="mx-auto text-[var(--text-muted)]" />
+                        <p className="text-base font-bold" style={{ color: "var(--text-primary)" }}>No contests match filters.</p>
+                        <p className="text-xs" style={{ color: "var(--text-secondary)" }}>Try modifying filters or search query terms.</p>
+                      </div>
+                    )}
+                  </motion.div>
                 )}
-              </motion.div>
-            )}
-          </div>
+              </div>
             </div>
           </div>
 
