@@ -16,11 +16,11 @@ const FEATURES_LIST = [
         title: "Complete Institute Admin Portal",
         subtitle: "Admin Portal",
         icon: ShieldAlert,
-        description: "A centralized command center for your institution. Create and manage mentors, batch managers, and students. Organize them into batches, track progress, and oversee every aspect of your campus operations.",
+        description: "A centralized command center for your institution. Create and manage mentors, batch managers, and students. Organize them into batches, track progress, and oversee every aspect of your institute operations.",
         bullets: [
             "Create & manage Mentors, Batch Managers, and Students",
             "Organize students into batches and cohorts effortlessly",
-            "Full campus-wide analytics and progress dashboards",
+            "Full institute-wide analytics and progress dashboards",
             "Role-based access control for secure operations"
         ],
         mockup: "admin",
@@ -1806,7 +1806,7 @@ function FeatureScrollStack() {
                         <span className="text-[11px] font-bold tracking-wider uppercase text-emerald-500">Platform Features</span>
                     </div>
                     <h2 className="text-3xl font-black tracking-tight leading-tight mb-3" style={{ color: "var(--text-primary)" }}>
-                        Everything your campus needs, <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">all in one place.</span>
+                        Everything your institute needs, <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">all in one place.</span>
                     </h2>
                     <p className="text-sm text-slate-400">Four powerful modules. One unified platform. Zero compromises.</p>
                 </div>
@@ -1828,7 +1828,7 @@ function FeatureScrollStack() {
                     <span className="text-[11px] font-bold tracking-wider uppercase text-emerald-500">Platform Features</span>
                 </div>
                 <h2 className="text-6xl md:text-7xl font-bold tracking-tighter font-black leading-tight mb-2" style={{ color: "var(--text-primary)" }}>
-                    Everything your campus needs, <br></br> <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">all in one place.</span>
+                    Everything your institute needs, <br></br> <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">all in one place.</span>
                 </h2>
             </div>
 

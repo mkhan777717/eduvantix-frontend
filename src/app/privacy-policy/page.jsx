@@ -15,7 +15,7 @@ export default function PrivacyPolicy() {
         <section>
           <h2 className="text-2xl font-semibold mb-4 text-[var(--text-primary)]">1. Introduction</h2>
           <p>
-            Welcome to Eduvantix, a product by DataMindx (<a href="https://datamindx.in" target="_blank" rel="noopener noreferrer" className="underline text-[var(--text-primary)]">datamindx.in</a>). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our platform.
+            Welcome to Eduvantix, a product by DatamindX (<a href="https://datamindx.in" target="_blank" rel="noopener noreferrer" className="underline text-[var(--text-primary)]">datamindx.in</a>). This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our platform.
           </p>
         </section>
 

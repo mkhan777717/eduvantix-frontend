@@ -160,7 +160,7 @@ export default function Footer() {
           <p className="text-[11px]" style={{ color: "var(--text-muted)" }}>
             © {new Date().getFullYear()} Eduvantix Inc. All rights reserved. A product of{" "}
             <a href="https://datamindx.in" target="_blank" rel="noopener noreferrer" className="hover:text-[var(--text-secondary)] transition-colors underline">
-              DataMindx
+              DatamindX
             </a>.
           </p>
 

@@ -41,6 +41,19 @@ export default function Navbar() {
 
   return (
     <>
+      {/* Blurred Top Overlay */}
+      <div
+        className="fixed top-0 left-0 right-0 z-[49] pointer-events-none"
+        style={{
+          height: "40px",
+          background: isDark
+            ? "rgba(15,15,15,0.85)"
+            : "rgba(240,240,240,0.85)",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+          transition: "background 0.25s"
+        }}
+      ></div>
       <motion.header
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}

@@ -129,9 +129,7 @@ const SandboxIllustration = () => {
 
 const AIIllustration = () => {
   return (
-    <div className="w-full h-full p-4 md:p-6 flex flex-col justify-center items-center font-mono text-[10px] relative overflow-hidden group 
-      bg-emerald-50 dark:bg-[var(--bg-secondary)]
-      ">
+    <div className="w-full h-full p-4 md:p-6 flex flex-col justify-center items-center font-mono text-[10px] relative overflow-hidden group bg-emerald-50 dark:bg-[var(--bg-secondary)]">
       <div className="absolute inset-0 bg-emerald-100/60 dark:bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
 
       {/* Code Background */}

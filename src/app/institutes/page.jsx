@@ -406,7 +406,7 @@ function HeroRightGraphic() {
             <div className="w-6 h-6 rounded bg-blue-500/20 flex items-center justify-center border border-blue-500/30">
               <Building2 size={12} className="text-blue-400" />
             </div>
-            <span className="text-[10px] font-bold text-slate-200">Campus Overview</span>
+            <span className="text-[10px] font-bold text-slate-200">Institute Overview</span>
           </div>
         </div>
         <div className="space-y-3 mt-2">
@@ -629,7 +629,7 @@ export default function InstitutesPage() {
                     transition={{ boxShadow: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
                   >
                     <Building2 size={14} className="text-emerald-500" />
-                    <span className="text-[11px] font-bold tracking-wider uppercase text-emerald-500">Eduvantix for Campus</span>
+                    <span className="text-[11px] font-bold tracking-wider uppercase text-emerald-500">Eduvantix for Institute</span>
                   </motion.div>
                 </motion.div>
 
@@ -745,7 +745,7 @@ export default function InstitutesPage() {
                       {[
                         { icon: <Users size={22} className="text-emerald-500" />, title: "Mentor Portal", desc: "Dedicated dashboard for instructors to manage submissions, guide students, and track engagement." },
                         { icon: <Layers size={22} className="text-emerald-500" />, title: "Batch Manager", desc: "Organize students into cohorts, assign tracks, and monitor batch-wise progress effortlessly." },
-                        { icon: <BarChart2 size={22} className="text-emerald-500" />, title: "Analytics & Reports", desc: "Comprehensive dashboards with real-time insights into student performance and campus metrics." },
+                        { icon: <BarChart2 size={22} className="text-emerald-500" />, title: "Analytics & Reports", desc: "Comprehensive dashboards with real-time insights into student performance and institute metrics." },
                         { icon: <GraduationCap size={22} className="text-emerald-500" />, title: "Study Materials", desc: "Centralized distribution of curriculum, notes, and references directly to specific batches." },
                         { icon: <Calendar size={22} className="text-emerald-500" />, title: "Attendance Tracking", desc: "Track and monitor student attendance seamlessly across all live sessions, contests, and assignments." },
                         { icon: <ShieldAlert size={22} className="text-emerald-500" />, title: "Role-Based Access", desc: "Granular control over permissions for admins, mentors, and students with secure authentication." },
@@ -833,7 +833,7 @@ export default function InstitutesPage() {
                           </p>
                           <div className="space-y-4 pt-4">
                             {[
-                              "Custom campus onboarding",
+                              "Custom institute onboarding",
                               "Dedicated support manager",
                               "Bulk student provisioning",
                               "Customized tracking & analytics"
@@ -941,7 +941,7 @@ export default function InstitutesPage() {
                                   <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Message (Optional)</label>
                                   <textarea value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}
                                     className="w-full px-4 py-3 rounded-xl border bg-transparent outline-none transition-all duration-300 resize-none border-[var(--border-primary)] focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.1)]"
-                                    rows={4} style={{ color: "var(--text-primary)" }} placeholder="Tell us about your campus size and specific requirements..." />
+                                    rows={4} style={{ color: "var(--text-primary)" }} placeholder="Tell us about your institute size and specific requirements..." />
                                 </div>
 
                                 <MagneticButton

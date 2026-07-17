@@ -15,7 +15,7 @@ export default function TermsOfService() {
         <section>
           <h2 className="text-2xl font-semibold mb-4 text-[var(--text-primary)]">1. Acceptance of Terms</h2>
           <p>
-            By accessing and using Eduvantix, a product by DataMindx (<a href="https://datamindx.in" target="_blank" rel="noopener noreferrer" className="underline text-[var(--text-primary)]">datamindx.in</a>), you accept and agree to be bound by the terms and provision of this agreement.
+            By accessing and using Eduvantix, a product by DatamindX (<a href="https://datamindx.in" target="_blank" rel="noopener noreferrer" className="underline text-[var(--text-primary)]">datamindx.in</a>), you accept and agree to be bound by the terms and provision of this agreement.
           </p>
         </section>
 

@@ -213,9 +213,10 @@ function PlanCard({ plan, isAnnual, index, isSelected, onClick }) {
             >
               <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
             </svg>
-            <span style={{ color: plan.featured ? "rgba(255,255,255,0.5)" : "var(--text-muted)", textDecoration: "line-through" }}>
+            <span style={{ color: plan.featured ? "var(--text-secondary)" : "var(--text-muted)", textDecoration: plan.featured ? "none" : "line-through" }}>
               {f}
             </span>
+       
           </div>
         ))}
       </div>

@@ -912,12 +912,12 @@ export default function Tracks() {
                     </div>
 
                     <div className="mb-8">
-                      <div className="text-[10px] font-black tracking-widest uppercase opacity-40 mb-2 font-mono">// TECH STACK</div>
+                      <div className="text-[10px] font-black tracking-widest uppercase opacity-40 mb-2 font-mono">TECH STACK</div>
                       <div className="font-bold tracking-wide text-xl uppercase">{prod.stack}</div>
                     </div>
 
                     <div className="mb-auto">
-                      <div className="text-[10px] font-black tracking-widest uppercase opacity-40 mb-3 font-mono">// BIOGRAPHY</div>
+                      <div className="text-[10px] font-black tracking-widest uppercase opacity-40 mb-3 font-mono">BIOGRAPHY</div>
                       <p className="opacity-70 text-sm leading-relaxed">
                         A phantom of the codebase, the {prod.title} architecture scales in the cloud. Render latency blind, deploy across global regions, then let flawless performance take hold as competitors scramble to learn where you might ship next.
                       </p>

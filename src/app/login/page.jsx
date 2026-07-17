@@ -452,8 +452,7 @@ export default function LoginPage() {
             onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--border-accent)"; }}
             onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border-primary)"; }}
           >
-            <GraduationCap size={16} style={{ color: "var(--accent-primary)" }} />
-            Explore Eduvantix for Campus
+            Explore Eduvantix for Institutions
           </a>
         </div>
       </div>
