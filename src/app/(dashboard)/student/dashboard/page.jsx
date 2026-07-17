@@ -15,23 +15,23 @@ import { useAuth } from "@/context/AuthContext";
 function timeAgo(dateStr) {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  const hrs  = Math.floor(diff / 3600000);
+  const hrs = Math.floor(diff / 3600000);
   const days = Math.floor(diff / 86400000);
-  if (mins < 1)   return "Just now";
-  if (mins < 60)  return `${mins}m ago`;
-  if (hrs  < 24)  return `${hrs}h ago`;
+  if (mins < 1) return "Just now";
+  if (mins < 60) return `${mins}m ago`;
+  if (hrs < 24) return `${hrs}h ago`;
   return `${days}d ago`;
 }
 
 // Status badge styling
 function statusStyle(status) {
   switch (status) {
-    case "ACCEPTED":             return { color: "text-emerald-400", label: "Accepted ✓" };
-    case "WRONG_ANSWER":         return { color: "text-rose-400",    label: "Wrong Answer" };
-    case "RUNTIME_ERROR":        return { color: "text-orange-400",  label: "Runtime Error" };
-    case "COMPILATION_ERROR":    return { color: "text-amber-400",   label: "Compile Error" };
-    case "TIME_LIMIT_EXCEEDED":  return { color: "text-slate-400",  label: "TLE" };
-    default:                     return { color: "text-slate-400",   label: status };
+    case "ACCEPTED": return { color: "text-emerald-400", label: "Accepted ✓" };
+    case "WRONG_ANSWER": return { color: "text-rose-400", label: "Wrong Answer" };
+    case "RUNTIME_ERROR": return { color: "text-orange-400", label: "Runtime Error" };
+    case "COMPILATION_ERROR": return { color: "text-amber-400", label: "Compile Error" };
+    case "TIME_LIMIT_EXCEEDED": return { color: "text-slate-400", label: "TLE" };
+    default: return { color: "text-slate-400", label: status };
   }
 }
 
@@ -39,10 +39,10 @@ export default function StudentDashboard() {
   const router = useRouter();
   const { user, token, API_BASE } = useAuth();
 
-  const [submissions, setSubmissions]   = useState([]);
-  const [contests, setContests]         = useState([]);
-  const [loading, setLoading]           = useState(true);
-  const [error, setError]               = useState(null);
+  const [submissions, setSubmissions] = useState([]);
+  const [contests, setContests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeBottomTab, setActiveBottomTab] = useState("contests");
 
   const handleEnterContest = (contestId) => {
@@ -110,12 +110,12 @@ export default function StudentDashboard() {
   }, [user, token, API_BASE]);
 
   // --- Derived stats from live data ---
-  const acceptedSubs   = submissions.filter(s => s.status === "ACCEPTED");
-  const uniqueSolved   = new Set(acceptedSubs.map(s => s.problemId)).size;
-  const totalSubs      = submissions.length;
+  const acceptedSubs = submissions.filter(s => s.status === "ACCEPTED");
+  const uniqueSolved = new Set(acceptedSubs.map(s => s.problemId)).size;
+  const totalSubs = submissions.length;
 
   const now = new Date();
-  const activeContests   = contests.filter(c => new Date(c.startTime) <= now && new Date(c.endTime) >= now);
+  const activeContests = contests.filter(c => new Date(c.startTime) <= now && new Date(c.endTime) >= now);
   const upcomingContests = contests.filter(c => new Date(c.startTime) > now);
 
   // Contests the user participated in
@@ -164,21 +164,21 @@ export default function StudentDashboard() {
   // Calculate dynamic active streak from user submissions
   const calculateStreak = (subs) => {
     if (!subs || subs.length === 0) return 0;
-    
+
     // Extract unique dates of submissions (YYYY-MM-DD) in local time
     const datesList = subs.map(s => {
       const d = new Date(s.createdAt);
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
     });
-    
+
     const uniqueDates = Array.from(new Set(datesList)).sort((a, b) => new Date(b) - new Date(a));
     if (uniqueDates.length === 0) return 0;
 
     const today = new Date();
     const formatDate = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-    
+
     const todayStr = formatDate(today);
-    
+
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
     const yesterdayStr = formatDate(yesterday);
@@ -204,12 +204,12 @@ export default function StudentDashboard() {
         break;
       }
     }
-    
+
     return streak;
   };
 
   const activeStreak = calculateStreak(submissions);
-  
+
   // Custom SVG solved breakdown (Difficulties solved)
   const easySolved = acceptedSubs.filter(s => s.problem?.difficulty === "EASY" || !s.problem?.difficulty).length;
   const mediumSolved = acceptedSubs.filter(s => s.problem?.difficulty === "MEDIUM").length;
@@ -248,7 +248,7 @@ export default function StudentDashboard() {
       color: "text-slate-400",
       bgColor: "bg-slate-500/10",
     },
-  ];  return (
+  ]; return (
     <div className="space-y-12">
       {/* ── Editorial Header Banner ───────────────── */}
       <div className="flex flex-col lg:flex-row items-stretch justify-between gap-8 border-b pb-12" style={{ borderColor: "var(--border-primary)" }}>
@@ -290,10 +290,10 @@ export default function StudentDashboard() {
           <div className="relative flex items-center justify-center h-32 w-32 shrink-0">
             <svg className="w-full h-full transform -rotate-90">
               <circle cx="64" cy="64" r="54" stroke="var(--border-primary)" strokeWidth="4" fill="transparent" />
-              <circle 
-                cx="64" cy="64" r="54" 
-                stroke="var(--accent-primary)" 
-                strokeWidth="4" fill="transparent" 
+              <circle
+                cx="64" cy="64" r="54"
+                stroke="var(--accent-primary)"
+                strokeWidth="4" fill="transparent"
                 strokeDasharray="339.29"
                 strokeDashoffset={339.29 - (339.29 * progressPercent) / 100}
                 strokeLinecap="square"
@@ -349,7 +349,7 @@ export default function StudentDashboard() {
               45 <span className="text-sm not-italic font-sans" style={{ color: "var(--text-muted)" }}>/ 60 mins</span>
             </p>
           </div>
-          
+
           <div className="space-y-4">
             <div className="w-full h-1" style={{ backgroundColor: "var(--border-primary)" }}>
               <div className="h-full transition-all duration-1000" style={{ width: "75%", backgroundColor: "var(--accent-primary)" }} />
@@ -363,7 +363,7 @@ export default function StudentDashboard() {
         {/* Recommended Problem */}
         <div className="lg:col-span-2 p-8 rounded-2xl border border-[var(--border-primary)] relative overflow-hidden" style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)" }}>
           <div className="absolute inset-0 dot-grid opacity-50 pointer-events-none" />
-          
+
           <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
             <div className="space-y-3">
               <div className="flex items-center gap-3 mb-1">
@@ -379,8 +379,8 @@ export default function StudentDashboard() {
                 Given a string s, find the length of the longest substring without repeating characters. A classic sliding window problem.
               </p>
             </div>
-            
-            <button 
+
+            <button
               onClick={() => router.push("/practice/longest-substring-without-repeating-characters")}
               className="px-6 py-3 rounded-xl font-bold text-xs shadow-sm transition-all cursor-pointer hover:-translate-y-0.5 shrink-0"
               style={{ background: "var(--text-primary)", color: "var(--bg-primary)" }}
@@ -443,7 +443,7 @@ export default function StudentDashboard() {
               ) : (
                 [...activeContests.slice(0, 2), ...upcomingContests.slice(0, 2)].map((contest) => {
                   const start = new Date(contest.startTime);
-                  const end   = new Date(contest.endTime);
+                  const end = new Date(contest.endTime);
                   const isLive = start <= now && end >= now;
                   const minsLeft = isLive ? Math.max(0, Math.floor((end - now) / 60000)) : null;
 

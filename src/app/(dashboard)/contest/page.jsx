@@ -90,7 +90,9 @@ export default function ContestLobby() {
   const [pastContestResults, setPastContestResults] = useState(null);
   const [isStudentLoggedIn, setIsStudentLoggedIn] = useState(false);
 
-  const isGlobalStudent = user && user.instituteId === null;
+  // Lock applies to: students without an institute (global/new users)
+  // Note: new registrations return no instituteId (undefined); institute-linked users have it set
+  const isGlobalStudent = user && !user.institute && !user.instituteId;
   const [timeLeftStr, setTimeLeftStr] = useState("24h 00m 00s");
 
   // Dynamic 1-day running timer loop for global students
