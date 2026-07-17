@@ -140,7 +140,7 @@ function MeshBackground({ className = "" }) {
 function FloatingParticles({ count = 12 }) {
   const reduced = useReducedMotion();
   const [mounted, setMounted] = useState(false);
-  
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -346,7 +346,7 @@ function HeroRightGraphic() {
         animate={reduced ? {} : { scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
         transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
       />
-      
+
       {/* Floating Card 1: Live Class */}
       <motion.div
         className="absolute top-[0%] right-[0%] w-[65%] bg-[#101014] border border-white/10 rounded-xl p-4 shadow-2xl backdrop-blur-xl z-20"
@@ -361,37 +361,37 @@ function HeroRightGraphic() {
           <span className="text-[9px] text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2 py-0.5 rounded">1.2k joined</span>
         </div>
         <div className="w-full h-32 bg-[#1A1A1A] rounded-lg border border-white/5 relative overflow-hidden flex items-center justify-center">
-           {/* System Design Diagram Representation */}
-           <div className="flex flex-col items-center gap-2 -mt-4">
-              <div className="w-16 h-5 border border-blue-500/50 bg-blue-500/20 rounded text-[6px] flex items-center justify-center text-blue-200 shadow-[0_0_10px_rgba(59,130,246,0.3)]">Load Balancer</div>
-              <div className="w-0.5 h-3 bg-slate-600" />
-              <div className="flex gap-6 relative">
-                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-[3.2rem] h-0.5 bg-slate-600" />
-                 <div className="w-0.5 h-3 bg-slate-600 absolute -top-3 left-3" />
-                 <div className="w-0.5 h-3 bg-slate-600 absolute -top-3 right-3" />
-                 
-                 <div className="w-10 h-10 border border-emerald-500/50 bg-emerald-500/20 rounded flex flex-col items-center justify-center text-[5px] text-emerald-200 gap-1 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                   <Layers size={10} />
-                   Node 1
-                 </div>
-                 <div className="w-10 h-10 border border-emerald-500/50 bg-emerald-500/20 rounded flex flex-col items-center justify-center text-[5px] text-emerald-200 gap-1 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                   <Layers size={10} />
-                   Node 2
-                 </div>
+          {/* System Design Diagram Representation */}
+          <div className="flex flex-col items-center gap-2 -mt-4">
+            <div className="w-16 h-5 border border-blue-500/50 bg-blue-500/20 rounded text-[6px] flex items-center justify-center text-blue-200 shadow-[0_0_10px_rgba(59,130,246,0.3)]">Load Balancer</div>
+            <div className="w-0.5 h-3 bg-slate-600" />
+            <div className="flex gap-6 relative">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-[3.2rem] h-0.5 bg-slate-600" />
+              <div className="w-0.5 h-3 bg-slate-600 absolute -top-3 left-3" />
+              <div className="w-0.5 h-3 bg-slate-600 absolute -top-3 right-3" />
+
+              <div className="w-10 h-10 border border-emerald-500/50 bg-emerald-500/20 rounded flex flex-col items-center justify-center text-[5px] text-emerald-200 gap-1 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                <Layers size={10} />
+                Node 1
               </div>
-           </div>
-           {/* Mentor Video Feed */}
-           <div className="absolute bottom-2 left-2 w-10 h-12 bg-black rounded border border-white/20 overflow-hidden shadow-lg">
-              <img src="/images/indian_educator.png" alt="mentor" className="w-full h-full object-cover opacity-80" />
-           </div>
-           <div className="absolute bottom-2 right-2 flex gap-1 z-10">
-             <div className="w-6 h-6 rounded bg-black/60 border border-white/10 flex items-center justify-center backdrop-blur-md">
-               <Mic size={8} className="text-emerald-400" />
-             </div>
-             <div className="w-6 h-6 rounded bg-black/60 border border-white/10 flex items-center justify-center backdrop-blur-md">
-               <Users size={8} className="text-slate-300" />
-             </div>
-           </div>
+              <div className="w-10 h-10 border border-emerald-500/50 bg-emerald-500/20 rounded flex flex-col items-center justify-center text-[5px] text-emerald-200 gap-1 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                <Layers size={10} />
+                Node 2
+              </div>
+            </div>
+          </div>
+          {/* Mentor Video Feed */}
+          <div className="absolute bottom-2 left-2 w-10 h-12 bg-black rounded border border-white/20 overflow-hidden shadow-lg">
+            <img src="/images/indian_educator.png" alt="mentor" className="w-full h-full object-cover opacity-80" />
+          </div>
+          <div className="absolute bottom-2 right-2 flex gap-1 z-10">
+            <div className="w-6 h-6 rounded bg-black/60 border border-white/10 flex items-center justify-center backdrop-blur-md">
+              <Mic size={8} className="text-emerald-400" />
+            </div>
+            <div className="w-6 h-6 rounded bg-black/60 border border-white/10 flex items-center justify-center backdrop-blur-md">
+              <Users size={8} className="text-slate-300" />
+            </div>
+          </div>
         </div>
       </motion.div>
 
@@ -444,12 +444,12 @@ function HeroRightGraphic() {
           <span className="text-[8px] font-bold text-slate-200">Attendance</span>
         </div>
         <div className="grid grid-cols-5 gap-1.5 mt-2">
-           {[1,2,3,4,5,6,7,8,9,10].map((_, i) => (
-             <div key={i} className={`w-4 h-4 rounded-sm flex items-center justify-center ${i === 8 ? 'bg-rose-500/20 border border-rose-500/30' : i === 9 ? 'bg-white/5 border border-white/10' : 'bg-emerald-500/20 border border-emerald-500/30'}`}>
-               {i < 8 && <CheckCircle2 size={8} className="text-emerald-400" />}
-               {i === 8 && <X size={8} className="text-rose-400" />}
-             </div>
-           ))}
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((_, i) => (
+            <div key={i} className={`w-4 h-4 rounded-sm flex items-center justify-center ${i === 8 ? 'bg-rose-500/20 border border-rose-500/30' : i === 9 ? 'bg-white/5 border border-white/10' : 'bg-emerald-500/20 border border-emerald-500/30'}`}>
+              {i < 8 && <CheckCircle2 size={8} className="text-emerald-400" />}
+              {i === 8 && <X size={8} className="text-rose-400" />}
+            </div>
+          ))}
         </div>
       </motion.div>
 
@@ -467,20 +467,20 @@ function HeroRightGraphic() {
             <span className="text-[9px] font-bold text-white">Proctored Exam</span>
           </div>
           <div className="flex gap-1 items-center">
-             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-             <span className="text-[7px] text-emerald-400">Secure</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-[7px] text-emerald-400">Secure</span>
           </div>
         </div>
         <div className="bg-white/5 rounded border border-white/5 p-2 flex items-center gap-3">
           <div className="w-10 h-10 bg-black rounded overflow-hidden relative border border-white/10 shrink-0">
-             <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" alt="student" className="w-full h-full object-cover opacity-60 grayscale" />
-             {/* Face tracking box overlay */}
-             <div className="absolute inset-1.5 border border-emerald-500/70 rounded-sm shadow-[0_0_10px_rgba(16,185,129,0.3)]">
-                <div className="absolute -top-1 -left-1 w-1.5 h-1.5 border-t border-l border-emerald-500"></div>
-                <div className="absolute -top-1 -right-1 w-1.5 h-1.5 border-t border-r border-emerald-500"></div>
-                <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 border-b border-l border-emerald-500"></div>
-                <div className="absolute -bottom-1 -right-1 w-1.5 h-1.5 border-b border-r border-emerald-500"></div>
-             </div>
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&h=100&fit=crop" alt="student" className="w-full h-full object-cover opacity-60 grayscale" />
+            {/* Face tracking box overlay */}
+            <div className="absolute inset-1.5 border border-emerald-500/70 rounded-sm shadow-[0_0_10px_rgba(16,185,129,0.3)]">
+              <div className="absolute -top-1 -left-1 w-1.5 h-1.5 border-t border-l border-emerald-500"></div>
+              <div className="absolute -top-1 -right-1 w-1.5 h-1.5 border-t border-r border-emerald-500"></div>
+              <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 border-b border-l border-emerald-500"></div>
+              <div className="absolute -bottom-1 -right-1 w-1.5 h-1.5 border-b border-r border-emerald-500"></div>
+            </div>
           </div>
           <div className="flex-1 space-y-1.5">
             <div className="flex justify-between items-center">
@@ -511,8 +511,8 @@ function HeroRightGraphic() {
           </div>
         </div>
         <div className="w-full h-1 bg-white/5 rounded-full overflow-hidden mt-2">
-          <motion.div 
-            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400" 
+          <motion.div
+            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400"
             initial={{ width: "0%" }}
             animate={{ width: "98%" }}
             transition={{ duration: 2, delay: 0.5, ease: EASE_OUT_EXPO }}
@@ -539,9 +539,9 @@ export default function InstitutesPage() {
   useLenis();
 
   const heroRef = useRef(null);
-  const { scrollYProgress: heroProgress } = useScroll({ 
-    target: heroRef, 
-    offset: ["start start", "end start"] 
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"]
   });
   const heroY = useTransform(heroProgress, [0, 1], [0, 200]);
   const heroOpacity = useTransform(heroProgress, [0, 0.6], [1, 0]);
@@ -635,14 +635,14 @@ export default function InstitutesPage() {
 
                 {/* Main headline — kinetic typography with clip-path reveal */}
                 <div className="overflow-hidden">
-                    <motion.h1
-                      className="inline-block bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent text-6xl md:text-7xl font-bold tracking-tighter"
-                      initial={{ opacity: 0, y: 60, scale: 0.9, filter: "blur(12px)" }}
-                      animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                      transition={{ delay: 0.8, duration: 1, ease: EASE_OUT_EXPO }}
-                    >
-                      One Powerful Platform for Every Institute
-                    </motion.h1>
+                  <motion.h1
+                    className="inline-block bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent text-6xl md:text-7xl font-bold tracking-tighter"
+                    initial={{ opacity: 0, y: 60, scale: 0.9, filter: "blur(12px)" }}
+                    animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+                    transition={{ delay: 0.8, duration: 1, ease: EASE_OUT_EXPO }}
+                  >
+                    One Powerful Platform for Every Institute
+                  </motion.h1>
                 </div>
 
                 <motion.p
@@ -677,7 +677,7 @@ export default function InstitutesPage() {
                     Explore Features
                   </a>
                 </motion.div>
-           
+
               </motion.div>
 
               {/* Right Content */}
@@ -691,14 +691,14 @@ export default function InstitutesPage() {
               </motion.div>
             </div>
           </section>
-     
+
 
 
           {/* ─── FEATURE SHOWCASES (Scroll-Stack) ─────────────────── */}
           <section id="features" className="px-6 py-12 sm:px-12 sm:py-20 lg:px-28 lg:py-28">
             <FeatureScrollStack />
           </section>
-     
+
 
 
           {/* ─── MORE FEATURES GRID ────────────────────────────── */}
@@ -780,7 +780,7 @@ export default function InstitutesPage() {
           </section>
 
           <section>
-            
+
             {/* Stats bar */}
             <motion.div
               initial={{ opacity: 0, y: 60, scale: 0.9 }}
@@ -825,7 +825,7 @@ export default function InstitutesPage() {
                           transition={{ duration: 1, ease: EASE_OUT_EXPO }}
                         >
                           <h2 className="text-3xl md:text-4xl font-black tracking-tight flex items-center gap-3 flex-wrap" style={{ color: "var(--text-primary)" }}>
-                            Partner with 
+                            Partner with
                             <img src={isDark ? "/logo-white-text.webp" : "/logo-black-text.webp"} alt="Eduvantix" className="h-8 md:h-10 inline-block mt-0.5" />
                           </h2>
                           <p className="leading-relaxed" style={{ color: "var(--text-secondary)" }}>
@@ -910,13 +910,13 @@ export default function InstitutesPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                   <div className="space-y-1.5">
                                     <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Full Name</label>
-                                    <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})}
+                                    <input required type="text" value={formData.name} onChange={e => setFormData({ ...formData, name: e.target.value })}
                                       className="w-full px-4 py-3 rounded-xl border bg-transparent outline-none transition-all duration-300 border-[var(--border-primary)] focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.1)]"
                                       style={{ color: "var(--text-primary)" }} placeholder="Jane Doe" />
                                   </div>
                                   <div className="space-y-1.5">
                                     <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">University / Institute</label>
-                                    <input required type="text" value={formData.university} onChange={e => setFormData({...formData, university: e.target.value})}
+                                    <input required type="text" value={formData.university} onChange={e => setFormData({ ...formData, university: e.target.value })}
                                       className="w-full px-4 py-3 rounded-xl border bg-transparent outline-none transition-all duration-300 border-[var(--border-primary)] focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.1)]"
                                       style={{ color: "var(--text-primary)" }} placeholder="Global Tech University" />
                                   </div>
@@ -925,13 +925,13 @@ export default function InstitutesPage() {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                   <div className="space-y-1.5">
                                     <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Work Email</label>
-                                    <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})}
+                                    <input required type="email" value={formData.email} onChange={e => setFormData({ ...formData, email: e.target.value })}
                                       className="w-full px-4 py-3 rounded-xl border bg-transparent outline-none transition-all duration-300 border-[var(--border-primary)] focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.1)]"
                                       style={{ color: "var(--text-primary)" }} placeholder="jane@university.edu" />
                                   </div>
                                   <div className="space-y-1.5">
                                     <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Phone Number</label>
-                                    <input type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})}
+                                    <input type="tel" value={formData.phone} onChange={e => setFormData({ ...formData, phone: e.target.value })}
                                       className="w-full px-4 py-3 rounded-xl border bg-transparent outline-none transition-all duration-300 border-[var(--border-primary)] focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.1)]"
                                       style={{ color: "var(--text-primary)" }} placeholder="+1 (555) 000-0000" />
                                   </div>
@@ -939,7 +939,7 @@ export default function InstitutesPage() {
 
                                 <div className="space-y-1.5">
                                   <label className="text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">Message (Optional)</label>
-                                  <textarea value={formData.message} onChange={e => setFormData({...formData, message: e.target.value})}
+                                  <textarea value={formData.message} onChange={e => setFormData({ ...formData, message: e.target.value })}
                                     className="w-full px-4 py-3 rounded-xl border bg-transparent outline-none transition-all duration-300 resize-none border-[var(--border-primary)] focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.1)]"
                                     rows={4} style={{ color: "var(--text-primary)" }} placeholder="Tell us about your institute size and specific requirements..." />
                                 </div>
@@ -959,7 +959,7 @@ export default function InstitutesPage() {
                                       />
                                       Submitting Request...
                                     </span>
-                                  ) : "Request Institute Access"}
+                                  ) : "Request Demo"}
                                 </MagneticButton>
 
                                 {formStatus === "error" && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
 
 /* ─── Flowing Line SVG ─────────────────── */
@@ -42,6 +42,43 @@ function FlowLines() {
 export default function CTA() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  // Syllabus form state
+  const [syllabusEmail, setSyllabusEmail] = useState("");
+  const [syllabusStatus, setSyllabusStatus] = useState("idle"); // idle | loading | success | error
+  const [syllabusMessage, setSyllabusMessage] = useState("");
+
+  const handleSyllabusSubmit = async (e) => {
+    e.preventDefault();
+    if (!syllabusEmail.trim()) return;
+
+    setSyllabusStatus("loading");
+    setSyllabusMessage("");
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5472"}/api/syllabus/send`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: syllabusEmail.trim() }),
+        }
+      );
+      const data = await res.json();
+
+      if (data.success) {
+        setSyllabusStatus("success");
+        setSyllabusMessage(data.message || "Syllabus sent! Check your inbox.");
+        setSyllabusEmail("");
+      } else {
+        setSyllabusStatus("error");
+        setSyllabusMessage(data.message || "Something went wrong. Please try again.");
+      }
+    } catch {
+      setSyllabusStatus("error");
+      setSyllabusMessage("Network error. Please check your connection and try again.");
+    }
+  };
 
   const headline = ["Ready to", "accelerate?"];
 
@@ -165,23 +202,23 @@ export default function CTA() {
             </div>
 
             <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const email = e.currentTarget.querySelector('input[type="email"]')?.value;
-                if (email) window.location.href = `/login?redirect=/student&email=${encodeURIComponent(email)}`;
-              }}
+              onSubmit={handleSyllabusSubmit}
               className="space-y-3"
             >
               <input
                 suppressHydrationWarning
                 type="email"
                 required
-                placeholder="you@eduvantix.com"
+                placeholder="you@company.com"
+                value={syllabusEmail}
+                onChange={(e) => setSyllabusEmail(e.target.value)}
+                disabled={syllabusStatus === "loading" || syllabusStatus === "success"}
                 className="w-full rounded-xl px-4 py-3 text-sm outline-none transition-all"
                 style={{
                   backgroundColor: "var(--bg-input)",
                   border: "1px solid var(--border-primary)",
                   color: "var(--text-primary)",
+                  opacity: syllabusStatus === "success" ? 0.6 : 1,
                 }}
                 onFocus={e => e.target.style.borderColor = "var(--accent-primary)"}
                 onBlur={e => e.target.style.borderColor = "var(--border-primary)"}
@@ -189,13 +226,44 @@ export default function CTA() {
               <button
                 suppressHydrationWarning
                 type="submit"
-                className="w-full rounded-xl py-3 text-sm font-bold text-[var(--text-on-accent)] transition-all duration-200"
-                style={{ background: "var(--accent-gradient)" }}
-                onMouseEnter={e => e.currentTarget.style.opacity = "0.9"}
-                onMouseLeave={e => e.currentTarget.style.opacity = "1"}
+                disabled={syllabusStatus === "loading" || syllabusStatus === "success"}
+                className="w-full rounded-xl py-3 text-sm font-bold text-[var(--text-on-accent)] transition-all duration-200 flex items-center justify-center gap-2"
+                style={{
+                  background: syllabusStatus === "success" ? "#16a34a" : "var(--accent-gradient)",
+                  opacity: syllabusStatus === "loading" ? 0.7 : 1,
+                  cursor: syllabusStatus === "loading" || syllabusStatus === "success" ? "not-allowed" : "pointer",
+                }}
+                onMouseEnter={e => { if (syllabusStatus === "idle" || syllabusStatus === "error") e.currentTarget.style.opacity = "0.9"; }}
+                onMouseLeave={e => { if (syllabusStatus === "idle" || syllabusStatus === "error") e.currentTarget.style.opacity = "1"; }}
               >
-                Send Me the Syllabus
+                {syllabusStatus === "loading" ? (
+                  <>
+                    <svg className="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" />
+                    </svg>
+                    Sending...
+                  </>
+                ) : syllabusStatus === "success" ? (
+                  <>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Sent!
+                  </>
+                ) : (
+                  "Send Me the Syllabus"
+                )}
               </button>
+
+              {/* Inline feedback message */}
+              {syllabusMessage && (
+                <p
+                  className="text-xs text-center font-medium pt-1"
+                  style={{ color: syllabusStatus === "success" ? "#16a34a" : "#ef4444" }}
+                >
+                  {syllabusStatus === "success" ? "✓ " : "✕ "}{syllabusMessage}
+                </p>
+              )}
             </form>
 
             <div className="space-y-3 pt-2">
