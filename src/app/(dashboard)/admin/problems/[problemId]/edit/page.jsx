@@ -168,6 +168,7 @@ export default function CreateProblem() {
   const [loadingProblem, setLoadingProblem] = useState(true);
 
   const [activeTab,  setActiveTab]  = useState("details");
+  const [showGuideModal, setShowGuideModal] = useState(false);
   const [templatesVisited, setTemplatesVisited] = useState(true);
   const [tabcontentVisited, setTabcontentVisited] = useState(true);
 
@@ -450,6 +451,127 @@ export default function CreateProblem() {
         )}
       </AnimatePresence>
 
+      {/* Creation Guide Modal */}
+      <AnimatePresence>
+        {showGuideModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md"
+            onClick={() => setShowGuideModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-3xl rounded-3xl border border-white/10 p-6 sm:p-8 space-y-6 max-h-[85vh] overflow-y-auto"
+              style={{ background: "var(--bg-card)" }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                <div className="flex items-center gap-2 text-white">
+                  <Info size={18} className="text-violet-400" />
+                  <h2 className="text-lg font-black tracking-tight">Problem & Boilerplate Guide</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowGuideModal(false)}
+                  className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="space-y-6 text-slate-300 text-xs leading-relaxed">
+                {/* Section 1 */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-black text-white flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-violet-400" />
+                    1. General Problem Creation
+                  </h3>
+                  <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 space-y-3">
+                    <p>
+                      Creating a coding problem requires completing 5 main steps:
+                    </p>
+                    <ul className="list-disc list-inside space-y-1.5 pl-2 text-slate-400">
+                      <li><strong className="text-white">Details:</strong> Give the problem a title, select its difficulty (Easy, Medium, Hard), and add optional tags.</li>
+                      <li><strong className="text-white">Statement:</strong> Describe the problem in Markdown. Be explicit about input formats, output formats, and mathematical/size constraints.</li>
+                      <li><strong className="text-white">Templates:</strong> Write the default starter boilerplate code for the supported languages (JavaScript, Python, C++, Java, Go).</li>
+                      <li><strong className="text-white">Test Cases:</strong> Provide input/output pairs. You must mark <span className="text-amber-400">at least one</span> test case as a <strong className="text-white">Sample</strong> case to be displayed to students.</li>
+                      <li><strong className="text-white">Tab Content:</strong> Add an editorial, reference solution, evaluation criteria, and followup challenge questions.</li>
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Section 2 */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-black text-white flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                    2. Designing Starter Templates & Boilerplates
+                  </h3>
+                  <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 space-y-3">
+                    <p>
+                      The system wraps user solutions using preconfigured driver wrappers to test them. Depending on your coding design, template creation can follow two paths:
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+                      <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1.5">
+                        <span className="font-extrabold uppercase text-[10px] tracking-wider text-amber-400">LeetCode Style (Method Stubs)</span>
+                        <p className="text-[11px] text-slate-400">
+                          Students only write the core solution method/function. The judge takes care of reading input from <code className="text-zinc-400 bg-white/5 px-1 py-0.5 rounded">stdin</code> and printing output to <code className="text-zinc-400 bg-white/5 px-1 py-0.5 rounded">stdout</code>.
+                        </p>
+                        <p className="text-[11px] text-slate-400 italic font-normal">
+                          Example standard template signature:
+                          <code className="block mt-1 bg-black/40 p-2 rounded text-[10px] text-amber-300 font-mono">
+                            {"function solve(nums, target) {\n  // solve...\n}"}
+                          </code>
+                        </p>
+                      </div>
+                      <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1.5">
+                        <span className="font-extrabold uppercase text-[10px] tracking-wider text-emerald-400">CodeChef Style (Standard I/O)</span>
+                        <p className="text-[11px] text-slate-400">
+                          Students read input line-by-line and write directly to <code className="text-zinc-400 bg-white/5 px-1 py-0.5 rounded">stdout</code>. The template should provide standard input readers like <code className="text-zinc-400 bg-white/5 px-1 py-0.5 rounded">readline()</code> or <code className="text-zinc-400 bg-white/5 px-1 py-0.5 rounded">cin</code>.
+                        </p>
+                        <p className="text-[11px] text-slate-400 italic font-normal">
+                          Example standard template signature:
+                          <code className="block mt-1 bg-black/40 p-2 rounded text-[10px] text-emerald-300 font-mono">
+                            {"const fs = require('fs');\nconst input = fs.readFileSync(0, 'utf-8');\n// parse and print..."}
+                          </code>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 3 */}
+                <div className="space-y-2">
+                  <h3 className="text-sm font-black text-white flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                    3. Supported Database Data Types
+                  </h3>
+                  <div className="bg-white/[0.02] border border-white/5 rounded-2xl p-4 space-y-2">
+                    <p className="mb-2 text-slate-400">
+                      When mapping inputs, the platform's automatic parameter parsing supports:
+                    </p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-[10px] font-mono text-zinc-400">
+                      <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">INT</div>
+                      <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">FLOAT</div>
+                      <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">STRING</div>
+                      <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">BOOLEAN</div>
+                      <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">CHAR</div>
+                      <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">ARRAY_INT</div>
+                      <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">ARRAY_FLOAT</div>
+                      <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">ARRAY_STRING</div>
+                      <div className="bg-black/30 p-1.5 rounded border border-white/5 text-center">MATRIX_INT</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Page header */}
         <div className="flex items-center justify-between">
@@ -462,8 +584,18 @@ export default function CreateProblem() {
               <Sparkles size={20} className="text-amber-400 animate-pulse" />
             </h1>
           </div>
-          <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-600 bg-white/5 border border-[var(--border-primary)] border-white/10 rounded-full px-3 py-1.5">
-            <span className="font-black text-white">{STEPS.filter(s => stepDone[s.id]).length}</span>/{STEPS.length} steps done
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowGuideModal(true)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-400 bg-white/5 border border-white/10 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all cursor-pointer shadow-md"
+            >
+              <Info size={13} className="text-violet-400" />
+              <span>Creation Guide</span>
+            </button>
+            <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-600 bg-white/5 border border-[var(--border-primary)] border-white/10 rounded-full px-3 py-1.5">
+              <span className="font-black text-white">{STEPS.filter(s => stepDone[s.id]).length}</span>/{STEPS.length} steps done
+            </div>
           </div>
         </div>
 

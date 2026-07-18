@@ -857,7 +857,7 @@ if (_fn) {
       _parsedSuccess = true;
     } catch {
       try {
-        const _lines = _rawInput.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+        const _lines = _rawInput.split(/\\r?\\n/).map(l => l.trim()).filter(Boolean);
         _parsedInput = _lines.map(l => {
           try { return JSON.parse(l); } catch { return l; }
         });
