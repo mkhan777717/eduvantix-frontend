@@ -859,7 +859,7 @@ export default function PracticeWorkspace() {
       <div className="flex min-h-screen flex-col items-center justify-center space-y-4" style={{ backgroundColor: "var(--bg-primary)", color: "var(--text-primary)" }}>
         <h1 className="text-2xl font-black font-display">Practice Task Not Found</h1>
         <Link href="/practice" className="px-5 py-2.5 rounded-full text-xs font-bold text-[var(--text-on-accent)] shadow-md transition-all" style={{ background: "var(--accent-gradient)" }}>
-          Back to Catalog
+          Back to Free Courses
         </Link>
       </div>
     );

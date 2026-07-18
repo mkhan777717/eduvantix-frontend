@@ -141,21 +141,9 @@ export default function GamesHubPage() {
             <Gamepad2 size={12} className="text-violet-500" />
             Arcade
           </div>
-          <button
-            onClick={() => router.push("/student/dashboard")}
-            className="flex items-center space-x-2 px-4 py-2 border border-[var(--border-primary)] rounded-xl font-semibold text-sm transition-colors shadow-sm cursor-pointer hover:bg-[var(--bg-secondary)]"
-            style={{ 
-              backgroundColor: "var(--bg-primary)", 
-              borderColor: "var(--border-primary)",
-              color: "var(--text-primary)"
-            }}
-          >
-            <ArrowLeft size={14} className="mr-0.5" />
-            <span>Exit Arcade</span>
-          </button>
         </div>
         
-        <h1 className="text-4xl font-serif tracking-tight" style={{ color: "var(--text-primary)" }}>Synapse Arcade</h1>
+        <h1 className="text-4xl font-serif tracking-tight" style={{ color: "var(--text-primary)" }}>Eduvantix Arcade</h1>
         <p className="text-sm max-w-xl" style={{ color: "var(--text-secondary)" }}>
           Level up your engineering skills through interactive, edge-to-edge game arenas. Solve layout puzzles, repair code bases, and hack endpoints in real-time.
         </p>
@@ -163,7 +151,7 @@ export default function GamesHubPage() {
 
       <div className="space-y-8 relative z-10">
         {/* Filters Toolbar */}
-        <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-[var(--border-primary)] shadow-sm" style={{ backgroundColor: "var(--bg-primary)", borderColor: "var(--border-primary)" }}>
+        <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-2xl border border-[var(--border-primary)] shadow-sm" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
           {/* Track Filters */}
           <div className="flex flex-wrap items-center gap-1.5">
             <span className="text-[10px] font-bold uppercase tracking-wider mr-2" style={{ color: "var(--text-muted)" }}>
@@ -226,7 +214,7 @@ export default function GamesHubPage() {
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: idx * 0.05 }}
                   className="rounded-2xl border border-[var(--border-primary)] p-6 flex flex-col justify-between space-y-6 transition-all hover:shadow-md bg-[var(--bg-primary)] hover:bg-[var(--bg-secondary)]"
-                  style={{ borderColor: "var(--border-primary)" }}
+                  style={{ borderColor: "var(--border-primary)",  backgroundColor: "var(--bg-card)" }}
                 >
                   {/* Top Details */}
                   <div className="space-y-4">

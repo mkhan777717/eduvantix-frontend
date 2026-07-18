@@ -7,34 +7,36 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, User, ShieldAlert, ArrowRight, RefreshCw, AlertCircle, GraduationCap, Sparkles, Eye, EyeOff, Ban } from "lucide-react";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
+/**
+ * Checks if the given path points to /free-course/<courseId>, for special redirect after login/signup.
+ */
+function getFreeCoursePath(redirectTo) {
+  if (
+    typeof redirectTo === "string" &&
+    /^\/free-course(\/|$)/.test(redirectTo)
+  ) {
+    return redirectTo;
+  }
+  return null;
+}
+
 function LoginForm() {
   const { login, register, user, logout, forgotPassword, loginWithGoogle } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirect") || "/";
 
+  // Tracks if the login is for a free course redirection
+  const [freeCoursePath, setFreeCoursePath] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
 
-  const handleGoogleSuccess = async (response) => {
-    setLoading(true);
-    setErrorMsg("");
-    try {
-      const result = await loginWithGoogle(response.credential);
-      if (result.blocked) {
-        setIsBlocked(true);
-        setErrorMsg(result.message);
-      } else if (!result.success) {
-        setErrorMsg(result.message);
-      }
-    } catch (err) {
-      setErrorMsg("Google Authentication failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  useEffect(() => {
+    setFreeCoursePath(getFreeCoursePath(redirectTo));
+  }, [redirectTo]);
+
+  // Show/hide form states
   const [isForgot, setIsForgot] = useState(false);
   const [forgotSuccess, setForgotSuccess] = useState(false);
-
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -48,13 +50,14 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [isBlocked, setIsBlocked] = useState(false);
 
-  // Role selection is now fully automated post-login
+  // Autofill email if provided in query
   useEffect(() => {
     setHasExplicitRole(false);
     const emailParam = searchParams.get("email");
     if (emailParam) setEmail(emailParam);
   }, [searchParams, redirectTo]);
 
+  // Check for role mismatch with redirectTo
   const isMismatched = (() => {
     if (!user || !redirectTo) return false;
     const path = redirectTo.toLowerCase();
@@ -70,33 +73,94 @@ function LoginForm() {
     return false;
   })();
 
+  // MAIN: Handle user login effect (including for free course redirect)
   useEffect(() => {
+    // Don't redirect on role mismatch, that screen comes up below
     if (user && !isMismatched) {
       if (typeof window !== "undefined") {
         localStorage.removeItem("synapse_admin_session");
         localStorage.removeItem("synapse_student_session");
         localStorage.removeItem("synapse_mentor_session");
         const role = user.role;
-        if (role === "ADMIN" || role === "INSTITUTE_ADMIN" || role === "BATCH_MANAGER") localStorage.setItem("synapse_admin_session", "true");
+        if (
+          role === "ADMIN" ||
+          role === "INSTITUTE_ADMIN" ||
+          role === "BATCH_MANAGER"
+        )
+          localStorage.setItem("synapse_admin_session", "true");
         else if (role === "MENTOR") localStorage.setItem("synapse_mentor_session", "true");
         else localStorage.setItem("synapse_student_session", "true");
       }
-      let targetRoute = redirectTo;
-      if (redirectTo === "/") {
+      // If they came from a free course, ALWAYS send back to that free course path.
+      let targetRoute;
+      if (freeCoursePath) {
+        targetRoute = freeCoursePath;
+      } else if (redirectTo === "/") {
+        // Normal logic
         const isUserAdmin = user.role === 'ADMIN' || user.role === 'INSTITUTE_ADMIN' || user.role === 'BATCH_MANAGER';
         const isUserMentor = user.role === 'MENTOR';
         if (isUserAdmin) targetRoute = '/admin/dashboard';
         else if (isUserMentor) targetRoute = '/mentor/dashboard';
         else targetRoute = '/student/dashboard';
+      } else {
+        // fallback to redirectTo param
+        targetRoute = redirectTo;
       }
       router.replace(targetRoute);
     }
-  }, [user, redirectTo, router, isMismatched]);
+  }, [user, redirectTo, router, isMismatched, freeCoursePath]);
+
+  // Invoked on Google Login
+  const handleGoogleSuccess = async (response) => {
+    setLoading(true);
+    setErrorMsg("");
+    try {
+      const result = await loginWithGoogle(response.credential);
+      if (result.blocked) {
+        setIsBlocked(true);
+        setErrorMsg(result.message);
+      } else if (!result.success) {
+        setErrorMsg(result.message);
+      } else {
+        // Always prefer freeCoursePath if available
+        let targetRoute;
+        if (freeCoursePath) {
+          targetRoute = freeCoursePath;
+        } else if (redirectTo === "/") {
+          const isUserAdmin =
+            result.user?.role === "ADMIN" ||
+            result.user?.role === "INSTITUTE_ADMIN" ||
+            result.user?.role === "BATCH_MANAGER" ||
+            (result.user?.email || "").toLowerCase().includes("admin");
+          const isUserMentor =
+            result.user?.role === "MENTOR" ||
+            (result.user?.email || "").toLowerCase().includes("mentor");
+          if (isUserAdmin) targetRoute = "/admin/dashboard";
+          else if (isUserMentor) targetRoute = "/mentor/dashboard";
+          else targetRoute = "/student/dashboard";
+        } else {
+          targetRoute = redirectTo;
+        }
+        if (result.offlineMode) {
+          setErrorMsg("⚠️ Backend offline. Your account is saved locally only.");
+          setTimeout(() => router.replace(targetRoute), 2000);
+        } else {
+          router.replace(targetRoute);
+        }
+      }
+    } catch (err) {
+      setErrorMsg("Google Authentication failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getRoleTheme = () => {
     return {
-      accentColor: "#10b981", accentGradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-      bgBadge: "rgba(16, 185, 129, 0.08)", borderAccent: "rgba(16, 185, 129, 0.2)",
+      accentColor: "#10b981",
+      accentGradient: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+      bgBadge: "rgba(16, 185, 129, 0.08)",
+      borderAccent: "rgba(16, 185, 129, 0.2)",
       icon: (
         <img
           src="/logo.webp"
@@ -112,47 +176,87 @@ function LoginForm() {
 
   const theme = getRoleTheme();
 
+  // Handle form submit (login/register/forgot)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
     setLoading(true);
+
     if (isForgot) {
-      if (!email) { setErrorMsg("Please enter your email address."); setLoading(false); return; }
+      if (!email) {
+        setErrorMsg("Please enter your email address.");
+        setLoading(false);
+        return;
+      }
       try {
         const result = await forgotPassword(email);
         if (result.success) setForgotSuccess(true);
         else setErrorMsg(result.message || "Failed to send reset link.");
-      } catch { setErrorMsg("Unable to connect to the authentication server."); }
-      finally { setLoading(false); }
+      } catch {
+        setErrorMsg("Unable to connect to the authentication server.");
+      } finally {
+        setLoading(false);
+      }
       return;
     }
-    if (!email || !password) { setErrorMsg("Please fill in all required fields."); setLoading(false); return; }
-    if (isRegistering && !username) { setErrorMsg("Username is required."); setLoading(false); return; }
-    if (isRegistering && password !== confirmPassword) { setErrorMsg("Passwords do not match."); setLoading(false); return; }
+    if (!email || !password) {
+      setErrorMsg("Please fill in all required fields.");
+      setLoading(false);
+      return;
+    }
+    if (isRegistering && !username) {
+      setErrorMsg("Username is required.");
+      setLoading(false);
+      return;
+    }
+    if (isRegistering && password !== confirmPassword) {
+      setErrorMsg("Passwords do not match.");
+      setLoading(false);
+      return;
+    }
     const submitRole = activeTab === "ADMIN" ? "ADMIN" : activeTab === "MENTOR" ? "MENTOR" : "USER";
     try {
       let result;
-      if (isRegistering) result = await register(username, email, password, submitRole);
+      if (isRegistering)
+        result = await register(username, email, password, submitRole);
       else result = await login(email, password);
       if (result.success) {
-        let targetRoute = redirectTo;
-        if (redirectTo === "/") {
+        // Always prefer freeCoursePath if available
+        let targetRoute;
+        if (freeCoursePath) {
+          targetRoute = freeCoursePath;
+        } else if (redirectTo === "/") {
           const emailLower = (result.user?.email || "").toLowerCase();
-          const isUserAdmin = result.user?.role === 'ADMIN' || result.user?.role === 'INSTITUTE_ADMIN' || result.user?.role === 'BATCH_MANAGER' || emailLower.includes('admin');
-          const isUserMentor = result.user?.role === 'MENTOR' || emailLower.includes('mentor');
+          const isUserAdmin =
+            result.user?.role === 'ADMIN' ||
+            result.user?.role === 'INSTITUTE_ADMIN' ||
+            result.user?.role === 'BATCH_MANAGER' ||
+            emailLower.includes('admin');
+          const isUserMentor =
+            result.user?.role === 'MENTOR' ||
+            emailLower.includes('mentor');
           if (isUserAdmin) targetRoute = '/admin/dashboard';
           else if (isUserMentor) targetRoute = '/mentor/dashboard';
           else targetRoute = '/student/dashboard';
+        } else {
+          targetRoute = redirectTo;
         }
-        if (result.offlineMode) { setErrorMsg("⚠️ Backend offline. Your account is saved locally only."); setTimeout(() => router.replace(targetRoute), 2000); }
-        else router.replace(targetRoute);
+        if (result.offlineMode) {
+          setErrorMsg("⚠️ Backend offline. Your account is saved locally only.");
+          setTimeout(() => router.replace(targetRoute), 2000);
+        } else {
+          router.replace(targetRoute);
+        }
       } else if (result.blocked) {
         setIsBlocked(true);
       } else {
         setErrorMsg(result.message || "An error occurred. Please check your credentials.");
       }
-    } catch { setErrorMsg("Unable to connect to the authentication server."); }
-    finally { setLoading(false); }
+    } catch {
+      setErrorMsg("Unable to connect to the authentication server.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   /* ─── Role mismatch screen ─────────── */
@@ -161,7 +265,11 @@ function LoginForm() {
     const isUserMentor = user.role === 'MENTOR';
     const userRoleLabel = isUserMentor ? 'Mentor' : isUserAdmin ? 'Administrator' : 'Student';
     const targetPortalLabel = redirectTo.toLowerCase().startsWith('/admin') ? 'Admin Control' : redirectTo.toLowerCase().startsWith('/mentor') ? 'Mentor Board' : 'Student Desk';
-    const getDashboardPath = () => { if (isUserAdmin) return '/admin/dashboard'; if (isUserMentor) return '/mentor/dashboard'; return '/student/dashboard'; };
+    const getDashboardPath = () => {
+      if (isUserAdmin) return '/admin/dashboard';
+      if (isUserMentor) return '/mentor/dashboard';
+      return '/student/dashboard';
+    };
 
     return (
       <div className="p-8 rounded-2xl border border-[var(--border-primary)] shadow-lg space-y-6 text-center w-full max-w-md" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
@@ -199,7 +307,6 @@ function LoginForm() {
   /* ─── Main Form ─────────────────── */
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }} className="w-full space-y-5">
-
       {/* Role tabs removed */}
       <div className="p-8 rounded-2xl border border-[var(--border-primary)] space-y-6" style={{ backgroundColor: "var(--bg-card)", borderColor: theme.borderAccent }}>
 
@@ -231,16 +338,12 @@ function LoginForm() {
             <div className="p-4 rounded-xl bg-emerald-500/10 border border-[var(--border-primary)] border-emerald-500/20 text-emerald-600 text-xs font-medium">✅ Reset link sent! Check your inbox.</div>
             <button type="button" onClick={() => { setIsForgot(false); setForgotSuccess(false); setErrorMsg(""); }} className="w-full py-3 rounded-xl font-bold text-xs text-white" style={{ background: theme.accentGradient }}>Back to Sign In</button>
           </div>
-
-          /* Forgot form */
         ) : isForgot ? (
           <form onSubmit={handleSubmit} className="space-y-4">
             <InputField label="Email Address" type="email" value={email} onChange={setEmail} icon={<Mail size={14} />} placeholder="name@example.com" required />
             <SubmitButton loading={loading} gradient={theme.accentGradient} label="Send Reset Link" />
             <div className="text-center"><button type="button" onClick={() => { setIsForgot(false); setErrorMsg(""); }} className="text-xs font-bold" style={{ color: "var(--accent-primary)" }}>Back to Sign In</button></div>
           </form>
-
-          /* Main form */
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <AnimatePresence mode="popLayout">
@@ -250,9 +353,7 @@ function LoginForm() {
                 </motion.div>
               )}
             </AnimatePresence>
-
             <InputField label="Email Address" type="email" value={email} onChange={setEmail} icon={<Mail size={14} />} placeholder="name@eduvantix.com" required />
-
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
                 <label className="text-[10px] font-bold uppercase tracking-wider" style={{ color: "var(--text-muted)" }}>Password</label>
@@ -271,7 +372,6 @@ function LoginForm() {
                 </button>
               </div>
             </div>
-
             <AnimatePresence mode="popLayout">
               {isRegistering && (
                 <motion.div key="confirm" className="space-y-1.5" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
@@ -290,9 +390,7 @@ function LoginForm() {
                 </motion.div>
               )}
             </AnimatePresence>
-
             <SubmitButton loading={loading} gradient={theme.accentGradient} label={isRegistering ? `Register as Student` : `Sign In`} />
-
             {!isForgot && (
               <div className="relative flex items-center justify-center my-4">
                 <div className="absolute inset-0 flex items-center">
@@ -301,7 +399,6 @@ function LoginForm() {
                 <span className="relative px-3 text-[10px] uppercase font-bold tracking-widest text-[var(--text-muted)] bg-[var(--bg-card)]">Or continue with</span>
               </div>
             )}
-
             {!isForgot && (
               <div className="flex justify-center w-full mt-2">
                 <GoogleLogin
@@ -315,7 +412,6 @@ function LoginForm() {
             )}
           </form>
         )}
-
         {/* Toggle register/login */}
         {!isForgot && (
           <div className="pt-2 text-center border-t" style={{ borderColor: "var(--border-primary)" }}>
@@ -369,8 +465,8 @@ export default function LoginPage() {
 
       {/* LEFT — editorial branding */}
       <div className="hidden lg:flex flex-col justify-between w-[44%] min-h-screen p-12 relative"
-
-        style={{ backgroundColor: "white", borderRight: "1px solid var(--border-primary)" }}>
+        style={{ backgroundColor: "white", borderRight: "1px solid var(--border-primary)" }}
+      >
         {/* Logo */}
         <div
           className="flex items-center gap-3 cursor-pointer"
@@ -385,24 +481,18 @@ export default function LoginPage() {
             src="/logo-black-text.webp"
             alt="Eduvantix Logo"
             className="h-10 w-auto block"
-
-
             style={{
               position: "fixed",
               width: "auto",
             }}
           />
         </div>
-
-
         <video
           src="/guy-coding.mp4"
           autoPlay
           loop
           muted
           playsInline
-
-
           style={{
             position: "fixed",
             left: 0,
@@ -418,8 +508,6 @@ export default function LoginPage() {
             pointerEvents: "none",
           }}
         />
-
-
       </div>
 
       {/* RIGHT — form panel */}
@@ -433,7 +521,6 @@ export default function LoginPage() {
           </div>
           <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>Eduvantix</span>
         </div>
-
         <div className="w-full max-w-md">
           <Suspense fallback={<div className="flex items-center justify-center p-8"><RefreshCw className="animate-spin" size={22} style={{ color: "var(--accent-primary)" }} /></div>}>
             <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}>
@@ -441,38 +528,27 @@ export default function LoginPage() {
             </GoogleOAuthProvider>
           </Suspense>
         </div>
-
         <div className="mt-10 pt-8 w-full max-w-sm text-center flex flex-col items-center gap-4" style={{ borderTop: "1px solid var(--border-primary)" }}>
           <p className="text-[12px] font-semibold tracking-widest uppercase mb-1" style={{ color: "var(--text-muted)", letterSpacing: "0.15em" }}>
             Are you an educational institution?
           </p>
           <a
             href="/institutes"
-            className="relative inline-flex items-center justify-center w-full px-6 py-3 text-base font-extrabold rounded-[1.15rem] shadow-lg group transition-all duration-300"
+            className="w-full px-1 py-3 font-bold rounded-lg text-center relative overflow-hidden group border-2 border-yellow-400 shadow-xl"
             style={{
-              background: "linear-gradient(92deg, #26e6d3 0%, #175cff 102%)",
-              color: "#fff",
-              border: "none",
-              boxShadow: "0 8px 32px 0 rgba(38,230,211,0.24), 0 2px 8px 0 rgba(23,92,255,0.12)"
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.background = "linear-gradient(98deg, #25d3c9 0%, #5123e3 100%)";
-              e.currentTarget.style.boxShadow = "0 12px 36px 0 rgba(80,84,207,0.25), 0 2px 8px 0 rgba(38,230,211,0.10)";
-              e.currentTarget.style.transform = "translateY(-2px) scale(1.014)";
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.background = "linear-gradient(92deg, #26e6d3 0%, #175cff 102%)";
-              e.currentTarget.style.boxShadow = "0 8px 32px 0 rgba(38,230,211,0.24), 0 2px 8px 0 rgba(23,92,255,0.12)";
-              e.currentTarget.style.transform = "none";
+              background: "linear-gradient(90deg, #f7e260 0%, #ffb300 100%)",
+              letterSpacing: ".02em",
+              boxShadow: "0 6px 30px 0 rgba(255,223,72,0.13)",
             }}
           >
-            <span className="inline-flex items-center gap-2 relative z-10">
-              Explore Eduvantix for Institutions
+            <span className="relative z-20 flex items-center justify-center gap-2">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFD600" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="mr-2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+              <span className="uppercase tracking-widest text-[12px] text-black">Explore Eduvantix For Institutions</span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#FFD600" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="ml-2"><path d="M12 18v-6m0 0c-1.7-1.7-4.4-1.7-6 0m6 0c1.7-1.7 4.4-1.7 6 0" /></svg>
             </span>
             <span
-              aria-hidden="true"
-              className="absolute inset-0 rounded-[1.15rem] bg-gradient-to-r from-cyan-300 to-blue-500 opacity-0 group-hover:opacity-10 transition-opacity pointer-events-none"
-            />
+              className="absolute left-[-85%] top-0 w-[170%] h-full bg-gradient-to-r from-white/30 to-yellow-100/10 opacity-80 blur-[1.5px] transform skew-x-[-18deg] animate-premium-shimmer pointer-events-none"
+            ></span>
           </a>
         </div>
       </div>

@@ -390,7 +390,7 @@ export default function ContestLobby() {
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden" style={{ backgroundColor: "var(--bg-primary)" }}>
       {/* Background ambient light */}
-      <div className="absolute top-0 left-0 right-0 h-[450px] pointer-events-none z-0" style={{ background: "linear-gradient(180deg, rgba(16,185,129,0.04) 0%, transparent 100%)" }} />
+      <div className="absolute top-0 left-0 right-0 h-[450px] pointer-events-none z-0" />
 
       {!user && <Navbar />}
 
@@ -413,10 +413,10 @@ export default function ContestLobby() {
                 backgroundColor: "var(--bg-secondary)"
               }}
             >
-              <Trophy size={12} className="text-violet-500 animate-bounce" />
+              <Trophy size={12} className="text-violet-500" />
               <span>Eduvantix Competitive Coding</span>
             </div>
-            <h1 className="text-4xl font-serif tracking-tight" style={{ color: "var(--text-primary)" }}>
+            <h1   className="text-4xl font-serif tracking-tight" style={{ color: "var(--text-primary)" }}>
               Contest Arena
             </h1>
             <p className="text-sm max-w-xl leading-relaxed" style={{ color: "var(--text-secondary)" }}>
@@ -487,12 +487,7 @@ export default function ContestLobby() {
 
             <div className={isGlobalStudent ? "opacity-30 pointer-events-none blur-[1.5px]" : ""}>
               {/* Lobby controls bar */}
-              <div className="flex flex-col lg:flex-row gap-4 justify-between items-center p-4 rounded-3xl border border-[var(--border-primary)] backdrop-blur-md"
-                style={{
-                  backgroundColor: "var(--glass-bg)",
-                  borderColor: "var(--border-primary)"
-                }}
-              >
+              <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
                 {/* Tab links */}
                 <div className="flex flex-wrap gap-1 items-center p-1 rounded-full border" style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)" }}>
                   {[
@@ -550,7 +545,7 @@ export default function ContestLobby() {
                   <motion.div
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="border border-[var(--border-primary)] rounded-3xl overflow-hidden shadow-sm max-w-4xl mx-auto"
+                    className="border border-[var(--border-primary)] rounded-3xl overflow-hidden shadow-sm max-w-4xl mx-auto mt-8"
                     style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-card)" }}
                   >
                     <div className="px-6 py-5 border-b flex items-center justify-between" style={{ borderColor: "var(--border-primary)" }}>
@@ -615,7 +610,7 @@ export default function ContestLobby() {
                   /* Loading state */
                   <div className="flex flex-col items-center justify-center py-24 space-y-4">
                     <RefreshCw size={28} className="animate-spin" style={{ color: "var(--text-accent)" }} />
-                    <p className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>Loading contests from the server...</p>
+                    <p className="text-sm font-semibold" style={{ color: "var(--text-secondary)" }}>Loading contests...</p>
                   </div>
                 ) : filteredContests.length === 0 ? (
                   /* Empty state */
@@ -640,7 +635,7 @@ export default function ContestLobby() {
                   /* Contests Card Grid */
                   <motion.div
                     layout
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8"
                   >
                     <AnimatePresence mode="popLayout">
                       {filteredContests.map((contest, idx) => {
@@ -665,7 +660,7 @@ export default function ContestLobby() {
                           >
                             {/* Status Line */}
                             <div
-                              className={`absolute top-0 left-0 right-0 h-[3px] ${isActive ? "bg-emerald-500" : isUpcoming ? "bg-zinc-500" : "bg-slate-400"
+                              className={`absolute top-0 left-0 right-0 h-[3px]"
                                 }`}
                             />
 
@@ -843,13 +838,13 @@ export default function ContestLobby() {
                   <h3 className="text-base font-bold text-[var(--text-primary)]">Scoreboard: {pastContestResults.title}</h3>
                   <p className="text-[10px] text-[var(--text-muted)]">Completed on {pastContestResults.startTime}</p>
                 </div>
-                <button
+                {/* <button
                   onClick={() => setPastContestResults(null)}
                   className="p-1.5 rounded-lg hover:bg-slate-500/10 cursor-pointer"
                   style={{ color: "var(--text-secondary)" }}
                 >
                   <AlertCircle size={18} />
-                </button>
+                </button> */}
               </div>
 
               {/* Ranks list */}

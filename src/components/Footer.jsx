@@ -18,7 +18,7 @@ const footerLinks = [
     links: [
       { name: "Live Classes", href: "/live-classes" },
       { name: "Contest Hub", href: "/contest" },
-      { name: "Course Catalog", href: "/courses" },
+      { name: "Free Courses", href: "/courses" },
       { name: "Pricing", href: "/#pricing" },
     ],
   },

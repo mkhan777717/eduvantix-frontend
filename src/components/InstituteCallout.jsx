@@ -147,7 +147,7 @@ export default function InstituteCallout() {
                   <span className="relative flex items-center gap-2">
                     Partner with
                     <img
-                      src={isDark ? "/logo-black-text.webp" : "/logo-white-text.webp"}
+                      src={"/logo-white-text.webp"}
                       alt="Eduvantix Logo"
                       className="h-4 w-auto object-contain inline-block ml-1"
                     />

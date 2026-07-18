@@ -16,6 +16,7 @@ import {
   Volume2,
   VolumeX,
   User,
+  RadioIcon,
 } from "lucide-react";
 
 import { getApiBase } from "@/utils/api";
@@ -86,7 +87,7 @@ function LiveNowBanner({ session }) {
             {session.description}
           </p>
         )}
-        
+
         {/* Join button */}
         <div className="pt-1">
           <div className="w-full flex items-center justify-center gap-1.5 py-2 rounded bg-red-500 text-white text-[10px] font-extrabold uppercase tracking-wider group-hover:bg-red-600 transition-colors shadow-md shadow-red-500/10">
@@ -137,7 +138,7 @@ function PastSessionCard({ session, onWatchRecording }) {
             </p>
           )}
         </div>
-        
+
         <div className="space-y-3">
           {/* Metadata footer */}
           <div className="flex items-center gap-2.5 text-[9px] font-semibold pt-2 border-t" style={{ borderColor: "var(--border-primary)", color: "var(--text-muted)" }}>
@@ -405,21 +406,27 @@ export default function LiveBanner() {
   const noSessions = !activeSession && pastSessions.length === 0;
 
   return (
-    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6 relative z-40">
+    <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-40">
       {/* Section Header */}
-      <div className="space-y-1 text-center md:text-left">
-        <h2 className="text-2xl font-black font-display tracking-tight text-gradient">
-          Live Classes & Speedruns
-        </h2>
-        <p className="text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
+      <section className="flex flex-col gap-2 border-b pb-6 shrink-0 mb-8" style={{ borderColor: "var(--border-primary)" }}>
+        <div className="flex items-center justify-between">
+          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-[var(--border-primary)] mb-3 w-fit"
+            style={{ borderColor: "var(--border-primary)", color: "var(--text-secondary)", backgroundColor: "var(--bg-secondary)" }}>
+            <RadioIcon size={12} className="text-violet-500" />
+            Live Sessions
+          </div>
+        </div>
+        
+        <h1 className="text-4xl font-serif tracking-tight" style={{ color: "var(--text-primary)" }}>Live Classes & Speedruns</h1>
+        <p className="text-sm max-w-xl" style={{ color: "var(--text-secondary)" }}>
           Join live developer sessions, watch past streams, and learn in flow state.
         </p>
-      </div>
+      </section>
 
       {noSessions ? (
         <div className="w-full rounded-lg border border-[var(--border-primary)] p-8 text-center space-y-4 max-w-md mx-auto"
-          style={{ 
-            backgroundColor: "var(--bg-card)", 
+          style={{
+            backgroundColor: "var(--bg-card)",
             borderColor: "var(--border-primary)",
             background: "linear-gradient(135deg, var(--bg-card), rgba(99,102,241,0.02))"
           }}
@@ -438,7 +445,7 @@ export default function LiveBanner() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          
+
           {/* Active Session Card */}
           {activeSession && (
             <div className="md:col-span-1 space-y-3">
@@ -479,18 +486,18 @@ export default function LiveBanner() {
 
       {/* Custom Secure Video Modal Player */}
       {selectedVideoUrl && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm"
           onClick={() => setSelectedVideoUrl(null)}
         >
-          <div 
+          <div
             className="relative w-full max-w-4xl rounded-2xl border border-[var(--border-primary)] border-[var(--border-primary)] bg-[var(--bg-card)]/95 shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--border-primary)] bg-[var(--bg-card)]/50">
               <span className="text-xs font-bold text-slate-300">Session Playback</span>
-              <button 
+              <button
                 onClick={() => setSelectedVideoUrl(null)}
                 className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-[var(--bg-hover)] transition-colors cursor-pointer text-xs"
               >
@@ -499,7 +506,7 @@ export default function LiveBanner() {
             </div>
 
             {/* Video Container */}
-            <div 
+            <div
               ref={containerRef}
               className={isFullscreen ? "relative w-full h-full bg-black flex items-center justify-center group" : "relative aspect-video bg-black flex items-center justify-center group"}
             >
@@ -516,7 +523,7 @@ export default function LiveBanner() {
                 onClick={handlePlayPause}
                 className="w-full h-full object-contain cursor-pointer"
               />
-              
+
               {/* Custom controls overlay at the bottom */}
               <div className="absolute bottom-0 left-0 right-0 z-20 bg-gradient-to-t from-black/90 via-black/40 to-transparent px-4 py-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col gap-2 pointer-events-auto">
                 <input
@@ -532,7 +539,7 @@ export default function LiveBanner() {
                 />
                 <div className="flex items-center justify-between text-white text-xs select-none">
                   <div className="flex items-center gap-3">
-                    <button 
+                    <button
                       onClick={handlePlayPause}
                       className="p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
                     >
@@ -543,7 +550,7 @@ export default function LiveBanner() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5">
-                    <button 
+                    <button
                       onClick={handleToggleMute}
                       className="p-1 rounded hover:bg-white/10 transition-colors cursor-pointer"
                     >
@@ -561,7 +568,7 @@ export default function LiveBanner() {
                         background: `linear-gradient(to right, rgb(99, 102, 241) 0%, rgb(99, 102, 241) ${(isMuted ? 0 : volume) * 100}%, rgba(51, 65, 85, 0.6) ${(isMuted ? 0 : volume) * 100}%, rgba(51, 65, 85, 0.6) 100%)`
                       }}
                     />
-                    <button 
+                    <button
                       onClick={toggleFullscreen}
                       className="p-1 rounded hover:bg-white/10 transition-colors cursor-pointer ml-1"
                       title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
@@ -571,7 +578,7 @@ export default function LiveBanner() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Dynamic Watermark Overlay */}
               {user && selectedVideoSession?.showWatermark && (() => {
                 const watermarkOptsArray = selectedVideoSession?.watermarkOptions?.split(',') || ["inst", "username", "email"];
@@ -580,7 +587,7 @@ export default function LiveBanner() {
                 const showEmail = watermarkOptsArray.includes("email");
 
                 return (
-                  <div 
+                  <div
                     className="absolute z-10 pointer-events-none select-none text-slate-100 font-mono text-[9px] sm:text-xs bg-slate-950/20 backdrop-blur-[1px] px-2.5 py-1.5 rounded-lg border border-[var(--border-primary)] border-white/5 opacity-[0.16] shadow-sm"
                     style={{
                       top: watermarkPos.top,

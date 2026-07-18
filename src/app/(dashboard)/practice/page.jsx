@@ -183,7 +183,7 @@ export default function PracticeCatalogPage() {
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden animate-fade-in" style={{ backgroundColor: "var(--bg-primary)" }}>
       {/* Background ambient lighting */}
-      <div className="absolute top-0 left-0 right-0 h-[450px] pointer-events-none z-0" style={{ background: "linear-gradient(180deg, rgba(16,185,129,0.04) 0%, transparent 100%)" }} />
+      <div className="absolute top-0 left-0 right-0 h-[450px] pointer-events-none z-0" />
       
       {!user && <Navbar />}
 
@@ -209,6 +209,7 @@ export default function PracticeCatalogPage() {
               <Zap size={12} className="text-violet-500 animate-pulse" />
               <span>Interactive Practice Sandbox</span>
             </div>
+            <h1 className="text-4xl font-serif tracking-tight" style={{ color: "var(--text-primary)" }}>
             <h1 className="text-4xl font-serif tracking-tight" style={{ color: "var(--text-primary)" }}>
               Interactive Code Zone
             </h1>
@@ -283,12 +284,7 @@ export default function PracticeCatalogPage() {
 
             <div className={isGlobalStudent ? "opacity-30 pointer-events-none blur-[1.5px]" : ""}>
               {/* Filtering bar */}
-              <div className="flex flex-col lg:flex-row gap-4 justify-between items-center bg-white/5 p-4 rounded-3xl border border-[var(--border-primary)] backdrop-blur-md"
-                style={{
-                  backgroundColor: "var(--glass-bg)",
-                  borderColor: "var(--border-primary)"
-                }}
-              >
+              <div className="flex flex-col lg:flex-row gap-4 justify-between items-center">
                 <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                   {/* Category tabs */}
                   <div className="flex flex-wrap gap-1 items-center p-1 rounded-full border" style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)" }}>
@@ -296,7 +292,7 @@ export default function PracticeCatalogPage() {
                       <button
                         key={cat}
                         onClick={() => setSelectedCategory(cat)}
-                        className="relative px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer"
+                        className="relative px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer"
                         style={{
                           color: selectedCategory === cat ? "#ffffff" : "var(--text-secondary)"
                         }}
@@ -320,7 +316,7 @@ export default function PracticeCatalogPage() {
                       <button
                         key={diff}
                         onClick={() => setSelectedDifficulty(diff)}
-                        className="relative px-3.5 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer"
+                        className="relative px-4 py-2 rounded-full text-xs font-bold transition-all cursor-pointer"
                         style={{
                           color: selectedDifficulty === diff ? "#ffffff" : "var(--text-secondary)"
                         }}
@@ -366,9 +362,9 @@ export default function PracticeCatalogPage() {
                 /* Cards Grid */
                 <motion.div 
                   layout
-                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8"
+                  className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8 mt-8"
                 >
-                  <AnimatePresence mode="popLayout">
+                  <AnimatePresence mode="popLayout">  
                     {filteredProblems.map((prob, idx) => {
                       const isHovered = hoveredProblemId === prob.id;
                       const isCompleted = completedProblems.includes(prob.id);
@@ -386,18 +382,14 @@ export default function PracticeCatalogPage() {
                           onClick={() => {
                             window.location.href = `/practice/${prob.id}`;
                           }}
-                          className="group relative flex flex-col justify-between rounded-3xl p-6 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border"
+                          className="group relative flex flex-col justify-between rounded-2xl p-6 overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer border"
                           style={{
                             backgroundColor: "var(--bg-card)",
-                            borderColor: isHovered ? "var(--border-accent)" : "var(--border-card)"
                           }}
                         >
                           {/* Hover highlights */}
                           <div 
                             className="absolute inset-0 z-0 opacity-5 group-hover:opacity-10 transition-opacity duration-500"
-                            style={{
-                              background: "var(--accent-gradient)"
-                            }}
                           />
 
                           <div className="relative z-10 space-y-4">
@@ -424,7 +416,7 @@ export default function PracticeCatalogPage() {
 
                             {/* Title & Desc */}
                             <div className="space-y-2">
-                              <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)] group-hover:underline">
+                              <h2 className="text-xl font-bold tracking-tight text-[var(--text-primary)]">
                                 {prob.title}
                               </h2>
                               <p className="text-xs leading-relaxed text-[var(--text-muted)] line-clamp-2">
@@ -465,7 +457,7 @@ export default function PracticeCatalogPage() {
                   {/* Empty view */}
                   {filteredProblems.length === 0 && (
                     <div className="col-span-full py-16 text-center space-y-4">
-                      <Terminal size={48} className="mx-auto text-[var(--text-muted)] animate-bounce" />
+                      <Terminal size={48} className="mx-auto text-[var(--text-muted)]" />
                       <p className="text-base font-bold" style={{ color: "var(--text-primary)" }}>No practice exercises match filters.</p>
                       <p className="text-xs" style={{ color: "var(--text-secondary)" }}>Try modifying filters or search query terms.</p>
                     </div>

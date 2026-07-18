@@ -340,8 +340,8 @@ export default function StudentDashboard() {
       {/* ── Dashboard Widgets: Goal & Recommended ─── */}
       {/* 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        // Daily Goal Tracker
-        <div className="p-6 rounded-2xl border border-[var(--border-primary)] flex flex-col justify-between" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
+        {/* Daily Goal Tracker */}
+        {/* <div className="p-6 rounded-2xl border border-[var(--border-primary)] flex flex-col justify-between" style={{ backgroundColor: "var(--bg-card)", borderColor: "var(--border-primary)" }}>
           <div className="space-y-2 mb-8">
             <h2 className="text-[11px] font-bold uppercase tracking-widest" style={{ color: "var(--text-secondary)" }}>
               Daily Study Goal
@@ -359,10 +359,10 @@ export default function StudentDashboard() {
               You are <strong style={{ color: "var(--text-primary)" }}>15 mins</strong> away from your daily goal!
             </p>
           </div>
-        </div>
+        </div> */}
 
-        // Recommended Problem
-        <div className="lg:col-span-2 p-8 rounded-2xl border border-[var(--border-primary)] relative overflow-hidden" style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)" }}>
+        {/* Recommended Problem */}
+        {/* <div className="lg:col-span-2 p-8 rounded-2xl border border-[var(--border-primary)] relative overflow-hidden" style={{ backgroundColor: "var(--bg-secondary)", borderColor: "var(--border-primary)" }}>
           <div className="absolute inset-0 dot-grid opacity-50 pointer-events-none" />
 
           <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
@@ -389,7 +389,7 @@ export default function StudentDashboard() {
               Solve Now
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
       */}
 

@@ -599,7 +599,7 @@ export default function InstitutesPage() {
               <FloatingParticles count={15} />
             </div>
 
-            <div className="relative z-10 flex flex-col lg:flex-row items-center gap-12 lg:gap-8 max-w-7xl mx-auto px-6 md:px-12">
+            <div className="relative z-10 flex flex-col lg:flex-row items-center gap-12 lg:gap-8 max-w-7xl mx-auto py-12 px-6 md:py-12">
               {/* Left Content */}
               <motion.div
                 className="w-full lg:w-[55%] text-left space-y-8"
@@ -610,29 +610,6 @@ export default function InstitutesPage() {
                   filter: reduced ? "none" : heroFilter,
                 }}
               >
-                {/* Badge */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20, scale: 0.8, filter: "blur(10px)" }}
-                  animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-                  transition={{ duration: 0.8, ease: EASE_OUT_EXPO }}
-                >
-                  <motion.div
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border mb-2"
-                    style={{ borderColor: "var(--border-accent)", backgroundColor: "rgba(16, 185, 129, 0.08)" }}
-                    whileHover={{ scale: 1.05, boxShadow: "0 0 30px rgba(16,185,129,0.15)" }}
-                    animate={reduced ? {} : {
-                      boxShadow: [
-                        "0 0 0px rgba(16,185,129,0)",
-                        "0 0 25px rgba(16,185,129,0.12)",
-                        "0 0 0px rgba(16,185,129,0)",
-                      ],
-                    }}
-                    transition={{ boxShadow: { duration: 4, repeat: Infinity, ease: "easeInOut" } }}
-                  >
-                    <Building2 size={14} className="text-emerald-500" />
-                    <span className="text-[11px] font-bold tracking-wider uppercase text-emerald-500">Eduvantix for Institute</span>
-                  </motion.div>
-                </motion.div>
 
                 {/* Main headline — kinetic typography with clip-path reveal */}
                 <div className="overflow-hidden">
