@@ -30,15 +30,22 @@ const nextConfig = {
           /* Control referrer information sent to external sites */
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
 
-          /* Permissions Policy — restrict powerful APIs */
+          /* Permissions Policy — restrict powerful APIs
+             NOTE: camera/microphone left open so Google Identity Services
+             can access them during the OAuth popup flow */
           {
             key: "Permissions-Policy",
             value:
-              "camera=(), microphone=(), geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=()",
+              "geolocation=(), payment=(), usb=(), magnetometer=(), gyroscope=()",
           },
 
           /* DNS Prefetch Control */
           { key: "X-DNS-Prefetch-Control", value: "on" },
+
+          /* Allow Google OAuth popup to communicate back.
+             'same-origin-allow-popups' is required for Google Sign-In to work. */
+          { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+
         ],
       },
       /* ── Protect dashboard/auth routes from indexing via header ── */
