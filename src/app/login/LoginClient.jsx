@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock, User, ShieldAlert, ArrowRight, RefreshCw, AlertCircle, GraduationCap, Sparkles, Eye, EyeOff, Ban } from "lucide-react";
-import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
+import useThemeStore from "@/store/useThemeStore";
 
 /**
  * Checks if the given path points to /free-course/<courseId>, for special redirect after login/signup.
@@ -110,12 +111,31 @@ function LoginForm() {
     }
   }, [user, redirectTo, router, isMismatched, freeCoursePath]);
 
-  // Invoked on Google Login
+  // Generate a cryptographically-random state token once per mount (CSRF protection)
+  // Fixes Google OAuth "state parameter" security warning
+  const oauthStateRef = useRef(null);
+  if (!oauthStateRef.current && typeof window !== 'undefined') {
+    const array = new Uint8Array(16);
+    crypto.getRandomValues(array);
+    oauthStateRef.current = Array.from(array, b => b.toString(16).padStart(2, '0')).join('');
+    sessionStorage.setItem('google_oauth_state', oauthStateRef.current);
+  }
+
+  // Invoked on Google Login success (credential / ID-token flow)
   const handleGoogleSuccess = async (response) => {
+    // Verify state token to prevent CSRF
+    const storedState = sessionStorage.getItem('google_oauth_state');
+    if (response.state && storedState && response.state !== storedState) {
+      setErrorMsg("Security check failed. Please try again.");
+      return;
+    }
+    sessionStorage.removeItem('google_oauth_state');
+
     setLoading(true);
     setErrorMsg("");
     try {
-      const result = await loginWithGoogle(response.credential);
+      // Pass full response: implicit flow gives access_token, ID token flow gives credential
+      const result = await loginWithGoogle(response.access_token ? response : response.credential);
       if (result.blocked) {
         setIsBlocked(true);
         setErrorMsg(result.message);
@@ -154,6 +174,14 @@ function LoginForm() {
       setLoading(false);
     }
   };
+
+  // useGoogleLogin hook — uses the secure implicit flow with a state CSRF token
+  const googleLogin = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => setErrorMsg("Google Login failed."),
+    flow: 'implicit',
+    state: oauthStateRef.current || '',
+  });
 
   const getRoleTheme = () => {
     return {
@@ -401,13 +429,29 @@ function LoginForm() {
             )}
             {!isForgot && (
               <div className="flex justify-center w-full mt-2">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => setErrorMsg("Google Login failed.")}
-                  theme="filled_blue"
-                  shape="pill"
-                  width="100%"
-                />
+                <button
+                  type="button"
+                  onClick={() => googleLogin()}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border font-semibold text-sm transition-all cursor-pointer disabled:opacity-50"
+                  style={{
+                    backgroundColor: "var(--bg-input)",
+                    borderColor: "var(--border-primary)",
+                    color: "var(--text-primary)",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = "var(--accent-primary)"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = "var(--border-primary)"}
+                >
+                  {/* Google SVG icon */}
+                  <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" />
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" />
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" />
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" />
+                    <path fill="none" d="M0 0h48v48H0z" />
+                  </svg>
+                  <span>Continue with Google</span>
+                </button>
               </div>
             )}
           </form>
@@ -459,6 +503,7 @@ function SubmitButton({ loading, gradient, label }) {
 
 /* ─── Page Wrapper ──────────────────── */
 export default function LoginPage() {
+  const isDark = useThemeStore((state) => state.isDark);
   return (
     <div className="relative flex min-h-screen overflow-hidden" style={{ backgroundColor: "var(--bg-primary)" }}>
       <div className="absolute inset-0 dot-grid pointer-events-none" />
@@ -514,12 +559,10 @@ export default function LoginPage() {
       <div className="flex-1 flex flex-col items-center justify-center min-h-screen px-6 py-12 lg:px-12 relative z-10">
         {/* Mobile logo */}
         <div className="lg:hidden flex items-center gap-2 mb-10">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--text-on-accent)]" style={{ background: "var(--accent-gradient)" }}>
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-          </div>
-          <span className="text-sm font-bold" style={{ color: "var(--text-primary)" }}>Eduvantix</span>
+          <img src={isDark ? '/logo-white-text.webp' : '/logo-black-text.webp'}
+            alt="Eduvantix Logo"
+            className="h-10 w-auto"
+          />
         </div>
         <div className="w-full max-w-md">
           <Suspense fallback={<div className="flex items-center justify-center p-8"><RefreshCw className="animate-spin" size={22} style={{ color: "var(--accent-primary)" }} /></div>}>
