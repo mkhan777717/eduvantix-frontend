@@ -1,0 +1,16 @@
+{
+  "name": "Eduvantix",
+  "short_name": "Eduvantix",
+  "description": "AI-Powered Tech Learning Platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "64x64",
+      "type": "image/x-icon"
+    }
+  ]
+}

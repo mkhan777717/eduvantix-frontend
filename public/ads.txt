@@ -1,0 +1,2 @@
+# ads.txt placeholder
+# If you monetize the site with ads later, add your publisher IDs here.

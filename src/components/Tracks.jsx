@@ -682,6 +682,11 @@ export default function Tracks() {
     "Apple",
     "Netflix",
     "NVIDIA",
+    "OpenAI",
+    "Antropic",
+    "Meta",
+    "X",
+    "Airbnb"
   ];
 
   return (

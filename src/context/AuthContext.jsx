@@ -361,12 +361,18 @@ export function AuthProvider({ children }) {
   };
 
   // ---------------------------------------------------------------------------
-  const loginWithGoogle = async (credentialToken) => {
+  const loginWithGoogle = async (credentialOrTokenObj) => {
     try {
+      // Support both ID token (credential string) and access_token object (useGoogleLogin implicit flow)
+      const isAccessToken = typeof credentialOrTokenObj === 'object' && credentialOrTokenObj?.access_token;
+      const body = isAccessToken
+        ? { access_token: credentialOrTokenObj.access_token }
+        : { credential: credentialOrTokenObj };
+
       const res = await fetch(`${API_BASE}/api/auth/google`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credential: credentialToken }),
+        body: JSON.stringify(body),
         signal: AbortSignal.timeout(30000),
       });
 

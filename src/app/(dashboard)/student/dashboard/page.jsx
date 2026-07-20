@@ -389,10 +389,9 @@ export default function StudentDashboard() {
               Solve Now
             </button>
           </div>
-        </div> 
-      </div>
-
-
+        </div>
+      </div>*/}
+  
 
       {/* ── Bottom Section: Contests & Submissions ─ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-6">
