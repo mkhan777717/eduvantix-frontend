@@ -273,7 +273,9 @@ export function AuthProvider({ children }) {
 
     return {
       success: false,
-      message: "Invalid credentials.\n\nIf you registered while the database was offline, your account exists locally — try logging in again with the same email and password you used.\n\nOr use a demo account:\n• admin@demo.com / demo123\n• student@demo.com / demo123",
+      message: process.env.NODE_ENV === "development"
+        ? "Invalid credentials.\n\nIf you registered while the database was offline, your account exists locally — try logging in again with the same email and password you used.\n\nOr use a demo account:\n• admin@demo.com / demo123\n• student@demo.com / demo123"
+        : "Invalid email or password. Please try again."
     };
   };
 
