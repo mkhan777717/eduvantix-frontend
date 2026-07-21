@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Trophy, LogOut,
   Menu, X, ChevronLeft, ChevronRight, BookOpen, ArrowLeftRight,
   Code, Brain, Radio, AlertTriangle, FileText, Gamepad2, FileCheck, Activity, Settings, Paintbrush,
-  ShieldAlert, Layers, Users, PlusCircle, List
+  ShieldAlert, Layers, Users, PlusCircle, List, MessageSquare
 } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import { useAuth } from "@/context/AuthContext";
@@ -208,6 +208,7 @@ export default function DashboardLayout({ children }) {
       { label: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
       { label: "Practice Arena", href: "/practice", icon: Code },
       { label: "Contest Arena", href: "/contest", icon: Trophy },
+      { label: "Discuss Forum", href: "/discuss", icon: MessageSquare },
       { label: "AI Viva", href: "/student/viva", icon: Brain },
       { label: "Live Sessions", href: "/live-classes", icon: Radio },
       { label: "Learn with Games", href: "/student/games", icon: Gamepad2 },
@@ -225,6 +226,7 @@ export default function DashboardLayout({ children }) {
       isInstAdmin && { label: "Manage Batches", href: "/admin/batches", icon: Layers },
       isInstAdmin && { label: "Manage People", href: "/admin/people", icon: Users },
       isBatchMgr && { label: "My Batches", href: "/admin/batch-manager", icon: Layers },
+      { label: "Discuss Forum", href: "/discuss", icon: MessageSquare },
       (isBatchMgr || isInstAdmin || isMentor) && { label: "AI Viva", href: "/mentor/viva/questions", icon: Brain },
       (isBatchMgr || isInstAdmin || isMentor) && { label: "Study Materials", href: "/mentor/viva/materials", icon: FileText },
       isSuperAdmin && { label: "AI Settings", href: "/admin/viva/ai-settings", icon: Settings },

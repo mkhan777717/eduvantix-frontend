@@ -14,8 +14,8 @@ export function getApiBase(fallbackPort = 5472) {
     // Deployed checking: use the dynamic origin of the site
     return window.location.origin;
   }
-  // Production fallback for the VPS server
-  return "http://72.61.239.20";
+  // Local dev / SSR fallback
+  return "http://127.0.0.1:" + fallbackPort;
 }
 
 /**

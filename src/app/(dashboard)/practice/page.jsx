@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Search, BookOpen, Clock, Code, Sparkles, ShieldAlert,
-  Terminal, CheckCircle2, ChevronRight, Zap, RefreshCw, Lock
+  Terminal, CheckCircle2, ChevronRight, Zap, RefreshCw, Lock, MessageSquare
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
@@ -198,16 +198,26 @@ export default function PracticeCatalogPage() {
             className="flex flex-col gap-2 border-b pb-6 shrink-0 mb-8"
             style={{ borderColor: "var(--border-primary)" }}
           >
-            <div 
-              className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-[var(--border-primary)] mb-3 w-fit"
-              style={{
-                borderColor: "var(--border-primary)",
-                color: "var(--text-secondary)",
-                backgroundColor: "var(--bg-secondary)"
-              }}
-            >
-              <Zap size={12} className="text-violet-500 animate-pulse" />
-              <span>Interactive Practice Sandbox</span>
+            <div className="flex items-center justify-between flex-wrap gap-4 mb-3">
+              <div 
+                className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-[var(--border-primary)] w-fit"
+                style={{
+                  borderColor: "var(--border-primary)",
+                  color: "var(--text-secondary)",
+                  backgroundColor: "var(--bg-secondary)"
+                }}
+              >
+                <Zap size={12} className="text-violet-500 animate-pulse" />
+                <span>Interactive Practice Sandbox</span>
+              </div>
+
+              <a
+                href="/discuss?category=PROBLEM"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-[var(--bg-card)] border border-[var(--border-primary)] text-[var(--text-primary)] hover:border-[var(--accent-primary)] hover:text-[var(--accent-primary)] transition-all shadow-sm"
+              >
+                <MessageSquare size={14} className="text-[var(--accent-primary)]" />
+                Problem Discussions
+              </a>
             </div>
             <h1 className="text-4xl font-serif tracking-tight" style={{ color: "var(--text-primary)" }}>
               Interactive Code Zone
