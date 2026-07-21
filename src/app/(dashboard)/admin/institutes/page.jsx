@@ -23,6 +23,14 @@ export default function InstitutesPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [instituteName, setInstituteName] = useState("");
+  const [allowedManageBatches, setAllowedManageBatches] = useState(true);
+  const [allowedManagePeople, setAllowedManagePeople] = useState(true);
+  const [allowedAiViva, setAllowedAiViva] = useState(true);
+  const [allowedStudyMaterial, setAllowedStudyMaterial] = useState(true);
+  const [allowedContest, setAllowedContest] = useState(true);
+  const [allowedProblems, setAllowedProblems] = useState(true);
+  const [allowedGoLive, setAllowedGoLive] = useState(true);
+  const [allowedArcade, setAllowedArcade] = useState(true);
   
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState("");
@@ -36,6 +44,14 @@ export default function InstitutesPage() {
   const [editPassword, setEditPassword] = useState("");
   const [editConfirmPassword, setEditConfirmPassword] = useState("");
   const [editInstituteName, setEditInstituteName] = useState("");
+  const [editAllowedManageBatches, setEditAllowedManageBatches] = useState(true);
+  const [editAllowedManagePeople, setEditAllowedManagePeople] = useState(true);
+  const [editAllowedAiViva, setEditAllowedAiViva] = useState(true);
+  const [editAllowedStudyMaterial, setEditAllowedStudyMaterial] = useState(true);
+  const [editAllowedContest, setEditAllowedContest] = useState(true);
+  const [editAllowedProblems, setEditAllowedProblems] = useState(true);
+  const [editAllowedGoLive, setEditAllowedGoLive] = useState(true);
+  const [editAllowedArcade, setEditAllowedArcade] = useState(true);
 
   // Block states
   const [blockLoading, setBlockLoading] = useState(null); // id of institute being blocked
@@ -139,7 +155,12 @@ export default function InstitutesPage() {
       const res = await fetch(`${API_BASE}/api/auth/institute-admin`, {
         method: "POST",
         headers,
-        body: JSON.stringify({ username, email, password, instituteName }),
+        body: JSON.stringify({ 
+          username, email, password, instituteName,
+          allowedManageBatches, allowedManagePeople, allowedAiViva, 
+          allowedStudyMaterial, allowedContest, allowedProblems, 
+          allowedGoLive, allowedArcade
+        }),
       });
       const data = await res.json();
 
@@ -150,6 +171,14 @@ export default function InstitutesPage() {
         setPassword("");
         setConfirmPassword("");
         setInstituteName("");
+        setAllowedManageBatches(true);
+        setAllowedManagePeople(true);
+        setAllowedAiViva(true);
+        setAllowedStudyMaterial(true);
+        setAllowedContest(true);
+        setAllowedProblems(true);
+        setAllowedGoLive(true);
+        setAllowedArcade(true);
         // Reload table
         fetchAdmins();
         // Close modal after delay
@@ -210,6 +239,14 @@ export default function InstitutesPage() {
     setEditPassword("");
     setEditConfirmPassword("");
     setEditInstituteName(admin.institute?.name || "");
+    setEditAllowedManageBatches(admin.institute?.allowedManageBatches !== false);
+    setEditAllowedManagePeople(admin.institute?.allowedManagePeople !== false);
+    setEditAllowedAiViva(admin.institute?.allowedAiViva !== false);
+    setEditAllowedStudyMaterial(admin.institute?.allowedStudyMaterial !== false);
+    setEditAllowedContest(admin.institute?.allowedContest !== false);
+    setEditAllowedProblems(admin.institute?.allowedProblems !== false);
+    setEditAllowedGoLive(admin.institute?.allowedGoLive !== false);
+    setEditAllowedArcade(admin.institute?.allowedArcade !== false);
     setModalError("");
     setModalSuccess("");
     setIsEditModalOpen(true);
@@ -240,6 +277,14 @@ export default function InstitutesPage() {
         username: editUsername,
         email: editEmail,
         instituteName: editInstituteName,
+        allowedManageBatches: editAllowedManageBatches,
+        allowedManagePeople: editAllowedManagePeople,
+        allowedAiViva: editAllowedAiViva,
+        allowedStudyMaterial: editAllowedStudyMaterial,
+        allowedContest: editAllowedContest,
+        allowedProblems: editAllowedProblems,
+        allowedGoLive: editAllowedGoLive,
+        allowedArcade: editAllowedArcade,
       };
       if (editPassword) {
         body.password = editPassword;
@@ -580,6 +625,39 @@ export default function InstitutesPage() {
                   </div>
                 </div>
 
+                {/* Feature Access toggles */}
+                <div className="space-y-3 pt-2">
+                  <div className="h-px bg-[var(--border-primary)] opacity-40 my-3" />
+                  <label className="text-[10px] font-extrabold uppercase tracking-widest block" style={{ color: "var(--text-secondary)" }}>
+                    Feature Permissions
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { label: "Manage Batches", state: allowedManageBatches, setState: setAllowedManageBatches },
+                      { label: "Manage People", state: allowedManagePeople, setState: setAllowedManagePeople },
+                      { label: "AI Viva", state: allowedAiViva, setState: setAllowedAiViva },
+                      { label: "Study Material", state: allowedStudyMaterial, setState: setAllowedStudyMaterial },
+                      { label: "Contest", state: allowedContest, setState: setAllowedContest },
+                      { label: "Problems", state: allowedProblems, setState: setAllowedProblems },
+                      { label: "Go Live", state: allowedGoLive, setState: setAllowedGoLive },
+                      { label: "Arcade Questions", state: allowedArcade, setState: setAllowedArcade },
+                    ].map((f, i) => (
+                      <div key={i} className="flex items-center justify-between p-2.5 rounded-xl border border-[var(--border-primary)] bg-[var(--bg-primary)] hover:border-emerald-500/20 transition-all select-none">
+                        <span className="text-[11px] font-semibold" style={{ color: "var(--text-primary)" }}>{f.label}</span>
+                        <button
+                          type="button"
+                          onClick={() => f.setState(!f.state)}
+                          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${f.state ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-800"}`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${f.state ? "translate-x-4" : "translate-x-0"}`}
+                          />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 {/* Actions */}
                 <div className="flex justify-end gap-3 pt-2">
                   <button
@@ -748,6 +826,39 @@ export default function InstitutesPage() {
                       className="w-full bg-[var(--bg-primary)] border border-[var(--border-primary)] rounded-2xl px-4 py-3 text-xs font-semibold focus:outline-none focus:border-[var(--border-accent)] transition-all placeholder:text-[var(--text-muted)]"
                       style={{ borderColor: "var(--border-primary)" }}
                     />
+                  </div>
+                </div>
+
+                {/* Feature Access toggles */}
+                <div className="space-y-3 pt-2">
+                  <div className="h-px bg-[var(--border-primary)] opacity-40 my-3" />
+                  <label className="text-[10px] font-extrabold uppercase tracking-widest block" style={{ color: "var(--text-secondary)" }}>
+                    Feature Permissions
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { label: "Manage Batches", state: editAllowedManageBatches, setState: setEditAllowedManageBatches },
+                      { label: "Manage People", state: editAllowedManagePeople, setState: setEditAllowedManagePeople },
+                      { label: "AI Viva", state: editAllowedAiViva, setState: setEditAllowedAiViva },
+                      { label: "Study Material", state: editAllowedStudyMaterial, setState: setEditAllowedStudyMaterial },
+                      { label: "Contest", state: editAllowedContest, setState: setEditAllowedContest },
+                      { label: "Problems", state: editAllowedProblems, setState: setEditAllowedProblems },
+                      { label: "Go Live", state: editAllowedGoLive, setState: setEditAllowedGoLive },
+                      { label: "Arcade Questions", state: editAllowedArcade, setState: setEditAllowedArcade },
+                    ].map((f, i) => (
+                      <div key={i} className="flex items-center justify-between p-2.5 rounded-xl border border-[var(--border-primary)] bg-[var(--bg-primary)] hover:border-emerald-500/20 transition-all select-none">
+                        <span className="text-[11px] font-semibold" style={{ color: "var(--text-primary)" }}>{f.label}</span>
+                        <button
+                          type="button"
+                          onClick={() => f.setState(!f.state)}
+                          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${f.state ? "bg-emerald-500" : "bg-neutral-300 dark:bg-neutral-800"}`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${f.state ? "translate-x-4" : "translate-x-0"}`}
+                          />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
