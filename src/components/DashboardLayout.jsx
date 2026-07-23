@@ -176,12 +176,7 @@ export default function DashboardLayout({ children }) {
     }
   }, [isSuperAdmin]);
 
-  useEffect(() => {
-    initTheme();
-  }, [initTheme]);
-  const isStudentSession = typeof window !== "undefined" && localStorage.getItem("synapse_student_session") === "true";
-  const isAdminSession = typeof window !== "undefined" && localStorage.getItem("synapse_admin_session") === "true";
-  const isMentorSession = typeof window !== "undefined" && localStorage.getItem("synapse_mentor_session") === "true";
+
 
   const [localRequestedFeatures, setLocalRequestedFeatures] = useState([]);
 

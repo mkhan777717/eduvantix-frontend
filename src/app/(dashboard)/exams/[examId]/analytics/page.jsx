@@ -87,8 +87,11 @@ export default function ExamAnalyticsDashboard() {
 
     try {
       setPublishing(true);
-      const headers = buildAuthHeaders(token, user);
-      const res = await fetch(`${API_BASE}/api/v1/exams/results/publish`, {
+      const headers = {
+        "Content-Type": "application/json",
+        ...buildAuthHeaders(token, user)
+      };
+      const res = await fetch(`${API_BASE}/api/v1/exams/${numericExamId}/results/publish`, {
         method: "POST",
         headers,
         body: JSON.stringify({ examId: numericExamId, id: numericExamId })
